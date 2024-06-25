@@ -1,0 +1,254 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  username  String
+  name      String
+  email     String
+  password  String?
+  phone     String?
+  thumbnail String?
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  AuthToken AuthToken[]
+}
+
+model Admin {
+  id        String    @id @default(uuid())
+  name      String
+  email     String
+  password  String?
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  AuthTokenAdmin AuthTokenAdmin[]
+}
+
+model AuthToken {
+  id                Int       @id @default(autoincrement())
+  deviceId          String
+  token             String
+  refreshTokenId    Int?
+  fcmToken          String?
+  fcmTokenUpdatedAt DateTime? @db.Timestamptz(3)
+  userId            String
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime  @map("updated_at") @db.Timestamptz(3)
+  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz(3)
+  fcmTokenId        Int
+
+  Device   Device   @relation(fields: [deviceId], references: [id])
+  FcmToken FcmToken @relation(fields: [fcmTokenId], references: [id])
+  User     User     @relation(fields: [userId], references: [id])
+}
+
+model AuthTokenAdmin {
+  id                Int       @id @default(autoincrement())
+  deviceId          String
+  fcmToken          String?
+  fcmTokenUpdatedAt DateTime? @db.Timestamptz(3)
+  adminId           String
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime  @map("updated_at") @db.Timestamptz(3)
+  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  Device     DeviceAdmin @relation(fields: [deviceId], references: [id])
+  FcmToken   FcmToken    @relation(fields: [fcmTokenId], references: [id])
+  Admin      Admin       @relation(fields: [adminId], references: [id])
+  fcmTokenId Int
+}
+
+model DeviceAdmin {
+  id               String      @id @default(uuid())
+  platform         PlaformEnum
+  platformUniqueId String      @map("plaform_unique_id")
+  metadata         Json
+  deviceToken      String      @map("device_token")
+  createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime    @map("updated_at") @db.Timestamptz(3)
+  deletedAt        DateTime?   @map("deleted_at") @db.Timestamptz(3)
+  lastActivity     DateTime    @map("last_activity") @db.Timestamptz(3)
+
+  AuthTokenAdmin AuthTokenAdmin[]
+}
+
+model Device {
+  id               String      @id @default(uuid())
+  platform         PlaformEnum
+  platformUniqueId String      @map("plaform_unique_id")
+  metadata         Json
+  deviceToken      String      @map("device_token")
+  createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime    @map("updated_at") @db.Timestamptz(3)
+  deletedAt        DateTime?   @map("deleted_at") @db.Timestamptz(3)
+  lastActivity     DateTime    @map("last_activity") @db.Timestamptz(3)
+
+  AuthToken AuthToken[]
+}
+
+model Notification {
+  id        Int       @id @default(autoincrement())
+  scope     String
+  content   Json
+  readAt    DateTime  @map("read_at") @db.Timestamptz(3)
+  userId    String    @map("user_id")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+}
+
+// model ChatResource {
+//   chatId     Int      @id @default(autoincrement()) @map("chat_id")
+//   resourceId String   @map("resource_id")
+//   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+// }
+
+// model ChatDeleted {
+//   chatId    Int      @id @default(autoincrement()) @map("chat_id")
+//   deletedBy String   @map("deleted_by")
+//   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+// }
+
+// model Chat {
+//   id        Int       @id @default(autoincrement())
+//   content   Json
+//   info      Json      @db.JsonB()
+//   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+//   updatedAt DateTime  @map("updated_at") @db.Timestamptz(3)
+//   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+// }
+
+// model ChatRoom {
+//   id        String    @id @default(uuid())
+//   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+//   projectId String    @map("project_id")
+//   type      String
+//   chatId    Int
+//   updatedAt DateTime  @map("updated_at") @db.Timestamptz(3)
+//   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+// }
+
+// model ChatDeleted {
+//   id Int
+//   deletedBy
+// }
+
+enum PlaformEnum {
+  WEB     @map("web")
+  ANDROID @map("android")
+  IOS     @map("ios")
+}
+
+model Resource {
+  id        String  @id @default(uuid())
+  s3url     String
+  s3Key     String
+  fileName  String
+  fileType  String
+  fileSize  Int
+  metadata  Json?
+  relatedTo String?
+}
+
+model Project {
+  id               String    @id @default(uuid())
+  color            String
+  name             String
+  description      String
+  lastChatActivity DateTime  @map("last_chat_activity") @db.Timestamptz(3)
+  priority         String
+  target           String
+  budget           Int
+  goals            String
+  status           String
+  creatorId        String    @map("creator_id")
+  thumbnail        String
+  lastChatId       String    @map("last_chat_id")
+  organizationId   String    @map("organization_id")
+  chatRoom         String
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @map("updated_at") @db.Timestamptz(3)
+  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz(3)
+}
+
+model FcmToken {
+  id Int @id @default(autoincrement())
+
+  AuthToken      AuthToken[]
+  AuthTokenAdmin AuthTokenAdmin[]
+}
+
+model Log {
+  id        String   @id @default(uuid())
+  context   String?
+  level     Int      @db.SmallInt
+  data      Json     @db.JsonB()
+  timestamp DateTime @default(now()) @db.Timestamptz(4)
+
+  @@index([timestamp])
+  @@map("log")
+}
+
+// model City {
+//   code          String  @id @unique
+//   name          String
+//   province_code String
+//   latitude      String?
+//   longitude     String?
+
+//   province  Province   @relation(fields: [province_code], references: [code])
+//   districts District[]
+
+//   @@map("cities")
+// }
+
+// model Province {
+//   code      String  @id @unique
+//   name      String
+//   latitude  String?
+//   longitude String?
+//   cities    City[]
+
+//   @@map("provinces")
+// }
+
+// model District {
+//   code      String  @id @unique
+//   name      String
+//   city_code String
+//   latitude  String?
+//   longitude String?
+
+//   city         City          @relation(fields: [city_code], references: [code])
+//   subdistricts SubDistrict[]
+
+//   @@map("indonesia_districts")
+// }
+
+// model SubDistrict {
+//   code          String  @id @unique
+//   name          String
+//   district_code String
+//   latitude      String?
+//   longitude     String?
+
+//   district District @relation(fields: [district_code], references: [code])
+
+//   @@map("indonesia_subdistricts")
+// }

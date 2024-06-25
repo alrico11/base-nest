@@ -1,0 +1,52 @@
+version: '3.8'
+services:
+  kolabora-dev-db:
+    image: postgres:15
+    ports:
+      - ${POSTGRES_DB_PORT}:5432
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      TZ: Asia/Jakarta
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  kolabora-dev-minio-storage:
+    image: minio/minio:latest
+    ports:
+      - 9000:9000
+      - 9001:9090
+    environment:
+      MINIO_ROOT_USER: ${OBJECT_STORAGE_ACCESS_KEY_ID}
+      MINIO_ROOT_PASSWORD: ${OBJECT_STORAGE_SECRET_ACCESS_KEY}
+    volumes:
+      - 'minio:/data/minio'
+    command: minio server /data/minio --console-address ":9090"
+    restart: unless-stopped
+
+  valkey:
+    image: valkey/valkey:7.2.5
+    container_name: valkey 
+    environment:
+      REDIS_PASSWORD: myredispassword
+      REDIS_HOST: redis
+    volumes:
+      - valkey_volume_data:/data
+    ports: 
+      - 6380:6379
+    restart: unless-stopped
+  redis_insight:
+    image: redislabs/redisinsight:1.13.1
+    container_name: redis_insight
+    ports: 
+      - 8001:8001
+    volumes:
+      - redis_insight_volume_data:/db
+    restart: unless-stopped
+volumes:
+  minio:
+  postgres:
+  valkey_volume_data:
+  redis_insight_volume_data:
