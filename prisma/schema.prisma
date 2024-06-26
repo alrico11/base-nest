@@ -25,7 +25,18 @@ model User {
   updatedAt DateTime  @map("updated_at") @db.Timestamptz(3)
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
 
-  AuthToken AuthToken[]
+  ProjectCollaborations      ProjectCollaborator[] @relation(name: "UserProjectCollaborator")
+  AddedProjectCollaborations ProjectCollaborator[] @relation(name: "AddedByProjectCollaborator")
+  UserProjectAdmins          ProjectAdmin[]        @relation(name: "UserProjectAdmin")
+  AddedByProjectAdmins       ProjectAdmin[]        @relation(name: "AddedByProjectAdmin")
+  TaskCreatedByUser          Task[]                @relation(name: "TaskCreatedByUser")
+  TaskEditedByUser           Task[]                @relation(name: "TaskEditedByUser")
+  AuthTokens                 AuthToken[]
+  TaskAssignee               TaskAssignee[]
+  Comment                    Comment[]
+  Chat                       Chat[]
+  ChatDeleted                ChatDeleted[]
+  ChatRoomPrivate            ChatRoomPrivate[]
 }
 
 model Admin {
@@ -113,42 +124,6 @@ model Notification {
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
 }
 
-// model ChatResource {
-//   chatId     Int      @id @default(autoincrement()) @map("chat_id")
-//   resourceId String   @map("resource_id")
-//   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-// }
-
-// model ChatDeleted {
-//   chatId    Int      @id @default(autoincrement()) @map("chat_id")
-//   deletedBy String   @map("deleted_by")
-//   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-// }
-
-// model Chat {
-//   id        Int       @id @default(autoincrement())
-//   content   Json
-//   info      Json      @db.JsonB()
-//   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-//   updatedAt DateTime  @map("updated_at") @db.Timestamptz(3)
-//   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
-// }
-
-// model ChatRoom {
-//   id        String    @id @default(uuid())
-//   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-//   projectId String    @map("project_id")
-//   type      String
-//   chatId    Int
-//   updatedAt DateTime  @map("updated_at") @db.Timestamptz(3)
-//   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
-// }
-
-// model ChatDeleted {
-//   id Int
-//   deletedBy
-// }
-
 enum PlaformEnum {
   WEB     @map("web")
   ANDROID @map("android")
@@ -164,7 +139,22 @@ model Resource {
   fileSize  Int
   metadata  Json?
   relatedTo String?
+
+  ProjectImages ProjectImage[]
+  ProjectFiles  ProjectFile[]
+  TaskFile      TaskFile[]
+  TaskImage     TaskImage[]
+  ChatResource  ChatResource[]
 }
+
+model FcmToken {
+  id Int @id @default(autoincrement())
+
+  AuthToken      AuthToken[]
+  AuthTokenAdmin AuthTokenAdmin[]
+}
+
+// Project
 
 model Project {
   id               String    @id @default(uuid())
@@ -179,19 +169,442 @@ model Project {
   status           String
   creatorId        String    @map("creator_id")
   thumbnail        String
-  lastChatId       String    @map("last_chat_id")
+  lastChatId       String    @unique @map("last_chat_id")
   organizationId   String    @map("organization_id")
-  chatRoom         String
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt        DateTime  @map("updated_at") @db.Timestamptz(3)
   deletedAt        DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  LastChat             Chat                  @relation(fields: [lastChatId], references: [id])
+  ProjectTags          ProjectTag[]
+  ProjectCollaborators ProjectCollaborator[]
+  ProjectAdmins        ProjectAdmin[]
+  ProjectImages        ProjectImage[]
+  ProjectFiles         ProjectFile[]
+  ProjectNotes         ProjectNote[]
+  Task                 Task[]
+  NoteProject          NoteProject[]
+  ChatRoomProject      ChatRoomProject[]
+
+  @@map("project")
 }
 
-model FcmToken {
-  id Int @id @default(autoincrement())
+model ProjectTag {
+  tagId     String   @map("tag_id")
+  projectId String   @map("project_id")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
-  AuthToken      AuthToken[]
-  AuthTokenAdmin AuthTokenAdmin[]
+  Project Project @relation(fields: [projectId], references: [id])
+  Tag     Tag     @relation(fields: [tagId], references: [id])
+
+  @@id([tagId])
+  @@map("project_tag")
+}
+
+model Tag {
+  id             String    @id @default(uuid())
+  name           String
+  organizationId String    @map("organization_id")
+  creatorId      String    @map("creator_id")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @map("updated_at") @db.Timestamptz(3)
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  ProjectTags ProjectTag[]
+
+  @@map("tag")
+}
+
+model ProjectCollaborator {
+  projectId String    @map("project_id")
+  userId    String    @map("user_id")
+  addedById String    @map("added_by_id")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  Project Project @relation(fields: [projectId], references: [id])
+  User    User    @relation(name: "UserProjectCollaborator", fields: [userId], references: [id])
+  Addedby User    @relation(name: "AddedByProjectCollaborator", fields: [addedById], references: [id])
+
+  @@id([projectId, userId])
+  @@map("project_collaborator")
+}
+
+model ProjectAdmin {
+  projectId String    @map("project_id")
+  userId    String    @map("user_id")
+  addedById String    @map("added_by_id")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  Project Project @relation(fields: [projectId], references: [id])
+  User    User    @relation(name: "UserProjectAdmin", fields: [userId], references: [id])
+  Addedby User    @relation(name: "AddedByProjectAdmin", fields: [addedById], references: [id])
+
+  @@id([projectId, userId])
+  @@map("project_admin")
+}
+
+model ProjectImage {
+  projectId  String    @map("project_id")
+  resourceId String    @map("resource_id")
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime  @map("updated_at") @db.Timestamptz(3)
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  Project  Project  @relation(fields: [projectId], references: [id])
+  Resource Resource @relation(fields: [resourceId], references: [id])
+
+  @@id([projectId, resourceId])
+  @@map("project_image")
+}
+
+model ProjectFile {
+  projectId  String    @map("project_id")
+  resourceId String    @map("resource_id")
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime  @map("updated_at") @db.Timestamptz(3)
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  Project  Project  @relation(fields: [projectId], references: [id])
+  Resource Resource @relation(fields: [resourceId], references: [id])
+
+  @@id([projectId, resourceId])
+  @@map("project_file")
+}
+
+model ProjectNote {
+  projectId String    @map("project_id")
+  noteId    String    @map("note_id")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  Project Project @relation(fields: [projectId], references: [id])
+  Note    Note    @relation(fields: [noteId], references: [id])
+
+  @@id([projectId, noteId])
+  @@map("project_note")
+}
+
+enum TaskEnum {
+  NEW
+  IN_PROGRESS
+  POSTPONED
+  WAITING_APPROVAL
+  DONE
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW    @map("0")
+  MEDIUM @map("1")
+  HIGH   @map("2")
+}
+
+model Task {
+  id             String       @id @default(uuid())
+  name           String
+  description    String
+  startDate      DateTime     @map("start_date") @db.Date
+  endDate        DateTime     @map("end_date") @db.Date
+  status         TaskEnum
+  priority       TaskPriority
+  color          String?
+  duration       Int?
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime     @map("updated_at") @db.Timestamptz(3)
+  deletedAt      DateTime?    @map("deleted_at") @db.Timestamptz(3)
+  projectId      String       @map("project_id")
+  createdById    String       @map("creator_id")
+  doneById       String       @map("done_by_id")
+  doneAt         DateTime?    @map("done_at")
+  editedById     String       @map("edited_by_id")
+  organizationId String       @map("organization_id")
+
+  Project         Project          @relation(fields: [projectId], references: [id])
+  CreatedBy       User             @relation(name: "TaskCreatedByUser", fields: [createdById], references: [id])
+  EditedBy        User             @relation(name: "TaskEditedByUser", fields: [editedById], references: [id])
+  Organization    Organization     @relation(fields: [organizationId], references: [id])
+  TaskComment     TaskComment[]
+  TaskFile        TaskFile[]
+  TaskAssignee    TaskAssignee[]
+  TaskPrequisites TaskPrequisite[] @relation(name: "TaskPrequisite")
+  TaskParent      TaskPrequisite[] @relation(name: "TaskParent")
+  TaskImage       TaskImage[]
+  ReminderTask    ReminderTask[]
+
+  @@map("task")
+}
+
+model TaskComment {
+  taskId    String   @map("task_id")
+  commentId String   @map("comment_id")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  Task    Task    @relation(fields: [taskId], references: [id])
+  Comment Comment @relation(fields: [commentId], references: [id])
+
+  @@id([taskId, commentId])
+  @@map("task_comment")
+}
+
+model TaskFile {
+  taskId     String   @map("task_id")
+  resourceId String   @map("resource_id")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  Task     Task     @relation(fields: [taskId], references: [id])
+  Resource Resource @relation(fields: [resourceId], references: [id])
+
+  @@id([taskId, resourceId])
+  @@map("task_file")
+}
+
+model TaskAssignee {
+  taskId    String   @map("task_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  Task Task @relation(fields: [taskId], references: [id])
+  User User @relation(fields: [userId], references: [id])
+
+  @@id([taskId, userId])
+  @@map("task_assignee")
+}
+
+model TaskPrequisite {
+  taskId           String   @map("task_id")
+  taskPrequisiteId String   @map("task_prequisite_id")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  TaskParent     Task @relation(name: "TaskParent", fields: [taskId], references: [id])
+  TaskPrequisite Task @relation(name: "TaskPrequisite", fields: [taskPrequisiteId], references: [id])
+
+  @@id([taskId, taskPrequisiteId])
+  @@map("task_prequisite")
+}
+
+model TaskImage {
+  taskId     String   @map("task_id")
+  resourceId String   @map("resource_id")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  Task     Task     @relation(fields: [taskId], references: [id])
+  Resource Resource @relation(fields: [resourceId], references: [id])
+
+  @@id([taskId, resourceId])
+  @@map("task_image")
+}
+
+// Note
+
+model Note {
+  id               String             @id @default(uuid())
+  ProjectNote      ProjectNote[]
+  NoteProject      NoteProject[]
+  NoteOrganization NoteOrganization[]
+  ReminderNote     ReminderNote[]
+
+  @@map("note")
+}
+
+model NoteProject {
+  projectId String   @map("project_id")
+  noteId    String   @map("note_id")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  Project Project @relation(fields: [projectId], references: [id])
+  Note    Note    @relation(fields: [noteId], references: [id])
+
+  @@id([projectId, noteId])
+  @@map("note_project")
+}
+
+model NoteOrganization {
+  organizationId String   @map("organization_id")
+  noteId         String   @map("note_id")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  Organization Organization @relation(fields: [organizationId], references: [id])
+  Note         Note         @relation(fields: [noteId], references: [id])
+
+  @@id([organizationId, noteId])
+  @@map("note_organization")
+}
+
+// Comment
+
+model Comment {
+  id                 String    @id @default(uuid())
+  content            String
+  authorId           String    @map("author_id")
+  referenceCommentId String    @map("reference_comment_id")
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime  @map("updated_at") @db.Timestamptz(3)
+  deletedAt          DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  TaskComment TaskComment[]
+
+  Author        User      @relation(fields: [authorId], references: [id])
+  ParentComment Comment   @relation(name: "ReferenceComments", fields: [referenceCommentId], references: [id])
+  ChildComments Comment[] @relation(name: "ReferenceComments")
+
+  @@map("comment")
+}
+
+// Reminder
+
+enum IntervalReminder {
+  ONCE
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+model Reminder {
+  id                 String         @id @default(uuid())
+  dateReminder       DateTime       @map("date_reminder") @db.Date
+  timeReminder       DateTime       @map("time_reminder") @db.Time()
+  interval           Int
+  alarm              Boolean        @default(false)
+  previousInvocation DateTime?      @db.Timestamptz(3)
+  nextInvocation     DateTime?      @db.Timestamptz(3)
+  createdAt          DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime       @map("updated_at") @db.Timestamptz(3)
+  deletedAt          DateTime?      @map("deleted_at") @db.Timestamptz(3)
+  ReminderTask       ReminderTask[]
+  ReminderNote       ReminderNote[]
+
+  @@map("reminder")
+}
+
+model ReminderTask {
+  reminderId String   @map("reminder_id")
+  taskId     String   @map("task_id")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  Reminder   Reminder @relation(fields: [reminderId], references: [id])
+  Task       Task     @relation(fields: [taskId], references: [id])
+
+  @@id([reminderId, taskId])
+  @@map("reminder_task")
+}
+
+model ReminderNote {
+  reminderId String   @map("reminder_id")
+  noteId     String   @map("note_id")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  Reminder   Reminder @relation(fields: [reminderId], references: [id])
+  Note       Note     @relation(fields: [noteId], references: [id])
+
+  @@id([reminderId, noteId])
+  @@map("reminder_note")
+}
+
+// Chat
+
+model Chat {
+  id              String    @id @default(uuid())
+  content         String
+  chatRoomId      String    @map("chat_room_id")
+  authorId        String    @map("author_id")
+  referenceChatId String    @map("reference_chat_id")
+  info            Json      @db.JsonB
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime  @map("updated_at") @db.Timestamptz(3)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  Project         Project?
+  Author          User              @relation(fields: [authorId], references: [id])
+  ChatRoom        ChatRoom          @relation(name: "ChatRoom", fields: [chatRoomId], references: [id])
+  ParentChat      Chat              @relation(name: "ChildChat", fields: [referenceChatId], references: [id])
+  ChildChat       Chat[]            @relation(name: "ChildChat")
+  LastChat        ChatRoom?
+  ChatDeleted     ChatDeleted[]
+  ChatResource    ChatResource[]
+  ChatRoomProject ChatRoomProject[]
+  ChatRoomPrivate ChatRoomPrivate[]
+
+  @@map("chat")
+}
+
+enum ChatType {
+  PROJECT
+  PRIVATE
+}
+
+model ChatRoom {
+  id               String    @id @default(uuid())
+  type             ChatType
+  lastChatId       String    @unique @map("last_chat_id")
+  lastChatActivity DateTime  @map("last_chat_activity") @db.Timestamptz(3)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @map("updated_at") @db.Timestamptz(3)
+  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  Chat     Chat[] @relation(name: "ChatRoom")
+  LastChat Chat   @relation(fields: [lastChatId], references: [id])
+
+  @@map("chat_room")
+}
+
+model ChatDeleted {
+  chatId      String   @id @default(uuid())
+  deletedById String   @map("deleted_by_id")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  Chat      Chat @relation(fields: [chatId], references: [id])
+  DeletedBy User @relation(fields: [deletedById], references: [id])
+
+  @@map("chat_deleted")
+}
+
+model ChatResource {
+  chatId     String   @map("chat_id")
+  resourceId String   @map("resource_id")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  Chat     Chat     @relation(fields: [chatId], references: [id])
+  Resource Resource @relation(fields: [resourceId], references: [id])
+
+  @@id([chatId, resourceId])
+  @@map("chat_resource")
+}
+
+model ChatRoomProject {
+  chatId    String   @map("chat_id")
+  projectId String   @map("project_id")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  Chat    Chat    @relation(fields: [chatId], references: [id])
+  Project Project @relation(fields: [projectId], references: [id])
+
+  @@id([chatId, projectId])
+  @@map("chat_project")
+}
+
+model ChatRoomPrivate {
+  chatId    String   @map("chat_id")
+  userId    String   @map("project_id")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  Chat Chat @relation(fields: [chatId], references: [id])
+  User User @relation(fields: [userId], references: [id])
+
+  @@id([chatId, userId])
+  @@map("chat_room_private")
+}
+
+// Organization
+
+model Organization {
+  id               String             @id @default(uuid())
+  Task             Task[]
+  NoteOrganization NoteOrganization[]
+
+  @@map("organization")
 }
 
 model Log {
