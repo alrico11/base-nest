@@ -17,26 +17,57 @@ model User {
   id        String    @id @default(uuid())
   username  String
   name      String
-  email     String
+  email     String    @unique
   password  String?
   phone     String?
   thumbnail String?
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+  cityId    String    @map("city_id")
+
+  Firebase                       Firebase?
+  City                           City                  @relation(fields: [cityId], references: [code])
+  ProjectCollaborations          ProjectCollaborator[] @relation(name: "UserProjectCollaborator")
+  AddedProjectCollaborations     ProjectCollaborator[] @relation(name: "AddedByProjectCollaborator")
+  UserProjectAdmins              ProjectAdmin[]        @relation(name: "UserProjectAdmin")
+  AddedByProjectAdmins           ProjectAdmin[]        @relation(name: "AddedByProjectAdmin")
+  TaskCreatedByUsers             Task[]                @relation(name: "TaskCreatedByUser")
+  TaskEditedByUsers              Task[]                @relation(name: "TaskEditedByUser")
+  AuthTokens                     AuthToken[]
+  TaskAssignees                  TaskAssignee[]
+  Comments                       Comment[]
+  Chats                          Chat[]
+  ChatDeleteds                   ChatDeleted[]
+  ChatRoomPrivates               ChatRoomPrivate[]
+  UserOrganizationMembers        OrganizationMember[]  @relation(name: "UserOrganization")
+  AddedByUserOrganizationMembers OrganizationMember[]  @relation(name: "AddedByUser")
+  UserOrganizationAdmins         OrganizationAdmin[]   @relation(name: "UserOrganizationAdmin")
+  AddedByUserOrganizationAdmins  OrganizationAdmin[]   @relation(name: "AddedByUserOrganizationAdmin")
+  Notifications                  Notification[]
+  UserResetTokens                UserResetToken[]
+  Organization                   Organization[]
+  Project                        Project[]
+
+  @@map("user")
+}
+
+model Firebase {
+  id         String  @id @default(uuid())
+  firebaseId String  @unique @map("firebase_id")
+  name       String?
+  email      String?
+  phone      String?
+  photoUrl   String? @map("photo_url")
+  userId     String  @unique @map("user_id")
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime  @map("updated_at") @db.Timestamptz(3)
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
 
-  ProjectCollaborations      ProjectCollaborator[] @relation(name: "UserProjectCollaborator")
-  AddedProjectCollaborations ProjectCollaborator[] @relation(name: "AddedByProjectCollaborator")
-  UserProjectAdmins          ProjectAdmin[]        @relation(name: "UserProjectAdmin")
-  AddedByProjectAdmins       ProjectAdmin[]        @relation(name: "AddedByProjectAdmin")
-  TaskCreatedByUser          Task[]                @relation(name: "TaskCreatedByUser")
-  TaskEditedByUser           Task[]                @relation(name: "TaskEditedByUser")
-  AuthTokens                 AuthToken[]
-  TaskAssignee               TaskAssignee[]
-  Comment                    Comment[]
-  Chat                       Chat[]
-  ChatDeleted                ChatDeleted[]
-  ChatRoomPrivate            ChatRoomPrivate[]
+  User User @relation(fields: [userId], references: [id])
+
+  @@map("firebase")
 }
 
 model Admin {
@@ -45,44 +76,53 @@ model Admin {
   email     String
   password  String?
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime  @map("updated_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
 
-  AuthTokenAdmin AuthTokenAdmin[]
+  AuthTokenAdmins AuthTokenAdmin[]
+
+  @@map("admin")
 }
 
 model AuthToken {
-  id                Int       @id @default(autoincrement())
-  deviceId          String
-  token             String
-  refreshTokenId    Int?
-  fcmToken          String?
-  fcmTokenUpdatedAt DateTime? @db.Timestamptz(3)
-  userId            String
-  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt         DateTime  @map("updated_at") @db.Timestamptz(3)
-  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz(3)
-  fcmTokenId        Int
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  token     String
+  deviceId  String
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
-  Device   Device   @relation(fields: [deviceId], references: [id])
-  FcmToken FcmToken @relation(fields: [fcmTokenId], references: [id])
-  User     User     @relation(fields: [userId], references: [id])
+  Device Device @relation(fields: [deviceId], references: [id])
+  User   User   @relation(fields: [userId], references: [id])
+
+  @@map("auth_token")
 }
 
 model AuthTokenAdmin {
-  id                Int       @id @default(autoincrement())
-  deviceId          String
-  fcmToken          String?
-  fcmTokenUpdatedAt DateTime? @db.Timestamptz(3)
-  adminId           String
-  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt         DateTime  @map("updated_at") @db.Timestamptz(3)
-  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz(3)
+  id        String    @id @default(uuid())
+  adminId   String    @map("user_id")
+  token     String
+  deviceId  String
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
-  Device     DeviceAdmin @relation(fields: [deviceId], references: [id])
-  FcmToken   FcmToken    @relation(fields: [fcmTokenId], references: [id])
-  Admin      Admin       @relation(fields: [adminId], references: [id])
-  fcmTokenId Int
+  Device DeviceAdmin @relation(fields: [deviceId], references: [id])
+  Admin  Admin       @relation(fields: [adminId], references: [id])
+
+  @@map("auth_token_admin")
+}
+
+model UserResetToken {
+  id        String    @id
+  userId    String
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("user_reset_token")
 }
 
 model DeviceAdmin {
@@ -92,25 +132,27 @@ model DeviceAdmin {
   metadata         Json
   deviceToken      String      @map("device_token")
   createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt        DateTime    @map("updated_at") @db.Timestamptz(3)
+  updatedAt        DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt        DateTime?   @map("deleted_at") @db.Timestamptz(3)
   lastActivity     DateTime    @map("last_activity") @db.Timestamptz(3)
 
-  AuthTokenAdmin AuthTokenAdmin[]
+  AuthTokenAdmins AuthTokenAdmin[]
+
+  @@map("device_admin")
 }
 
 model Device {
-  id               String      @id @default(uuid())
-  platform         PlaformEnum
-  platformUniqueId String      @map("plaform_unique_id")
-  metadata         Json
-  deviceToken      String      @map("device_token")
-  createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt        DateTime    @map("updated_at") @db.Timestamptz(3)
-  deletedAt        DateTime?   @map("deleted_at") @db.Timestamptz(3)
-  lastActivity     DateTime    @map("last_activity") @db.Timestamptz(3)
+  id                 String    @id @default(uuid())
+  fingerprint        String
+  fcmToken           String?
+  fcmTokenLastUpdate DateTime? @db.Timestamptz(3)
+  lastActive         DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime  @map("updated_at") @db.Timestamptz(3)
+  deletedAt          DateTime? @map("deleted_at") @db.Timestamptz(3)
 
-  AuthToken AuthToken[]
+  AuthTokens AuthToken[]
+
+  @@map("device")
 }
 
 model Notification {
@@ -120,8 +162,12 @@ model Notification {
   readAt    DateTime  @map("read_at") @db.Timestamptz(3)
   userId    String    @map("user_id")
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime  @map("updated_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  User User @relation(fields: [userId], references: [id])
+
+  @@map("notification")
 }
 
 enum PlaformEnum {
@@ -131,27 +177,29 @@ enum PlaformEnum {
 }
 
 model Resource {
-  id        String  @id @default(uuid())
-  s3url     String
-  s3Key     String
-  fileName  String
-  fileType  String
-  fileSize  Int
-  metadata  Json?
-  relatedTo String?
+  id        String    @id @default(uuid())
+  objectUrl String?   @map("object_url")
+  objectKey String    @unique @map("object_key")
+  fileName  String    @map("file_name")
+  fileType  String    @map("file_type")
+  fileSize  Int       @map("file_size")
+  metadata  Json?     @map("meta_data")
+  blurHash  String?   @map("blur_hash")
+  relatedId String?   @map("related_id")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
 
-  ProjectImages ProjectImage[]
-  ProjectFiles  ProjectFile[]
-  TaskFile      TaskFile[]
-  TaskImage     TaskImage[]
-  ChatResource  ChatResource[]
-}
+  parentResource Resource?      @relation("ChildResources", fields: [relatedId], references: [id])
+  childResources Resource[]     @relation("ChildResources")
+  ProjectImages  ProjectImage[]
+  ProjectFiles   ProjectFile[]
+  TaskFiles      TaskFile[]
+  TaskImages     TaskImage[]
+  ChatResources  ChatResource[]
+  Organization   Organization?
 
-model FcmToken {
-  id Int @id @default(autoincrement())
-
-  AuthToken      AuthToken[]
-  AuthTokenAdmin AuthTokenAdmin[]
+  @@map("resource")
 }
 
 // Project
@@ -160,7 +208,7 @@ model Project {
   id               String    @id @default(uuid())
   color            String
   name             String
-  description      String
+  description      String?
   lastChatActivity DateTime  @map("last_chat_activity") @db.Timestamptz(3)
   priority         String
   target           String
@@ -172,19 +220,22 @@ model Project {
   lastChatId       String    @unique @map("last_chat_id")
   organizationId   String    @map("organization_id")
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt        DateTime  @map("updated_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt        DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   LastChat             Chat                  @relation(fields: [lastChatId], references: [id])
+  User                 User                  @relation(fields: [creatorId], references: [id])
+  Organization         Organization          @relation(fields: [organizationId], references: [id])
   ProjectTags          ProjectTag[]
   ProjectCollaborators ProjectCollaborator[]
   ProjectAdmins        ProjectAdmin[]
   ProjectImages        ProjectImage[]
   ProjectFiles         ProjectFile[]
   ProjectNotes         ProjectNote[]
-  Task                 Task[]
-  NoteProject          NoteProject[]
-  ChatRoomProject      ChatRoomProject[]
+  Tasks                Task[]
+  NoteProjects         NoteProject[]
+  ChatRoomProjects     ChatRoomProject[]
+  EventLogs            EventLog[]
 
   @@map("project")
 }
@@ -207,7 +258,7 @@ model Tag {
   organizationId String    @map("organization_id")
   creatorId      String    @map("creator_id")
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt      DateTime  @map("updated_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   ProjectTags ProjectTag[]
@@ -220,7 +271,7 @@ model ProjectCollaborator {
   userId    String    @map("user_id")
   addedById String    @map("added_by_id")
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime  @map("updated_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   Project Project @relation(fields: [projectId], references: [id])
@@ -236,7 +287,7 @@ model ProjectAdmin {
   userId    String    @map("user_id")
   addedById String    @map("added_by_id")
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime  @map("updated_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   Project Project @relation(fields: [projectId], references: [id])
@@ -251,7 +302,7 @@ model ProjectImage {
   projectId  String    @map("project_id")
   resourceId String    @map("resource_id")
   createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt  DateTime  @map("updated_at") @db.Timestamptz(3)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   Project  Project  @relation(fields: [projectId], references: [id])
@@ -265,7 +316,7 @@ model ProjectFile {
   projectId  String    @map("project_id")
   resourceId String    @map("resource_id")
   createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt  DateTime  @map("updated_at") @db.Timestamptz(3)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   Project  Project  @relation(fields: [projectId], references: [id])
@@ -279,7 +330,7 @@ model ProjectNote {
   projectId String    @map("project_id")
   noteId    String    @map("note_id")
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime  @map("updated_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   Project Project @relation(fields: [projectId], references: [id])
@@ -287,6 +338,21 @@ model ProjectNote {
 
   @@id([projectId, noteId])
   @@map("project_note")
+}
+
+model EventLog {
+  id              String    @id @default(uuid())
+  date            DateTime  @db.Timestamptz(3)
+  description     String?
+  lastUpdatedById String    @map("last_updated_by_id")
+  projectId       String    @map("project_id")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  Project Project @relation(fields: [projectId], references: [id])
+
+  @@map("event_log")
 }
 
 enum TaskEnum {
@@ -307,7 +373,7 @@ enum TaskPriority {
 model Task {
   id             String       @id @default(uuid())
   name           String
-  description    String
+  description    String?
   startDate      DateTime     @map("start_date") @db.Date
   endDate        DateTime     @map("end_date") @db.Date
   status         TaskEnum
@@ -315,7 +381,7 @@ model Task {
   color          String?
   duration       Int?
   createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt      DateTime     @map("updated_at") @db.Timestamptz(3)
+  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt      DateTime?    @map("deleted_at") @db.Timestamptz(3)
   projectId      String       @map("project_id")
   createdById    String       @map("creator_id")
@@ -328,13 +394,13 @@ model Task {
   CreatedBy       User             @relation(name: "TaskCreatedByUser", fields: [createdById], references: [id])
   EditedBy        User             @relation(name: "TaskEditedByUser", fields: [editedById], references: [id])
   Organization    Organization     @relation(fields: [organizationId], references: [id])
-  TaskComment     TaskComment[]
-  TaskFile        TaskFile[]
-  TaskAssignee    TaskAssignee[]
+  TaskComments    TaskComment[]
+  TaskFiles       TaskFile[]
+  TaskAssignees   TaskAssignee[]
   TaskPrequisites TaskPrequisite[] @relation(name: "TaskPrequisite")
-  TaskParent      TaskPrequisite[] @relation(name: "TaskParent")
-  TaskImage       TaskImage[]
-  ReminderTask    ReminderTask[]
+  TaskParents     TaskPrequisite[] @relation(name: "TaskParent")
+  TaskImages      TaskImage[]
+  ReminderTasks   ReminderTask[]
 
   @@map("task")
 }
@@ -402,11 +468,13 @@ model TaskImage {
 // Note
 
 model Note {
-  id               String             @id @default(uuid())
-  ProjectNote      ProjectNote[]
-  NoteProject      NoteProject[]
-  NoteOrganization NoteOrganization[]
-  ReminderNote     ReminderNote[]
+  id                String             @id @default(uuid())
+  title             String
+  description       String
+  ProjectNotes      ProjectNote[]
+  NoteProjects      NoteProject[]
+  NoteOrganizations NoteOrganization[]
+  ReminderNotes     ReminderNote[]
 
   @@map("note")
 }
@@ -443,7 +511,7 @@ model Comment {
   authorId           String    @map("author_id")
   referenceCommentId String    @map("reference_comment_id")
   createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt          DateTime  @map("updated_at") @db.Timestamptz(3)
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt          DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   TaskComment TaskComment[]
@@ -473,10 +541,10 @@ model Reminder {
   previousInvocation DateTime?      @db.Timestamptz(3)
   nextInvocation     DateTime?      @db.Timestamptz(3)
   createdAt          DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt          DateTime       @map("updated_at") @db.Timestamptz(3)
+  updatedAt          DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt          DateTime?      @map("deleted_at") @db.Timestamptz(3)
-  ReminderTask       ReminderTask[]
-  ReminderNote       ReminderNote[]
+  ReminderTasks      ReminderTask[]
+  ReminderNotes      ReminderNote[]
 
   @@map("reminder")
 }
@@ -513,19 +581,19 @@ model Chat {
   referenceChatId String    @map("reference_chat_id")
   info            Json      @db.JsonB
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt       DateTime  @map("updated_at") @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(3)
 
-  Project         Project?
-  Author          User              @relation(fields: [authorId], references: [id])
-  ChatRoom        ChatRoom          @relation(name: "ChatRoom", fields: [chatRoomId], references: [id])
-  ParentChat      Chat              @relation(name: "ChildChat", fields: [referenceChatId], references: [id])
-  ChildChat       Chat[]            @relation(name: "ChildChat")
-  LastChat        ChatRoom?
-  ChatDeleted     ChatDeleted[]
-  ChatResource    ChatResource[]
-  ChatRoomProject ChatRoomProject[]
-  ChatRoomPrivate ChatRoomPrivate[]
+  Project          Project?
+  Author           User              @relation(fields: [authorId], references: [id])
+  ChatRoom         ChatRoom          @relation(name: "ChatRoom", fields: [chatRoomId], references: [id])
+  ParentChat       Chat              @relation(name: "ChildChat", fields: [referenceChatId], references: [id])
+  ChildChats       Chat[]            @relation(name: "ChildChat")
+  LastChat         ChatRoom?
+  ChatDeleteds     ChatDeleted[]
+  ChatResources    ChatResource[]
+  ChatRoomProjects ChatRoomProject[]
+  ChatRoomPrivates ChatRoomPrivate[]
 
   @@map("chat")
 }
@@ -541,7 +609,7 @@ model ChatRoom {
   lastChatId       String    @unique @map("last_chat_id")
   lastChatActivity DateTime  @map("last_chat_activity") @db.Timestamptz(3)
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt        DateTime  @map("updated_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt        DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   Chat     Chat[] @relation(name: "ChatRoom")
@@ -600,11 +668,106 @@ model ChatRoomPrivate {
 // Organization
 
 model Organization {
-  id               String             @id @default(uuid())
-  Task             Task[]
-  NoteOrganization NoteOrganization[]
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  thumbnailId String?   @unique @map("thumbnail_id")
+  creatorId   String    @map("creator_id")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  Tasks               Task[]
+  NoteOrganizations   NoteOrganization[]
+  OrganizationMembers OrganizationMember[]
+  Departemens         Departement[]
+  Resource            Resource?            @relation(fields: [thumbnailId], references: [id])
+  Creator             User                 @relation(fields: [creatorId], references: [id])
+  Project             Project[]
+  OrganizationAdmin   OrganizationAdmin[]
 
   @@map("organization")
+}
+
+model OrganizationMember {
+  organizationId String   @map("organization_id")
+  userId         String   @map("user_id")
+  addedById      String   @map("added_by_id")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  Organization Organization @relation(fields: [organizationId], references: [id])
+  User         User         @relation(name: "UserOrganization", fields: [userId], references: [id])
+  AddedBy      User         @relation(name: "AddedByUser", fields: [addedById], references: [id])
+
+  @@id([organizationId, userId])
+  @@map("organization_member")
+}
+
+model OrganizationAdmin {
+  organizationId String   @map("organization_id")
+  userId         String   @map("user_id")
+  addedById      String   @map("added_by_id")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  Organization Organization @relation(fields: [organizationId], references: [id])
+  User         User         @relation(name: "UserOrganizationAdmin", fields: [userId], references: [id])
+  AddedBy      User         @relation(name: "AddedByUserOrganizationAdmin", fields: [addedById], references: [id])
+
+  @@id([organizationId, userId])
+  @@map("organization_admin")
+}
+
+model Departement {
+  id             String    @id @default(uuid())
+  name           String
+  description    String?
+  organizationId String    @map("organization_id")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  Organization Organization @relation(fields: [organizationId], references: [id])
+  Position     Position[]
+}
+
+model Position {
+  id            String    @id @default(uuid())
+  departementId String    @map("departement_id")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  Departement Departement @relation(fields: [departementId], references: [id])
+  Job         Job[]
+
+  @@map("position")
+}
+
+model Job {
+  id          String    @id @default(uuid())
+  name        String
+  sequence    String?
+  description String?
+  category    Json?
+  positionId  String    @map("position_id")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  Position Position @relation(fields: [positionId], references: [id])
+  Sop      Sop?
+}
+
+model Sop {
+  id        String    @id @default(uuid())
+  job_id    String    @unique @map("job_id")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  Job Job @relation(fields: [job_id], references: [id])
 }
 
 model Log {
@@ -618,50 +781,51 @@ model Log {
   @@map("log")
 }
 
-// model City {
-//   code          String  @id @unique
-//   name          String
-//   province_code String
-//   latitude      String?
-//   longitude     String?
+model City {
+  code         String  @id @unique
+  name         String
+  provinceCode String  @map("province_code")
+  latitude     String?
+  longitude    String?
 
-//   province  Province   @relation(fields: [province_code], references: [code])
-//   districts District[]
+  province  Province   @relation(fields: [provinceCode], references: [code])
+  districts District[]
+  User      User[]
 
-//   @@map("cities")
-// }
+  @@map("cities")
+}
 
-// model Province {
-//   code      String  @id @unique
-//   name      String
-//   latitude  String?
-//   longitude String?
-//   cities    City[]
+model Province {
+  code      String  @id @unique
+  name      String
+  latitude  String?
+  longitude String?
+  cities    City[]
 
-//   @@map("provinces")
-// }
+  @@map("provinces")
+}
 
-// model District {
-//   code      String  @id @unique
-//   name      String
-//   city_code String
-//   latitude  String?
-//   longitude String?
+model District {
+  code      String  @id @unique
+  name      String
+  cityCode  String  @map("city_code")
+  latitude  String?
+  longitude String?
 
-//   city         City          @relation(fields: [city_code], references: [code])
-//   subdistricts SubDistrict[]
+  city         City          @relation(fields: [cityCode], references: [code])
+  subdistricts SubDistrict[]
 
-//   @@map("indonesia_districts")
-// }
+  @@map("indonesia_districts")
+}
 
-// model SubDistrict {
-//   code          String  @id @unique
-//   name          String
-//   district_code String
-//   latitude      String?
-//   longitude     String?
+model SubDistrict {
+  code          String  @id @unique
+  name          String
+  district_code String
+  latitude      String?
+  longitude     String?
 
-//   district District @relation(fields: [district_code], references: [code])
+  district District @relation(fields: [district_code], references: [code])
 
-//   @@map("indonesia_subdistricts")
-// }
+  @@map("indonesia_subdistricts")
+}

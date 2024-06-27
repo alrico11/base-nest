@@ -3,6 +3,7 @@ import { EventEmitterModule } from "@nestjs/event-emitter"
 import { RateLimiterModule } from "nestjs-rate-limiter"
 import { PrismaModule } from "./prisma"
 import { XConfig } from "./xconfig"
+import { DeviceModule as UserDeviceModule } from "./main/device"
 
 const AppImports: (Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference<any>)[] = [
   XConfig,
@@ -16,6 +17,7 @@ const AppImports: (Type<any> | DynamicModule | Promise<DynamicModule> | ForwardR
     duration: 60,
   }),
   PrismaModule,
+  UserDeviceModule
 ]
 
 export default AppImports
