@@ -1,2 +1,2 @@
-export declare class XconfigModule {
+export declare class XConfigModule {
 }

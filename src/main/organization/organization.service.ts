@@ -8,7 +8,7 @@ import { LogService } from 'src/log';
 import { PrismaService } from 'src/prisma';
 import { dotToObject } from 'src/utils/string';
 import { XConfig } from 'src/xconfig';
-import { ICreateOrganization, IDeleteOrganization, IFindAllMemberOrganization, IFindAllOrganization, IFindOneOrganization, IUpdateOrganization } from './organization.@types';
+import { ICreateOrganization, IDeleteOrganization, IFindAllMemberOrganization, IFindAllOrganization, IFindOneOrganization, IsAdmin, IsOwner, IUpdateOrganization } from './organization.@types';
 import { OrganizationUpdatedEvent } from './organization.event';
 
 @Injectable()
@@ -44,6 +44,7 @@ export class OrganizationService {
   async findAll({ lang, query }: IFindAllOrganization) {
     const { limit, orderBy, orderDirection, page, search } = query
     const condition: Prisma.OrganizationWhereInput = {
+      deletedAt: null,
       name: { contains: search },
     }
 
@@ -64,7 +65,7 @@ export class OrganizationService {
 
   async findOne({ lang, param: { id }, user }: IFindOneOrganization) {
     const organizationExist = await this.prisma.organization.findFirst({
-      where: { id },
+      where: { id, deletedAt: null },
       include: {
         Resource: true,
         OrganizationAdmin: {
@@ -127,7 +128,7 @@ export class OrganizationService {
 
   async remove({ param: { id }, lang, user }: IDeleteOrganization) {
     const organizationExist = await this.prisma.organization.findFirst({
-      where: { id },
+      where: { id, deletedAt: null },
     })
     if (!organizationExist) throw new HttpException(LangResponse({ key: 'notFound', lang, object: 'ORGANIZATION' }), HttpStatus.NOT_FOUND)
     if (organizationExist.creatorId !== user.id) throw new HttpException(LangResponse({ key: "unauthorize", lang }), HttpStatus.UNAUTHORIZED)
@@ -144,7 +145,7 @@ export class OrganizationService {
   async findAllMember({ query, lang, param: { id } }: IFindAllMemberOrganization) {
     const { limit, orderBy, orderDirection, page, search } = query
     const { result, ...rest } = await this.prisma.extended.organization.paginate({
-      where: { id, name: { contains: search, mode: "insensitive" } },
+      where: { id, name: { contains: search, mode: "insensitive" }, deletedAt: null },
       orderBy: dotToObject({ orderBy, orderDirection }),
       limit, page,
       include: {

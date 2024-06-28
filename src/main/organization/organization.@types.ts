@@ -36,3 +36,10 @@ export interface IDeleteOrganization {
     lang: LangEnum
     user: User
 }
+
+export interface IsAdmin {
+    userId: string
+    organizationId: string
+    lang: LangEnum
+}
+export interface IsOwner extends IsAdmin { }

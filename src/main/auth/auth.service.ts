@@ -7,7 +7,7 @@ import { LogService } from 'src/log';
 import { PrismaService } from 'src/prisma';
 import { ILoginDto, ILogOutDto } from './auth.@types';
 import { XConfig } from 'src/xconfig';
-import { LangResponse } from 'src/lang';
+import { LangResponse } from 'src/constants';
 @Injectable()
 export class AuthService {
   constructor(

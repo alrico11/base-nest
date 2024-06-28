@@ -7,12 +7,6 @@ import AppImports from './app.imports';
 import { AppService } from './app.service';
 import { AllExceptionsFilter, InternalServerErrorExceptionFilter, ZodErrorFilter } from './globalException.filter';
 import { ResponseInterceptor } from './interceptor';
-import { OrganizationModule } from './main/organization/organization.module';
-import { ProjectModule } from './main/project/project.module';
-import { TaskModule } from './main/task/task.module';
-import { NoteModule } from './main/note/note.module';
-import { ChatModule } from './main/chat/chat.module';
-import { CommentModule } from './main/comment/comment.module';
 
 @Global()
 @Module({

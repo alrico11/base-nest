@@ -14,7 +14,9 @@ export const LangConstants = {
         conflict: 'sudah pernah dilakukan',
         forbidden: "akses dilarang",
         timeout: "permintaan waktu habis",
-        confirmed: "telah dikonfirmasi"
+        confirmed: "telah dikonfirmasi",
+        alreadyJoin: "sudah bergabung",
+        notJoin: "belum bergabung",
     },
     EN: {
         created: "created",
@@ -31,7 +33,9 @@ export const LangConstants = {
         badRequest: "bad request",
         forbidden: "forbidden",
         timeout: "timeout",
-        confirmed: "confirmed"
+        confirmed: "confirmed",
+        alreadyJoin: "already joined",
+        notJoin: "not join yet"
     }
 }
 

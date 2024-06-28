@@ -6,7 +6,7 @@ import { z } from 'zod';
 const zEnvValidationSchema = z.object({
     NODE_ENV: z.enum(['PRODUCTION', 'DEVELOPMENT', 'LOCAL']),
     APP_PORT: z.number({ coerce: true }).min(1000),
-    DATABASE_URL: z.string().url(),
+    DATABASE_URL: z.string(),
     USER_JWT_SECRET: z.string(),
     DEVICE_JWT_SECRET: z.string(),
     OBJECT_STORAGE_HOST: z.string(),
@@ -15,12 +15,12 @@ const zEnvValidationSchema = z.object({
     OBJECT_STORAGE_BUCKET: z.string(),
     OBJECT_STORAGE_ACCESS_KEY_ID: z.string(),
     OBJECT_STORAGE_SECRET_ACCESS_KEY: z.string(),
-    OBJECT_STORAGE_FORCE_PATH_STYLE: z.boolean(),
+    OBJECT_STORAGE_FORCE_PATH_STYLE: z.boolean({ coerce: true }),
     OBJECT_STORAGE_ENDPOINT: z.string(),
     DEFAULT_IMAGE_COMPRESSION_WIDTH: z.number({ coerce: true }),
     DEFAULT_IMAGE_COMPRESSION_HEIGHT: z.number({ coerce: true }),
     OBJECT_STORAGE_PREFIX_USER: z.string(),
-    OBJECT_STORAGE_PREFIX_ORGANIZATION : z.string(),
+    OBJECT_STORAGE_PREFIX_ORGANIZATION: z.string(),
     OBJECT_STORAGE_PREFIX_ADMIN: z.string(),
     TMP_FILE_PATH: z.string(),
     CDN_PATH_URL: z.string(),
@@ -28,7 +28,7 @@ const zEnvValidationSchema = z.object({
     CDN_BASE_URL: z.string(),
     BLURHASH_COMPONENT_X: z.number({ coerce: true }),
     BLURHASH_COMPONENT_Y: z.number({ coerce: true }),
-    MAX_CHILD_RESOURCE: z.number({coerce: true}),
+    MAX_CHILD_RESOURCE: z.number({ coerce: true }),
 })
 
 export type IXConfig = z.infer<typeof zEnvValidationSchema>

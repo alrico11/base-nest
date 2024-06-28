@@ -7,8 +7,8 @@ import { LogService } from 'src/log';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ICheckDevice, IRegisterDevice, IRegisterFcm } from './device.@types';
 import { ApplicationConfig } from '@nestjs/core';
-import { LangResponse } from 'src/lang';
 import { XConfig } from 'src/xconfig';
+import { LangResponse } from 'src/constants';
 
 @Injectable()
 export class DeviceService {

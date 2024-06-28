@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
-import { ResourceEditedEvent } from "src/resource";
 import { OrganizationUpdatedEvent } from "./organization.event";
+import { ResourceEditedEvent } from "src/file";
 
 @Injectable()
 

@@ -14,20 +14,21 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  username  String
-  name      String
-  email     String    @unique
-  password  String?
-  phone     String?
-  thumbnail String?
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
-  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
-  cityId    String    @map("city_id")
+  id          String    @id @default(uuid())
+  username    String
+  name        String
+  email       String    @unique
+  password    String?
+  phone       String?
+  thumbnailId String?   @map("thumbnail_id")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(3)
+  cityId      String    @map("city_id")
 
   Firebase                       Firebase?
   City                           City                  @relation(fields: [cityId], references: [code])
+  Resource                       Resource?             @relation(fields: [thumbnailId], references: [id])
   ProjectCollaborations          ProjectCollaborator[] @relation(name: "UserProjectCollaborator")
   AddedProjectCollaborations     ProjectCollaborator[] @relation(name: "AddedByProjectCollaborator")
   UserProjectAdmins              ProjectAdmin[]        @relation(name: "UserProjectAdmin")
@@ -48,6 +49,7 @@ model User {
   UserResetTokens                UserResetToken[]
   Organization                   Organization[]
   Project                        Project[]
+  Tag                            Tag[]
 
   @@map("user")
 }
@@ -90,7 +92,7 @@ model AuthToken {
   token     String
   deviceId  String
   createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @map("updated_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   Device Device @relation(fields: [deviceId], references: [id])
@@ -147,7 +149,7 @@ model Device {
   fcmToken           String?
   fcmTokenLastUpdate DateTime? @db.Timestamptz(3)
   lastActive         DateTime  @default(now()) @db.Timestamptz(3)
-  updatedAt          DateTime  @map("updated_at") @db.Timestamptz(3)
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt          DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   AuthTokens AuthToken[]
@@ -187,7 +189,7 @@ model Resource {
   blurHash  String?   @map("blur_hash")
   relatedId String?   @map("related_id")
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime  @map("updated_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   parentResource Resource?      @relation("ChildResources", fields: [relatedId], references: [id])
@@ -198,34 +200,46 @@ model Resource {
   TaskImages     TaskImage[]
   ChatResources  ChatResource[]
   Organization   Organization?
+  Project        Project[]
+  User           User[]
 
   @@map("resource")
 }
 
 // Project
 
+enum ProjectStatus {
+  NEW
+  IN_PROGRESS
+  POSTPONED
+  WAITING_APPROVAL
+  DONE
+  CANCELLED
+}
+
 model Project {
   id               String    @id @default(uuid())
-  color            String
+  color            String?
   name             String
   description      String?
-  lastChatActivity DateTime  @map("last_chat_activity") @db.Timestamptz(3)
+  lastChatActivity DateTime? @map("last_chat_activity") @db.Timestamptz(3)
   priority         String
   target           String
   budget           Int
   goals            String
-  status           String
+  status           ProjectStatus
   creatorId        String    @map("creator_id")
-  thumbnail        String
+  thumbnailId      String?   @map("thumbnail_id")
   lastChatId       String    @unique @map("last_chat_id")
-  organizationId   String    @map("organization_id")
+  organizationId   String?   @map("organization_id")
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt        DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   LastChat             Chat                  @relation(fields: [lastChatId], references: [id])
   User                 User                  @relation(fields: [creatorId], references: [id])
-  Organization         Organization          @relation(fields: [organizationId], references: [id])
+  Organization         Organization?         @relation(fields: [organizationId], references: [id])
+  Resource             Resource?             @relation(fields: [thumbnailId], references: [id])
   ProjectTags          ProjectTag[]
   ProjectCollaborators ProjectCollaborator[]
   ProjectAdmins        ProjectAdmin[]
@@ -255,13 +269,15 @@ model ProjectTag {
 model Tag {
   id             String    @id @default(uuid())
   name           String
-  organizationId String    @map("organization_id")
+  organizationId String?   @map("organization_id")
   creatorId      String    @map("creator_id")
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(3)
 
-  ProjectTags ProjectTag[]
+  ProjectTags  ProjectTag[]
+  Creator      User          @relation(fields: [creatorId], references: [id])
+  Organization Organization? @relation(fields: [organizationId], references: [id])
 
   @@map("tag")
 }
@@ -685,6 +701,7 @@ model Organization {
   Creator             User                 @relation(fields: [creatorId], references: [id])
   Project             Project[]
   OrganizationAdmin   OrganizationAdmin[]
+  Tag                 Tag[]
 
   @@map("organization")
 }

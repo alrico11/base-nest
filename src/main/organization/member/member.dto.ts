@@ -10,3 +10,9 @@ const CreateMemberOrganizationParamDtoSchema = FindOneParamDtoBaseSchema
 
 export class CreateMemberOrganizationBodyDto extends createZodDto(CreateMemberOrganizationBodyDtoSchema) { }
 export class CreateMemberOrganizationParamDto extends createZodDto(CreateMemberOrganizationParamDtoSchema) { }
+export class RemoveMemberOrganizationParamDto extends createZodDto(CreateMemberOrganizationParamDtoSchema) { }
+export class RemoveMemberOrganizationBodyDto extends createZodDto(CreateMemberOrganizationBodyDtoSchema) { }
+export class AddAdminOrganizationBodyDto extends createZodDto(CreateMemberOrganizationBodyDtoSchema) { }
+export class AddAdminOrganizationParamDto extends createZodDto(CreateMemberOrganizationParamDtoSchema) { }
+export class RemoveAdminOrganizationParamDto extends createZodDto(CreateMemberOrganizationParamDtoSchema) { }
+export class RemoveAdminOrganizationBodyDto extends createZodDto(CreateMemberOrganizationBodyDtoSchema) { }

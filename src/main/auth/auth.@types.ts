@@ -1,6 +1,6 @@
 import { Device, User } from "@prisma/client";
 import { LoginBodyDto } from "./auth.dto";
-import { LangEnum } from "src/lang";
+import { LangEnum } from "src/constants";
 
 export interface ILoginDto {
     body : LoginBodyDto,

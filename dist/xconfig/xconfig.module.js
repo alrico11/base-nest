@@ -6,24 +6,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.XconfigModule = void 0;
+exports.XConfigModule = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const x_config_1 = require("./x.config");
-let XconfigModule = class XconfigModule {
+let XConfigModule = class XConfigModule {
 };
-exports.XconfigModule = XconfigModule;
-exports.XconfigModule = XconfigModule = __decorate([
+exports.XConfigModule = XConfigModule;
+exports.XConfigModule = XConfigModule = __decorate([
     (0, common_1.Global)(),
     (0, common_1.Module)({
         imports: [
-            config_1.ConfigModule.forRoot({
-                isGlobal: true,
-                validate: x_config_1.XConfig.validate,
-            })
+            config_1.ConfigModule.forRoot({ isGlobal: true, validate: x_config_1.XConfig.validate, })
         ],
         exports: [x_config_1.XConfig],
         providers: [x_config_1.XConfig]
     })
-], XconfigModule);
+], XConfigModule);
 //# sourceMappingURL=xconfig.module.js.map

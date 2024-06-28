@@ -1,15 +1,13 @@
 import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiHeaders, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Device, User } from '@prisma/client';
-import { DeviceHeaders } from 'src/constants';
-import { Lang } from 'src/lang/lang.decorator';
+import { DeviceHeaders, Lang, LangEnum } from 'src/constants';
 import { DeviceInstance } from '../device';
 import { UserDeviceGuard } from '../device/device.guard';
 import { LoginBodyDto } from './auth.dto';
 import { AuthService } from './auth.service';
 import { UserJwtGuard } from './jwt.guard';
 import { UserInstance } from './user.decorator';
-import { LangEnum } from 'src/lang';
 
 @Controller('auth')
 @ApiTags('Main Auth')

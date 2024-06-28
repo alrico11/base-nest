@@ -5,12 +5,9 @@ import { XConfig } from './x.config';
 @Global()
 @Module({
     imports: [
-        ConfigModule.forRoot({
-            isGlobal: true,
-            validate: XConfig.validate,
-        })
+        ConfigModule.forRoot({ isGlobal: true, validate: XConfig.validate, })
     ],
     exports: [XConfig],
     providers: [XConfig]
 })
-export class XconfigModule { }
+export class XConfigModule { }

@@ -1,12 +1,10 @@
 import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common/decorators';
 import { HttpStatus } from '@nestjs/common/enums';
 import { ApiBearerAuth, ApiBody, ApiHeaders, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { DeviceHeaders } from 'src/constants';
-import { Lang } from 'src/lang/lang.decorator';
+import { DeviceHeaders, Lang, LangEnum } from 'src/constants';
 import { CheckDeviceBodyDto, RegisterDeviceBodyDto, RegisterFCMTokenBodyDto } from './device.dto';
 import { UserDeviceGuard } from './device.guard';
 import { DeviceService } from './device.service';
-import { LangEnum } from 'src/lang';
 
 @ApiTags('Device Devices')
 @Controller('/device')

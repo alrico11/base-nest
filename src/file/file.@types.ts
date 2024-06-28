@@ -2,6 +2,7 @@ import { Admin, User } from "@prisma/client"
 import { GetFileParamDto, GetImageParamDto, GetImageQueryDto } from "./file.dto"
 import { Response } from 'express'
 import sharp, { Metadata } from 'sharp';
+import { AnyObject } from "src/@types";
 export type ImageMetadata = Metadata;
 
 export interface IGetImageDto {
@@ -10,6 +11,7 @@ export interface IGetImageDto {
 }
 
 export interface IUploadToObjectStorage {
+    contentType : string
     filePath : string
     prefix : string
     fileName? : string
@@ -50,4 +52,14 @@ export interface IFindClosestSize{
 export interface ISizeXY {
     sizeX : number
     sizeY : number
+}
+export interface AddResourceInput {
+    objectUrl?: string
+    objectKey: string
+    fileName: string
+    fileType: string
+    fileSize: number
+    metadata?: AnyObject
+    blurHash?: string
+    relatedId? : string
 }

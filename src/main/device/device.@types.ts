@@ -1,17 +1,17 @@
-import { LangEnumType } from "src/lib/function/lang/lang.@types";
+import { LangEnum } from "src/constants";
 import { CheckDeviceBodyDto, RegisterDeviceBodyDto, RegisterFCMTokenBodyDto } from "./device.dto";
 
 export interface IRegisterDevice {
     body : RegisterDeviceBodyDto
-    lang : LangEnumType
+    lang : LangEnum
 }
 
 export interface ICheckDevice {
     body : CheckDeviceBodyDto
-    lang : LangEnumType
+    lang : LangEnum
 }
 
 export interface IRegisterFcm {
     body : RegisterFCMTokenBodyDto
-    lang : LangEnumType
+    lang : LangEnum
 }

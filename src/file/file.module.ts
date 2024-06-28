@@ -3,15 +3,15 @@ import { FileController } from './file.controller';
 import { FileService } from './file.service';
 import { MulterModule } from '@nestjs/platform-express';
 import { MulterConfigService } from './multer.config.service';
-import { ResourceModule } from 'src/resource/resource.module';
+import { ResourceService } from './file.resource.service';
+import { ResourceListener } from './file.listener';
 
 @Module({
   imports: [
-    MulterModule.registerAsync({ useClass: MulterConfigService }),
-    forwardRef(() => ResourceModule)
+    MulterModule.registerAsync({ useClass: MulterConfigService })
   ],
-  providers: [FileService],
+  providers: [FileService, ResourceService, ResourceListener],
   controllers: [FileController],
-  exports: [FileService] 
+  exports: [FileService, ResourceService]
 })
-export class FileModule {}
+export class FileModule { }

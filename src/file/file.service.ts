@@ -9,11 +9,11 @@ import { createReadStream, existsSync, mkdirSync, readFileSync, statSync } from 
 import mime from 'mime-types';
 import { basename, join, parse } from 'path';
 import sharp from 'sharp';
-import { ResourceService } from 'src/resource/resource.service';
 import { XConfig } from 'src/xconfig';
 import { Readable } from 'stream';
 import { resolve } from 'url';
 import { CompressImageOption, IFileCompressUpload, IFindClosestSize, IFindFile, IGetImageDto, IGetTmpFile, IResolveUrl, IUploadToObjectStorage } from './file.@types';
+import { ResourceService } from './file.resource.service';
 
 @Injectable()
 export class FileService {
@@ -68,40 +68,40 @@ export class FileService {
     };
   }
 
-  isImageFile(filePath: string) {
-    const mimeType = mime.lookup(filePath);
-    return mimeType && mimeType.startsWith('image/');
-  }
+  async uploadToObjectStorage({ filePath, prefix, fileName, blurHash, contentType }: IUploadToObjectStorage) {
+    if (!existsSync(filePath)) {
+      throw new HttpException({ message: 'File not found' }, HttpStatus.NOT_FOUND);
+    }
 
-  async uploadToObjectStorage({ filePath, prefix, fileName, blurHash }: IUploadToObjectStorage) {
-    if (!existsSync(filePath)) throw new HttpException({ message: 'file not found' }, HttpStatus.NOT_FOUND)
-    const originalFileName = basename(filePath)
-    const { size } = statSync(filePath)
-    const objectKey = join(prefix, originalFileName)
-    const contentType = mime.lookup(filePath)
-    if (contentType === false) throw new HttpException({ message: 'unrecognized file' }, HttpStatus.CONFLICT)
-    const metadata = contentType.startsWith('image/') ? await sharp(filePath).metadata() : undefined
+    const originalFileName = basename(filePath);
+    const { size } = statSync(filePath);
+    const objectKey = join(prefix, fileName || originalFileName);
+
+    let metadata;
+    if (contentType.startsWith('image/')) {
+      metadata = await sharp(filePath).metadata();
+    }
 
     await this.s3Client.send(new PutObjectCommand({
       Bucket: this.config.env.OBJECT_STORAGE_BUCKET,
       Key: objectKey,
       Body: readFileSync(filePath),
-      ACL: 'public-read'
-    }))
+      ACL: 'public-read',
+      ContentType: contentType,
+    }));
 
     const resource = await this.resourceService.add({
-      blurHash: blurHash,
+      blurHash: contentType.startsWith('image/') ? blurHash : undefined,
       objectKey: objectKey,
-      fileName: originalFileName,
+      fileName: fileName || originalFileName,
       fileType: contentType,
       fileSize: size,
       metadata: metadata,
-      objectUrl: originalFileName ? this.resolveUrl({ fileName: originalFileName, prefix }) : undefined
-    })
+      objectUrl: this.resolveUrl({ fileName: fileName || originalFileName, prefix }),
+    });
 
-    return resource
+    return resource;
   }
-
   async removeObjectFromStorage(objectKey: string) {
     await this.s3Client.send(new DeleteObjectCommand({
       Bucket: this.config.env.OBJECT_STORAGE_BUCKET,
@@ -139,22 +139,36 @@ export class FileService {
       return false // Invalid URL
     }
   }
+
+
   async compressAndUploadObjectStorage({ fileName, user, prefix }: IFileCompressUpload) {
     const fileNames = Array.isArray(fileName) ? fileName : [fileName];
     const resources: Resource[] = [];
     for (const name of fileNames) {
-      const baseName = name.split('.').slice(0, -1).join('.');
-      const fileNameWebp = `${prefix}/${baseName}.webp`;
-      let resource = await this.resourceService.getResourceByObjectkey(fileNameWebp);
-      if (!resource) {
+      const contentType = mime.lookup(name);
+      if (!contentType) {
+        throw new Error('Unrecognized file type.');
+      }
+      let resource;
+      if (contentType === 'image/webp') {
+        const baseName = name.split('.').slice(0, -1).join('.');
+        const fileNameWebp = `${prefix}/${baseName}.webp`;
+        resource = await this.resourceService.getResourceByObjectkey(fileNameWebp);
+        if (!resource) {
+          const filePath = this.findFile({ fileName: name, user });
+          const { blurHash, outputFilePath } = await this.compressImage(filePath);
+          resource = await this.uploadToObjectStorage({ filePath: outputFilePath, fileName: name, prefix, blurHash, contentType });
+        }
+      } else {
         const filePath = this.findFile({ fileName: name, user });
-        const { blurHash, outputFilePath } = await this.compressImage(filePath);
-        resource = await this.uploadToObjectStorage({ filePath: outputFilePath, fileName: name, prefix, blurHash });
+        resource = await this.uploadToObjectStorage({ filePath, fileName: name, prefix, contentType });
       }
       resources.push(resource);
     }
+
     return resources.length > 1 ? resources : resources[0];
   }
+
   async getObjectCustomize(response: Response, { param: { fileName, prefix }, query: { width, height } }: IGetImageDto) {
     const objectKey = `${prefix}/${fileName}`
     if (objectKey === undefined) throw new HttpException({ message: 'not found' }, HttpStatus.NOT_FOUND);
@@ -208,24 +222,24 @@ export class FileService {
         const childResourceXY = this.parseChildResource(childResource)
         const queryResourceXY = { sizeX: width, sizeY: height }
         const { closestSizeX, closestSizeY } = this.findClosestSize({ childResourceXY, queryResourceXY })
-        const objectKeyParam = `${prefix}/${fileName.split('.').splice(0,1)}_size=${closestSizeX}x${closestSizeY}.webp`
+        const objectKeyParam = `${prefix}/${fileName.split('.').splice(0, 1)}_size=${closestSizeX}x${closestSizeY}.webp`
         const oldResource = this.findClosestSizeResource({ objectKeyParam }, childResource)
-        if(!oldResource) throw new HttpException('child resource not found', HttpStatus.BAD_REQUEST)
-        const {objectKey} = oldResource
+        if (!oldResource) throw new HttpException('child resource not found', HttpStatus.BAD_REQUEST)
+        const { objectKey } = oldResource
         const { body } = await this.getObject(response, objectKey)
         body.pipe(response)
         return true;
       }
-    } 
-   else {
+    }
+    else {
       (body as Readable).pipe(response)
       return true;
     }
   }
   findClosestSizeResource({ objectKeyParam }, resource: Resource[]) {
-    const images = resource.find(({ objectKey }) => objectKey == objectKeyParam )
+    const images = resource.find(({ objectKey }) => objectKey == objectKeyParam)
     return images
-}
+  }
   parseChildResource(resource: Resource[]) {
     return resource.map(({ fileName }) => {
       const regex = /size=(\d+)x(\d+)/;
