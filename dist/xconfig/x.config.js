@@ -31,6 +31,8 @@ const zEnvValidationSchema = zod_1.z.object({
     DEFAULT_IMAGE_COMPRESSION_HEIGHT: zod_1.z.number({ coerce: true }),
     OBJECT_STORAGE_PREFIX_USER: zod_1.z.string(),
     OBJECT_STORAGE_PREFIX_ORGANIZATION: zod_1.z.string(),
+    OBJECT_STORAGE_PREFIX_PROJECT: zod_1.z.string(),
+    OBJECT_STORAGE_PREFIX_PROJECT_FILE: zod_1.z.string(),
     OBJECT_STORAGE_PREFIX_ADMIN: zod_1.z.string(),
     TMP_FILE_PATH: zod_1.z.string(),
     CDN_PATH_URL: zod_1.z.string(),

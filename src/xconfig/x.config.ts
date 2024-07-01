@@ -21,6 +21,8 @@ const zEnvValidationSchema = z.object({
     DEFAULT_IMAGE_COMPRESSION_HEIGHT: z.number({ coerce: true }),
     OBJECT_STORAGE_PREFIX_USER: z.string(),
     OBJECT_STORAGE_PREFIX_ORGANIZATION: z.string(),
+    OBJECT_STORAGE_PREFIX_PROJECT: z.string(),
+    OBJECT_STORAGE_PREFIX_PROJECT_FILE: z.string(),
     OBJECT_STORAGE_PREFIX_ADMIN: z.string(),
     TMP_FILE_PATH: z.string(),
     CDN_PATH_URL: z.string(),

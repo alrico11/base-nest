@@ -50,7 +50,7 @@ export class OrganizationController {
   }
   // organization/member
   @Get('member')
-  findAllMember(@Query() query: FindAllMemberOrganizationQueryDto, @Param() param: FindAllMemberOrganizationParamDto, @Lang() lang: LangEnum) {
-    this.organizationService.findAllMember({ lang, param, query })
+  findAllMember(@Query() query: FindAllMemberOrganizationQueryDto, @Param() param: FindAllMemberOrganizationParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
+    this.organizationService.findAllMember({ lang, param, query, user })
   }
 }

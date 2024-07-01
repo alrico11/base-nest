@@ -22,6 +22,7 @@ const log_1 = require("../../log");
 const prisma_1 = require("../../prisma");
 const string_1 = require("../../utils/string");
 const xconfig_1 = require("../../xconfig");
+const organization__types_1 = require("./organization.@types");
 const organization_event_1 = require("./organization.event");
 let OrganizationService = class OrganizationService {
     constructor(prisma, fileService, config, l, ee) {
@@ -36,7 +37,7 @@ let OrganizationService = class OrganizationService {
         let resource;
         if (thumbnail) {
             const prefix = this.config.env.OBJECT_STORAGE_PREFIX_ORGANIZATION;
-            resource = await this.fileService.compressAndUploadObjectStorage({ user, prefix, fileName: thumbnail });
+            resource = await this.fileService.handleUploadObjectStorage({ user, prefix, fileName: thumbnail });
         }
         const data = await this.prisma.organization.create({
             data: {
@@ -114,7 +115,7 @@ let OrganizationService = class OrganizationService {
             throw new common_1.HttpException((0, constants_1.LangResponse)({ key: "unauthorize", lang }), common_1.HttpStatus.UNAUTHORIZED);
         if (thumbnail) {
             const prefix = this.config.env.OBJECT_STORAGE_PREFIX_ORGANIZATION;
-            newResource = await this.fileService.compressAndUploadObjectStorage({ fileName: thumbnail, prefix, user });
+            newResource = await this.fileService.handleUploadObjectStorage({ fileName: thumbnail, prefix, user });
             if (organizationExist.Resource)
                 oldResource = organizationExist.Resource;
         }
@@ -151,44 +152,48 @@ let OrganizationService = class OrganizationService {
         });
         return { message: (0, constants_1.LangResponse)({ key: "deleted", lang, object: "ORGANIZATION" }) };
     }
-    async findAllMember({ query, lang, param: { id } }) {
-        const { limit, orderBy, orderDirection, page, search } = query;
+    async findAllMember({ query, lang, param: { id }, user }) {
+        const { limit, orderBy, orderDirection, page } = query;
         const { result, ...rest } = await this.prisma.extended.organization.paginate({
-            where: { id, name: { contains: search, mode: "insensitive" }, deletedAt: null },
+            where: { id, deletedAt: null },
             orderBy: (0, string_1.dotToObject)({ orderBy, orderDirection }),
             limit, page,
             include: {
-                OrganizationAdmin: { include: { User: true } },
-                OrganizationMembers: { include: { User: true } },
-                Creator: true
+                OrganizationAdmin: { include: { User: { include: { Resource: true } } } },
+                OrganizationMembers: { include: { User: { include: { Resource: true } } } },
+                Creator: { include: { Resource: true } }
             }
         });
         const data = result.map(({ OrganizationAdmin, OrganizationMembers, Creator }) => {
-            const admin = OrganizationAdmin.map(({ User }) => {
-                const { id, name, updatedAt } = User;
+            const adminIds = new Set(OrganizationAdmin.map(({ userId }) => userId));
+            const { Resource } = Creator;
+            const members = OrganizationMembers.map(({ User }) => {
+                const { id, name, updatedAt, Resource } = User;
                 return {
                     userId: id,
                     name: name,
-                    isAdmin: true,
-                    updatedAt: updatedAt
-                };
-            });
-            const member = OrganizationMembers.map(({ User }) => {
-                const { id, name, updatedAt } = User;
-                return {
-                    userId: id,
-                    name: name,
-                    isAdmin: false,
+                    role: adminIds.has(id) ? organization__types_1.EnumRoleOrganization.ADMIN : organization__types_1.EnumRoleOrganization.MEMBER,
+                    thumbnail: Resource?.objectKey ? this.fileService.cdnUrl({ objectKey: Resource.objectKey }) : undefined,
+                    blurHash: Resource?.blurHash,
                     updatedAt: updatedAt
                 };
             });
             return {
-                owner: {
-                    name: Creator.name,
-                    updatedAt: Creator.updatedAt,
-                    isOwner: true
+                userDetails: {
+                    userId: user.id,
+                    role: adminIds.has(user.id) ? organization__types_1.EnumRoleOrganization.ADMIN : organization__types_1.EnumRoleOrganization.MEMBER
                 },
-                members: [...admin, ...member]
+                members: [
+                    {
+                        name: Creator.name,
+                        userId: Creator.id,
+                        role: organization__types_1.EnumRoleOrganization.OWNER,
+                        thumbnail: Resource?.objectKey ? this.fileService.cdnUrl({ objectKey: Resource.objectKey }) : undefined,
+                        blurHash: Resource?.blurHash,
+                        updatedAt: Creator.updatedAt,
+                    },
+                    ...members
+                ]
             };
         });
         return { message: (0, constants_1.LangResponse)({ key: "fetched", lang, object: "ORGANIZATION" }), data: data, ...rest };

@@ -2,12 +2,16 @@ import { DynamicModule, ForwardReference, Type } from "@nestjs/common"
 import { EventEmitterModule } from "@nestjs/event-emitter"
 import { RateLimiterModule } from "nestjs-rate-limiter"
 import { PrismaModule } from "./prisma"
-import { DeviceModule as UserDeviceModule } from "./main/device"
+import { DeviceModule as MainDeviceModule } from "./main/device"
 import { LogModule } from "./log"
 import { XConfigModule } from "./xconfig"
-import { OrganizationModule as UserOrganizationModule } from "./main/organization/organization.module"
-import { TagModule as UserTagModule } from "./main/tag/tag.module"
-import { TagModule as OrganizationTagModule } from "./main/organization/tag/tag.module"
+import { OrganizationModule as MainOrganizationModule } from "./main/organization/organization.module"
+import { TagModule as MainProjectTagModule } from "./main/tag/tag.module"
+import { TagModule as MainOrganizationTagModule } from "./main/organization/tag"
+import { CollaboratorModule as MainProjectCollaboratorModule } from "./main/project/collaborator"
+import { MemberModule as MainOrganizationMemberModule } from "./main/organization/member/member.module"
+import { ProjectModule as MainOrganizationProjectModule} from "./main/organization/project"
+import { CollaboratorModule as MainOrganizationProjectCollaboratorModule } from "./main/organization/project/collaborator"
 
 const AppImports: (Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference<any>)[] = [
   XConfigModule,
@@ -22,10 +26,18 @@ const AppImports: (Type<any> | DynamicModule | Promise<DynamicModule> | ForwardR
   }),
   LogModule,
   PrismaModule,
-  UserDeviceModule,
-  UserOrganizationModule,
-  UserTagModule,
-  OrganizationTagModule
+  //ON TESTING
+  MainDeviceModule,
+  //ORGANIZATION
+  MainOrganizationModule,
+  MainOrganizationTagModule,
+  MainOrganizationProjectModule,
+  MainOrganizationProjectCollaboratorModule,
+  MainOrganizationMemberModule,
+  
+  //MAIN PROJECT
+  MainProjectCollaboratorModule,
+  MainProjectTagModule,
 ]
 
 export default AppImports

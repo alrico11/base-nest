@@ -8,7 +8,11 @@ const log_1 = require("./log");
 const xconfig_1 = require("./xconfig");
 const organization_module_1 = require("./main/organization/organization.module");
 const tag_module_1 = require("./main/tag/tag.module");
-const tag_module_2 = require("./main/organization/tag/tag.module");
+const tag_1 = require("./main/organization/tag");
+const collaborator_1 = require("./main/project/collaborator");
+const member_module_1 = require("./main/organization/member/member.module");
+const project_1 = require("./main/organization/project");
+const collaborator_2 = require("./main/organization/project/collaborator");
 const AppImports = [
     xconfig_1.XConfigModule,
     event_emitter_1.EventEmitterModule.forRoot({
@@ -24,8 +28,12 @@ const AppImports = [
     prisma_1.PrismaModule,
     device_1.DeviceModule,
     organization_module_1.OrganizationModule,
+    tag_1.TagModule,
+    project_1.ProjectModule,
+    collaborator_2.CollaboratorModule,
+    member_module_1.MemberModule,
+    collaborator_1.CollaboratorModule,
     tag_module_1.TagModule,
-    tag_module_2.TagModule
 ];
 exports.default = AppImports;
 //# sourceMappingURL=app.imports.js.map

@@ -3,24 +3,29 @@ import { GetFileParamDto, GetImageParamDto, GetImageQueryDto } from "./file.dto"
 import { Response } from 'express'
 import sharp, { Metadata } from 'sharp';
 import { AnyObject } from "src/@types";
+import { string } from "zod";
 export type ImageMetadata = Metadata;
 
 export interface IGetImageDto {
-    param : GetImageParamDto,
-    query : GetImageQueryDto
+    param: GetImageParamDto,
+    query: GetImageQueryDto
 }
 
 export interface IUploadToObjectStorage {
-    contentType : string
-    filePath : string
-    prefix : string
-    fileName? : string
-    blurHash? : string
+    contentType: string
+    filePath: string
+    prefix: string
+    fileName?: string
+    blurHash?: string
 }
 
-export interface IResolveUrl {
-    fileName : string
-    prefix : string
+export interface IResolve {
+    fileName: string
+    prefix: string
+}
+
+export interface ICDNUrl {
+    objectKey: string
 }
 
 export interface CompressImageOption {
@@ -29,29 +34,29 @@ export interface CompressImageOption {
 }
 
 export interface IFileCompressUpload {
-    fileName : string[] | string
-    user : User | Admin
-    prefix : string
+    fileName: string[] | string
+    user: User | Admin
+    prefix: string
 }
 
 export interface IFindFile {
-    user : User | Admin
-    fileName : string
+    user: User | Admin
+    fileName: string
 }
 
 export interface IGetTmpFile {
-    param : GetFileParamDto
-    response : Response
-    user : User | Admin
+    param: GetFileParamDto
+    response: Response
+    user: User | Admin
 }
 
-export interface IFindClosestSize{
-    childResourceXY :  ISizeXY[],
-    queryResourceXY : ISizeXY
+export interface IFindClosestSize {
+    childResourceXY: ISizeXY[],
+    queryResourceXY: ISizeXY
 }
 export interface ISizeXY {
-    sizeX : number
-    sizeY : number
+    sizeX: number
+    sizeY: number
 }
 export interface AddResourceInput {
     objectUrl?: string
@@ -61,5 +66,5 @@ export interface AddResourceInput {
     fileSize: number
     metadata?: AnyObject
     blurHash?: string
-    relatedId? : string
+    relatedId?: string
 }

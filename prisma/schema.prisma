@@ -218,25 +218,25 @@ enum ProjectStatus {
 }
 
 model Project {
-  id               String    @id @default(uuid())
+  id               String        @id @default(uuid())
   color            String?
   name             String
   description      String?
-  lastChatActivity DateTime? @map("last_chat_activity") @db.Timestamptz(3)
+  lastChatActivity DateTime?     @map("last_chat_activity") @db.Timestamptz(3)
   priority         String
-  target           String
-  budget           Int
-  goals            String
+  target           String?
+  budget           Int?
+  goals            String?
   status           ProjectStatus
-  creatorId        String    @map("creator_id")
-  thumbnailId      String?   @map("thumbnail_id")
-  lastChatId       String    @unique @map("last_chat_id")
-  organizationId   String?   @map("organization_id")
-  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
-  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz(3)
+  creatorId        String        @map("creator_id")
+  thumbnailId      String?       @map("thumbnail_id")
+  lastChatId       String?       @unique @map("last_chat_id")
+  organizationId   String?       @map("organization_id")
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt        DateTime?     @map("deleted_at") @db.Timestamptz(3)
 
-  LastChat             Chat                  @relation(fields: [lastChatId], references: [id])
+  LastChat             Chat?                 @relation(fields: [lastChatId], references: [id])
   User                 User                  @relation(fields: [creatorId], references: [id])
   Organization         Organization?         @relation(fields: [organizationId], references: [id])
   Resource             Resource?             @relation(fields: [thumbnailId], references: [id])

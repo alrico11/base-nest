@@ -1,0 +1,5 @@
+export * from './tag.@types'
+export * from './tag.controller'
+export * from './tag.dto'
+export * from './tag.module'
+export * from './tag.service'

@@ -4,10 +4,10 @@ export declare const enum LangEnum {
     EN = 1
 }
 type LangKeys = keyof typeof LangConstants["EN"];
-type LangObjects = keyof typeof LangObjects;
+export type LangObjectType = keyof typeof LangObjects["EN"];
 export interface ILang {
     lang: LangEnum;
     key: LangKeys;
-    object?: LangObjects | string;
+    object?: LangObjectType | string;
 }
 export {};

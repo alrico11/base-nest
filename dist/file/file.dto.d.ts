@@ -27,11 +27,11 @@ declare const GetFileParamDto_base: import("@anatine/zod-nestjs").ZodDtoStatic<z
     fileName: z.ZodString;
     userId: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    userId: string;
     fileName: string;
+    userId: string;
 }, {
-    userId: string;
     fileName: string;
+    userId: string;
 }>>;
 export declare class GetFileParamDto extends GetFileParamDto_base {
 }

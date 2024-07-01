@@ -1,34 +1,28 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Post } from '@nestjs/common';
+import { User } from '@prisma/client';
+import { Lang, LangEnum } from 'src/constants';
+import { UserInstance } from 'src/main/auth';
+import { AddAdminProjectCollaboratorBodyDto, AddAdminProjectCollaboratorParamDto, CreateProjectCollaboratorBodyDto, CreateProjectCollaboratorParamDto, RemoveAdminProjectCollaboratorBodyDto, RemoveAdminProjectCollaboratorParamDto, RemoveProjectCollaboratorBodyDto, RemoveProjectCollaboratorParamDto } from './collaborator..dto';
 import { CollaboratorService } from './collaborator.service';
-import { CreateCollaboratorDto } from './dto/create-collaborator.dto';
-import { UpdateCollaboratorDto } from './dto/update-collaborator.dto';
 
 @Controller('collaborator')
 export class CollaboratorController {
-  constructor(private readonly collaboratorService: CollaboratorService) {}
+  constructor(private readonly collaboratorService: CollaboratorService) { }
 
-  @Post()
-  create(@Body() createCollaboratorDto: CreateCollaboratorDto) {
-    return this.collaboratorService.create(createCollaboratorDto);
+  @Post('add-collaborator')
+  addCollaborator(@Body() body: CreateProjectCollaboratorBodyDto, @Param() param: CreateProjectCollaboratorParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
+    return this.collaboratorService.addCollaborator({ body, lang, param, user })
   }
-
-  @Get()
-  findAll() {
-    return this.collaboratorService.findAll();
+  @Post('add-admin')
+  addAdmin(@Body() body: AddAdminProjectCollaboratorBodyDto, @Param() param: AddAdminProjectCollaboratorParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
+    return this.collaboratorService.addAdmin({ body, lang, param, user })
   }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.collaboratorService.findOne(+id);
+  @Delete('remove-admin')
+  removeAdmin(@Body() body: RemoveAdminProjectCollaboratorBodyDto, @Param() param: RemoveAdminProjectCollaboratorParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
+    return this.collaboratorService.removeAdmin({ body, lang, param, user })
   }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCollaboratorDto: UpdateCollaboratorDto) {
-    return this.collaboratorService.update(+id, updateCollaboratorDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.collaboratorService.remove(+id);
+  @Delete('remove-collaborator')
+  removeMember(@Body() body: RemoveProjectCollaboratorBodyDto, @Param() param: RemoveProjectCollaboratorParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
+    return this.collaboratorService.removeCollaborator({ body, lang, param, user })
   }
 }

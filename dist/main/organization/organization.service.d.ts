@@ -3,7 +3,7 @@ import { FileService } from 'src/file';
 import { LogService } from 'src/log';
 import { PrismaService } from 'src/prisma';
 import { XConfig } from 'src/xconfig';
-import { ICreateOrganization, IDeleteOrganization, IFindAllMemberOrganization, IFindAllOrganization, IFindOneOrganization, IUpdateOrganization } from './organization.@types';
+import { EnumRoleOrganization, ICreateOrganization, IDeleteOrganization, IFindAllMemberOrganization, IFindAllOrganization, IFindOneOrganization, IUpdateOrganization } from './organization.@types';
 export declare class OrganizationService {
     private readonly prisma;
     private readonly fileService;
@@ -47,7 +47,7 @@ export declare class OrganizationService {
     remove({ param: { id }, lang, user }: IDeleteOrganization): Promise<{
         message: string;
     }>;
-    findAllMember({ query, lang, param: { id } }: IFindAllMemberOrganization): Promise<{
+    findAllMember({ query, lang, param: { id }, user }: IFindAllMemberOrganization): Promise<{
         limit: number;
         page: number;
         count: number;
@@ -55,15 +55,16 @@ export declare class OrganizationService {
         exceedTotalPages: boolean;
         message: string;
         data: {
-            owner: {
-                name: string;
-                updatedAt: Date;
-                isOwner: boolean;
+            userDetails: {
+                userId: string;
+                role: EnumRoleOrganization;
             };
             members: {
-                userId: string;
                 name: string;
-                isAdmin: boolean;
+                userId: string;
+                role: EnumRoleOrganization;
+                thumbnail: string | undefined;
+                blurHash: string | null | undefined;
                 updatedAt: Date;
             }[];
         }[];

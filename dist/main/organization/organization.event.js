@@ -5,5 +5,5 @@ const _classes_1 = require("../../@classes");
 class OrganizationUpdatedEvent extends _classes_1.CompactClass {
 }
 exports.OrganizationUpdatedEvent = OrganizationUpdatedEvent;
-OrganizationUpdatedEvent.key = "ORGANIZATION.UDPATED";
+OrganizationUpdatedEvent.key = "ORGANIZATION.UPDATED";
 //# sourceMappingURL=organization.event.js.map

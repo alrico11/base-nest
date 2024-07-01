@@ -18,6 +18,8 @@ declare const zEnvValidationSchema: z.ZodObject<{
     DEFAULT_IMAGE_COMPRESSION_HEIGHT: z.ZodNumber;
     OBJECT_STORAGE_PREFIX_USER: z.ZodString;
     OBJECT_STORAGE_PREFIX_ORGANIZATION: z.ZodString;
+    OBJECT_STORAGE_PREFIX_PROJECT: z.ZodString;
+    OBJECT_STORAGE_PREFIX_PROJECT_FILE: z.ZodString;
     OBJECT_STORAGE_PREFIX_ADMIN: z.ZodString;
     TMP_FILE_PATH: z.ZodString;
     CDN_PATH_URL: z.ZodString;
@@ -44,6 +46,8 @@ declare const zEnvValidationSchema: z.ZodObject<{
     DEFAULT_IMAGE_COMPRESSION_HEIGHT: number;
     OBJECT_STORAGE_PREFIX_USER: string;
     OBJECT_STORAGE_PREFIX_ORGANIZATION: string;
+    OBJECT_STORAGE_PREFIX_PROJECT: string;
+    OBJECT_STORAGE_PREFIX_PROJECT_FILE: string;
     OBJECT_STORAGE_PREFIX_ADMIN: string;
     TMP_FILE_PATH: string;
     CDN_PATH_URL: string;
@@ -70,6 +74,8 @@ declare const zEnvValidationSchema: z.ZodObject<{
     DEFAULT_IMAGE_COMPRESSION_HEIGHT: number;
     OBJECT_STORAGE_PREFIX_USER: string;
     OBJECT_STORAGE_PREFIX_ORGANIZATION: string;
+    OBJECT_STORAGE_PREFIX_PROJECT: string;
+    OBJECT_STORAGE_PREFIX_PROJECT_FILE: string;
     OBJECT_STORAGE_PREFIX_ADMIN: string;
     TMP_FILE_PATH: string;
     CDN_PATH_URL: string;
@@ -103,6 +109,8 @@ export declare class XConfig {
         DEFAULT_IMAGE_COMPRESSION_HEIGHT: number;
         OBJECT_STORAGE_PREFIX_USER: string;
         OBJECT_STORAGE_PREFIX_ORGANIZATION: string;
+        OBJECT_STORAGE_PREFIX_PROJECT: string;
+        OBJECT_STORAGE_PREFIX_PROJECT_FILE: string;
         OBJECT_STORAGE_PREFIX_ADMIN: string;
         TMP_FILE_PATH: string;
         CDN_PATH_URL: string;

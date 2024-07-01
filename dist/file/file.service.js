@@ -86,7 +86,7 @@ let FileService = class FileService {
             fileType: contentType,
             fileSize: size,
             metadata: metadata,
-            objectUrl: this.resolveUrl({ fileName: fileName || originalFileName, prefix }),
+            objectUrl: this.resolve({ fileName: fileName || originalFileName, prefix }),
         });
         return resource;
     }
@@ -116,8 +116,11 @@ let FileService = class FileService {
         response.setHeader('Content-Type', contentType);
         fileStream.pipe(response);
     }
-    resolveUrl({ fileName, prefix }) {
-        return (0, url_1.resolve)(`${this.config.env.CDN_BASE_URL}${prefix}/`, fileName);
+    resolve({ fileName, prefix }) {
+        return (0, url_1.resolve)(`${prefix}/`, fileName);
+    }
+    cdnUrl({ objectKey }) {
+        return (0, url_1.resolve)(`${this.config.env.CDN_BASE_URL}/`, objectKey);
     }
     isValidURL(url) {
         try {
@@ -128,7 +131,7 @@ let FileService = class FileService {
             return false;
         }
     }
-    async compressAndUploadObjectStorage({ fileName, user, prefix }) {
+    async handleUploadObjectStorage({ fileName, user, prefix }) {
         const fileNames = Array.isArray(fileName) ? fileName : [fileName];
         const resources = [];
         for (const name of fileNames) {
@@ -196,7 +199,7 @@ let FileService = class FileService {
                     objectKey: newObjectKey,
                     blurHash,
                     metadata: webpMetadata,
-                    objectUrl: fileNameWebp ? this.resolveUrl({ fileName: fileNameWebp, prefix }) : undefined,
+                    objectUrl: fileNameWebp ? this.resolve({ fileName: fileNameWebp, prefix }) : undefined,
                     relatedId: resource.id
                 });
                 const { body } = await this.getObject(response, newObjectKey);

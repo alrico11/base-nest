@@ -2,7 +2,7 @@ import { Resource } from '@prisma/client';
 import { Response } from 'express';
 import { XConfig } from 'src/xconfig';
 import { Readable } from 'stream';
-import { CompressImageOption, IFileCompressUpload, IFindClosestSize, IFindFile, IGetImageDto, IGetTmpFile, IResolveUrl, IUploadToObjectStorage } from './file.@types';
+import { CompressImageOption, ICDNUrl, IFileCompressUpload, IFindClosestSize, IFindFile, IGetImageDto, IGetTmpFile, IResolve, IUploadToObjectStorage } from './file.@types';
 import { ResourceService } from './file.resource.service';
 export declare class FileService {
     private readonly config;
@@ -35,9 +35,10 @@ export declare class FileService {
     removeObjectFromStorage(objectKey: string): Promise<void>;
     fetchObject(objectKey: string): Promise<void>;
     getTmpFile({ param, response, user }: IGetTmpFile): Promise<void>;
-    resolveUrl({ fileName, prefix }: IResolveUrl): string;
+    resolve({ fileName, prefix }: IResolve): string;
+    cdnUrl({ objectKey }: ICDNUrl): string;
     isValidURL(url: unknown): boolean;
-    compressAndUploadObjectStorage({ fileName, user, prefix }: IFileCompressUpload): Promise<{
+    handleUploadObjectStorage({ fileName, user, prefix }: IFileCompressUpload): Promise<{
         id: string;
         objectUrl: string | null;
         objectKey: string;

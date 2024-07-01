@@ -12,7 +12,7 @@ import sharp from 'sharp';
 import { XConfig } from 'src/xconfig';
 import { Readable } from 'stream';
 import { resolve } from 'url';
-import { CompressImageOption, IFileCompressUpload, IFindClosestSize, IFindFile, IGetImageDto, IGetTmpFile, IResolveUrl, IUploadToObjectStorage } from './file.@types';
+import { CompressImageOption, ICDNUrl, IFileCompressUpload, IFindClosestSize, IFindFile, IGetImageDto, IGetTmpFile, IResolve, IUploadToObjectStorage } from './file.@types';
 import { ResourceService } from './file.resource.service';
 
 @Injectable()
@@ -97,7 +97,7 @@ export class FileService {
       fileType: contentType,
       fileSize: size,
       metadata: metadata,
-      objectUrl: this.resolveUrl({ fileName: fileName || originalFileName, prefix }),
+      objectUrl: this.resolve({ fileName: fileName || originalFileName, prefix }),
     });
 
     return resource;
@@ -128,9 +128,14 @@ export class FileService {
     fileStream.pipe(response)
   }
 
-  resolveUrl({ fileName, prefix }: IResolveUrl) {
-    return resolve(`${this.config.env.CDN_BASE_URL}${prefix}/`, fileName)
+  resolve({ fileName, prefix }: IResolve) {
+    return resolve(`${prefix}/`, fileName)
   }
+
+  cdnUrl({ objectKey }: ICDNUrl) {
+    return resolve(`${this.config.env.CDN_BASE_URL}/`, objectKey)
+  }
+
   isValidURL(url: unknown) {
     try {
       const parsedURL = new URL(url as string)
@@ -140,8 +145,7 @@ export class FileService {
     }
   }
 
-
-  async compressAndUploadObjectStorage({ fileName, user, prefix }: IFileCompressUpload) {
+  async handleUploadObjectStorage({ fileName, user, prefix }: IFileCompressUpload) {
     const fileNames = Array.isArray(fileName) ? fileName : [fileName];
     const resources: Resource[] = [];
     for (const name of fileNames) {
@@ -212,7 +216,7 @@ export class FileService {
           objectKey: newObjectKey,
           blurHash,
           metadata: webpMetadata,
-          objectUrl: fileNameWebp ? this.resolveUrl({ fileName: fileNameWebp, prefix }) : undefined,
+          objectUrl: fileNameWebp ? this.resolve({ fileName: fileNameWebp, prefix }) : undefined,
           relatedId: resource.id
         })
         const { body } = await this.getObject(response, newObjectKey)

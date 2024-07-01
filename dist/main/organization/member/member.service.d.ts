@@ -7,10 +7,10 @@ export declare class MemberService {
     private readonly l;
     private readonly organization;
     constructor(prisma: PrismaService, l: LogService, organization: OrganizationService);
-    create({ body, lang, param: { id }, user }: ICreateMember): Promise<{
+    addMember({ body, lang, param: { id }, user }: ICreateMember): Promise<{
         message: string;
     }>;
-    remove({ param: { id }, body: { userId }, user, lang }: IRemoveMember): Promise<{
+    removeMember({ param: { id }, body: { userId }, user, lang }: IRemoveMember): Promise<{
         message: string;
     }>;
     addAdmin({ body, lang, param: { id }, user }: IAddAdmin): Promise<{

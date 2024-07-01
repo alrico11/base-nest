@@ -17,6 +17,7 @@ export declare const LangConstants: {
         confirmed: string;
         alreadyJoin: string;
         notJoin: string;
+        alreadyCollaborator: string;
     };
     EN: {
         created: string;
@@ -36,11 +37,18 @@ export declare const LangConstants: {
         confirmed: string;
         alreadyJoin: string;
         notJoin: string;
+        alreadyCollaborator: string;
     };
 };
 export declare const LangObjects: {
-    ORGANIZATION: {
-        ID: string;
-        EN: string;
+    ID: {
+        ORGANIZATION: string;
+        COLLABORATOR: string;
+        PROJECT: string;
+    };
+    EN: {
+        ORGANIZATION: string;
+        COLLABORATOR: string;
+        PROJECT: string;
     };
 };

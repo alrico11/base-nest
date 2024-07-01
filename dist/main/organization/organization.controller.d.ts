@@ -41,5 +41,5 @@ export declare class OrganizationController {
     remove(param: DeleteOrganizationParamDto, lang: LangEnum, user: User): Promise<{
         message: string;
     }>;
-    findAllMember(query: FindAllMemberOrganizationQueryDto, param: FindAllMemberOrganizationParamDto, lang: LangEnum): void;
+    findAllMember(query: FindAllMemberOrganizationQueryDto, param: FindAllMemberOrganizationParamDto, lang: LangEnum, user: User): void;
 }

@@ -20,6 +20,7 @@ exports.LangConstants = {
         confirmed: "telah dikonfirmasi",
         alreadyJoin: "sudah bergabung",
         notJoin: "belum bergabung",
+        alreadyCollaborator: "sudah menjadi kolaborator"
     },
     EN: {
         created: "created",
@@ -38,13 +39,20 @@ exports.LangConstants = {
         timeout: "timeout",
         confirmed: "confirmed",
         alreadyJoin: "already joined",
-        notJoin: "not join yet"
+        notJoin: "not join yet",
+        alreadyCollaborator: "already as a collaborator"
     }
 };
 exports.LangObjects = {
-    ORGANIZATION: {
-        ID: "ORGANISASI",
-        EN: "ORGANIZATION"
+    ID: {
+        ORGANIZATION: "organisasi",
+        COLLABORATOR: "kolaborator",
+        PROJECT: "proyek",
+    },
+    EN: {
+        ORGANIZATION: "organization",
+        COLLABORATOR: "collaborator",
+        PROJECT: "project",
     }
 };
 //# sourceMappingURL=lang.constant.js.map

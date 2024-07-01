@@ -39,8 +39,8 @@ let OrganizationController = class OrganizationController {
     remove(param, lang, user) {
         return this.organizationService.remove({ lang, param, user });
     }
-    findAllMember(query, param, lang) {
-        this.organizationService.findAllMember({ lang, param, query });
+    findAllMember(query, param, lang, user) {
+        this.organizationService.findAllMember({ lang, param, query, user });
     }
 };
 exports.OrganizationController = OrganizationController;
@@ -104,8 +104,9 @@ __decorate([
     __param(0, (0, common_1.Query)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, constants_1.Lang)()),
+    __param(3, (0, auth_1.UserInstance)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [organization_dto_1.FindAllMemberOrganizationQueryDto, organization_dto_1.FindAllMemberOrganizationParamDto, Number]),
+    __metadata("design:paramtypes", [organization_dto_1.FindAllMemberOrganizationQueryDto, organization_dto_1.FindAllMemberOrganizationParamDto, Number, Object]),
     __metadata("design:returntype", void 0)
 ], OrganizationController.prototype, "findAllMember", null);
 exports.OrganizationController = OrganizationController = __decorate([

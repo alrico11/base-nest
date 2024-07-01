@@ -17,6 +17,7 @@ export const LangConstants = {
         confirmed: "telah dikonfirmasi",
         alreadyJoin: "sudah bergabung",
         notJoin: "belum bergabung",
+        alreadyCollaborator: "sudah menjadi kolaborator"
     },
     EN: {
         created: "created",
@@ -35,13 +36,20 @@ export const LangConstants = {
         timeout: "timeout",
         confirmed: "confirmed",
         alreadyJoin: "already joined",
-        notJoin: "not join yet"
+        notJoin: "not join yet",
+        alreadyCollaborator: "already as a collaborator"
     }
 }
 
 export const LangObjects = {
-    ORGANIZATION: {
-        ID: "ORGANISASI",
-        EN: "ORGANIZATION"
+    ID: {
+        ORGANIZATION: "organisasi",
+        COLLABORATOR: "kolaborator",
+        PROJECT: "proyek",
+    },
+    EN: {
+        ORGANIZATION: "organization",
+        COLLABORATOR: "collaborator",
+        PROJECT: "project",
     }
 }

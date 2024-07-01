@@ -15,9 +15,12 @@ export interface IUploadToObjectStorage {
     fileName?: string;
     blurHash?: string;
 }
-export interface IResolveUrl {
+export interface IResolve {
     fileName: string;
     prefix: string;
+}
+export interface ICDNUrl {
+    objectKey: string;
 }
 export interface CompressImageOption {
     width?: number;

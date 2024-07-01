@@ -1,32 +1,36 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ProjectService } from './project.service';
+import { CreateProjectBodyDto, CreateProjectParamDto, DeleteProjectParamDto, FindAllProjectParamDto, FindAllProjectQueryDto, FindOneProjectParamDto, UpdateProjectParamDto } from './project.dto';
+import { UserInstance } from 'src/main/auth';
+import { User } from '@prisma/client';
+import { Lang, LangEnum } from 'src/constants';
 
-@Controller('project')
+@Controller(':organizationId/project')
 export class ProjectController {
-  constructor(private readonly projectService: ProjectService) {}
+  constructor(private readonly projectService: ProjectService) { }
 
-  // @Post()
-  // create(@Body() createProjectDto: CreateProjectDto) {
-  //   return this.projectService.create(createProjectDto);
-  // }
+  @Post()
+  create(@Body() body: CreateProjectBodyDto, @Param() param: CreateProjectParamDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
+    return this.projectService.create({ body, lang, param, user });
+  }
 
-  // @Get()
-  // findAll() {
-  //   return this.projectService.findAll();
-  // }
+  @Get()
+  findAll(@Query() query: FindAllProjectQueryDto, @Param() param: FindAllProjectParamDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
+    return this.projectService.findAll({ lang, param, query, user });
+  }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.projectService.findOne(+id);
-  // }
+  @Get(':id')
+  findOne(@Param() param: FindOneProjectParamDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
+    return this.projectService.findOne({ lang, param, user });
+  }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateProjectDto: UpdateProjectDto) {
-  //   return this.projectService.update(+id, updateProjectDto);
-  // }
+  @Patch(':id')
+  update(@Body() body: CreateProjectBodyDto, @Param() param: UpdateProjectParamDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
+    return this.projectService.update({ body, lang, param, user });
+  }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.projectService.remove(+id);
-  // }
+  @Delete(':id')
+  remove(@Param() param: DeleteProjectParamDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
+    return this.projectService.remove({ lang, param, user });
+  }
 }

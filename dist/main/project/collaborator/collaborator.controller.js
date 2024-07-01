@@ -14,65 +14,68 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CollaboratorController = void 0;
 const common_1 = require("@nestjs/common");
+const constants_1 = require("../../../constants");
+const auth_1 = require("../../auth");
+const collaborator__dto_1 = require("./collaborator..dto");
 const collaborator_service_1 = require("./collaborator.service");
-const create_collaborator_dto_1 = require("./dto/create-collaborator.dto");
-const update_collaborator_dto_1 = require("./dto/update-collaborator.dto");
 let CollaboratorController = class CollaboratorController {
     constructor(collaboratorService) {
         this.collaboratorService = collaboratorService;
     }
-    create(createCollaboratorDto) {
-        return this.collaboratorService.create(createCollaboratorDto);
+    addCollaborator(body, param, lang, user) {
+        return this.collaboratorService.addCollaborator({ body, lang, param, user });
     }
-    findAll() {
-        return this.collaboratorService.findAll();
+    addAdmin(body, param, lang, user) {
+        return this.collaboratorService.addAdmin({ body, lang, param, user });
     }
-    findOne(id) {
-        return this.collaboratorService.findOne(+id);
+    removeAdmin(body, param, lang, user) {
+        return this.collaboratorService.removeAdmin({ body, lang, param, user });
     }
-    update(id, updateCollaboratorDto) {
-        return this.collaboratorService.update(+id, updateCollaboratorDto);
-    }
-    remove(id) {
-        return this.collaboratorService.remove(+id);
+    removeMember(body, param, lang, user) {
+        return this.collaboratorService.removeCollaborator({ body, lang, param, user });
     }
 };
 exports.CollaboratorController = CollaboratorController;
 __decorate([
-    (0, common_1.Post)(),
+    (0, common_1.Post)('add-collaborator'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Param)()),
+    __param(2, (0, constants_1.Lang)()),
+    __param(3, (0, auth_1.UserInstance)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_collaborator_dto_1.CreateCollaboratorDto]),
+    __metadata("design:paramtypes", [collaborator__dto_1.CreateProjectCollaboratorBodyDto, collaborator__dto_1.CreateProjectCollaboratorParamDto, Number, Object]),
     __metadata("design:returntype", void 0)
-], CollaboratorController.prototype, "create", null);
+], CollaboratorController.prototype, "addCollaborator", null);
 __decorate([
-    (0, common_1.Get)(),
+    (0, common_1.Post)('add-admin'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Param)()),
+    __param(2, (0, constants_1.Lang)()),
+    __param(3, (0, auth_1.UserInstance)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [collaborator__dto_1.AddAdminProjectCollaboratorBodyDto, collaborator__dto_1.AddAdminProjectCollaboratorParamDto, Number, Object]),
     __metadata("design:returntype", void 0)
-], CollaboratorController.prototype, "findAll", null);
+], CollaboratorController.prototype, "addAdmin", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Delete)('remove-admin'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Param)()),
+    __param(2, (0, constants_1.Lang)()),
+    __param(3, (0, auth_1.UserInstance)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [collaborator__dto_1.RemoveAdminProjectCollaboratorBodyDto, collaborator__dto_1.RemoveAdminProjectCollaboratorParamDto, Number, Object]),
     __metadata("design:returntype", void 0)
-], CollaboratorController.prototype, "findOne", null);
+], CollaboratorController.prototype, "removeAdmin", null);
 __decorate([
-    (0, common_1.Patch)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
+    (0, common_1.Delete)('remove-collaborator'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Param)()),
+    __param(2, (0, constants_1.Lang)()),
+    __param(3, (0, auth_1.UserInstance)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_collaborator_dto_1.UpdateCollaboratorDto]),
+    __metadata("design:paramtypes", [collaborator__dto_1.RemoveProjectCollaboratorBodyDto, collaborator__dto_1.RemoveProjectCollaboratorParamDto, Number, Object]),
     __metadata("design:returntype", void 0)
-], CollaboratorController.prototype, "update", null);
-__decorate([
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], CollaboratorController.prototype, "remove", null);
+], CollaboratorController.prototype, "removeMember", null);
 exports.CollaboratorController = CollaboratorController = __decorate([
     (0, common_1.Controller)('collaborator'),
     __metadata("design:paramtypes", [collaborator_service_1.CollaboratorService])
