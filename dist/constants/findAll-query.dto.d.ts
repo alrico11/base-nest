@@ -7,14 +7,14 @@ export declare const FindAllQueryDtoBaseSchema: z.ZodObject<{
     search: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     orderBy: "createdAt";
-    orderDirection: "asc" | "desc";
     page: number;
     limit: number;
+    orderDirection: "asc" | "desc";
     search?: string | undefined;
 }, {
     orderBy?: "createdAt" | undefined;
     search?: string | undefined;
-    orderDirection?: "asc" | "desc" | undefined;
     page?: number | undefined;
     limit?: number | undefined;
+    orderDirection?: "asc" | "desc" | undefined;
 }>;

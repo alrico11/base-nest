@@ -7,6 +7,7 @@ import AppImports from './app.imports';
 import { AppService } from './app.service';
 import { AllExceptionsFilter, InternalServerErrorExceptionFilter, ZodErrorFilter } from './globalException.filter';
 import { ResponseInterceptor } from './interceptor';
+import { ReminderModule } from './main/reminder/reminder.module';
 
 @Global()
 @Module({

@@ -40,6 +40,8 @@ let TagController = class TagController {
 exports.TagController = TagController;
 __decorate([
     (0, common_1.Post)(),
+    (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
+    (0, swagger_1.ApiOperation)({ operationId: 'CreateTag' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, constants_1.Lang)()),
     __param(2, (0, auth_1.UserInstance)()),
@@ -49,6 +51,8 @@ __decorate([
 ], TagController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ operationId: 'FindAllTags' }),
     __param(0, (0, common_1.Query)()),
     __param(1, (0, constants_1.Lang)()),
     __param(2, (0, auth_1.UserInstance)()),
@@ -58,6 +62,8 @@ __decorate([
 ], TagController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Patch)(':id'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ operationId: 'UpdateTag' }),
     __param(0, (0, common_1.Param)()),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, constants_1.Lang)()),
@@ -68,6 +74,8 @@ __decorate([
 ], TagController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ operationId: 'DeleteTag' }),
     __param(0, (0, common_1.Param)()),
     __param(1, (0, constants_1.Lang)()),
     __param(2, (0, auth_1.UserInstance)()),
@@ -78,8 +86,8 @@ __decorate([
 exports.TagController = TagController = __decorate([
     (0, common_1.Controller)('tag'),
     (0, swagger_1.ApiHeaders)(constants_1.DeviceHeaders),
+    (0, swagger_1.ApiTags)('User Tag'),
     (0, common_1.UseGuards)(auth_1.UserJwtGuard, device_1.UserDeviceGuard),
-    (0, swagger_1.ApiTags)("User Tag"),
     __metadata("design:paramtypes", [tag_service_1.TagService])
 ], TagController);
 //# sourceMappingURL=tag.controller.js.map

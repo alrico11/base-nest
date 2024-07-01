@@ -22,16 +22,16 @@ declare const FindAllOrganizationQueryDto_base: import("@anatine/zod-nestjs").Zo
     search: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     orderBy: "createdAt";
-    orderDirection: "asc" | "desc";
     page: number;
     limit: number;
+    orderDirection: "asc" | "desc";
     search?: string | undefined;
 }, {
     orderBy?: "createdAt" | undefined;
     search?: string | undefined;
-    orderDirection?: "asc" | "desc" | undefined;
     page?: number | undefined;
     limit?: number | undefined;
+    orderDirection?: "asc" | "desc" | undefined;
 }>>;
 export declare class FindAllOrganizationQueryDto extends FindAllOrganizationQueryDto_base {
 }
@@ -85,16 +85,16 @@ declare const FindAllMemberOrganizationQueryDto_base: import("@anatine/zod-nestj
     search: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     orderBy: "createdAt";
-    orderDirection: "asc" | "desc";
     page: number;
     limit: number;
+    orderDirection: "asc" | "desc";
     search?: string | undefined;
 }, {
     orderBy?: "createdAt" | undefined;
     search?: string | undefined;
-    orderDirection?: "asc" | "desc" | undefined;
     page?: number | undefined;
     limit?: number | undefined;
+    orderDirection?: "asc" | "desc" | undefined;
 }>>;
 export declare class FindAllMemberOrganizationQueryDto extends FindAllMemberOrganizationQueryDto_base {
 }

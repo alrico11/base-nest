@@ -78,6 +78,13 @@ export declare class PrismaService extends PrismaClient implements OnModuleInit 
                 };
                 getTableName: () => <T>(this: T) => Promise<any>;
             };
+            userDevice: {
+                paginate: () => {
+                    <Model, Args>(this: Model, args: import("prisma-paginate/dist/prisma/PrismaFindManyArgs").PrismaFindManyArgs<Model, Args> & import("prisma-paginate/dist/prisma/PrismaPaginationArgs").PrismaPaginationArgs): import("prisma-paginate/dist/prisma/PrismaPaginateResult").PrismaPaginateResult<Model, Args>;
+                    <Model, Args>(this: Model, args: import("prisma-paginate/dist/prisma/PrismaFindManyArgs").PrismaFindManyArgs<Model, Args>, paginationArgs: import("prisma-paginate/dist/prisma/PrismaPaginationArgs").PrismaPaginationArgs): import("prisma-paginate/dist/prisma/PrismaPaginateResult").PrismaPaginateResult<Model, Args>;
+                };
+                getTableName: () => <T>(this: T) => Promise<any>;
+            };
             notification: {
                 paginate: () => {
                     <Model, Args>(this: Model, args: import("prisma-paginate/dist/prisma/PrismaFindManyArgs").PrismaFindManyArgs<Model, Args> & import("prisma-paginate/dist/prisma/PrismaPaginationArgs").PrismaPaginationArgs): import("prisma-paginate/dist/prisma/PrismaPaginateResult").PrismaPaginateResult<Model, Args>;
@@ -435,6 +442,13 @@ export declare class PrismaService extends PrismaClient implements OnModuleInit 
                 getTableName: () => <T>(this: T) => Promise<any>;
             };
             device: {
+                paginate: () => {
+                    <Model, Args>(this: Model, args: import("prisma-paginate/dist/prisma/PrismaFindManyArgs").PrismaFindManyArgs<Model, Args> & import("prisma-paginate/dist/prisma/PrismaPaginationArgs").PrismaPaginationArgs): import("prisma-paginate/dist/prisma/PrismaPaginateResult").PrismaPaginateResult<Model, Args>;
+                    <Model, Args>(this: Model, args: import("prisma-paginate/dist/prisma/PrismaFindManyArgs").PrismaFindManyArgs<Model, Args>, paginationArgs: import("prisma-paginate/dist/prisma/PrismaPaginationArgs").PrismaPaginationArgs): import("prisma-paginate/dist/prisma/PrismaPaginateResult").PrismaPaginateResult<Model, Args>;
+                };
+                getTableName: () => <T>(this: T) => Promise<any>;
+            };
+            userDevice: {
                 paginate: () => {
                     <Model, Args>(this: Model, args: import("prisma-paginate/dist/prisma/PrismaFindManyArgs").PrismaFindManyArgs<Model, Args> & import("prisma-paginate/dist/prisma/PrismaPaginationArgs").PrismaPaginationArgs): import("prisma-paginate/dist/prisma/PrismaPaginateResult").PrismaPaginateResult<Model, Args>;
                     <Model, Args>(this: Model, args: import("prisma-paginate/dist/prisma/PrismaFindManyArgs").PrismaFindManyArgs<Model, Args>, paginationArgs: import("prisma-paginate/dist/prisma/PrismaPaginationArgs").PrismaPaginationArgs): import("prisma-paginate/dist/prisma/PrismaPaginateResult").PrismaPaginateResult<Model, Args>;

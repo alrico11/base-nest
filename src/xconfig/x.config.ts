@@ -23,6 +23,7 @@ const zEnvValidationSchema = z.object({
     OBJECT_STORAGE_PREFIX_ORGANIZATION: z.string(),
     OBJECT_STORAGE_PREFIX_PROJECT: z.string(),
     OBJECT_STORAGE_PREFIX_PROJECT_FILE: z.string(),
+    OBJECT_STORAGE_PREFIX_TASK: z.string(),
     OBJECT_STORAGE_PREFIX_ADMIN: z.string(),
     TMP_FILE_PATH: z.string(),
     CDN_PATH_URL: z.string(),

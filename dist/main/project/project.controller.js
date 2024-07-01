@@ -14,79 +14,94 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProjectController = void 0;
 const common_1 = require("@nestjs/common");
-const constants_1 = require("../../constants");
-const auth_1 = require("../auth");
-const project_dto_1 = require("./project.dto");
 const project_service_1 = require("./project.service");
+const project_dto_1 = require("./project.dto");
+const auth_1 = require("../auth");
+const constants_1 = require("../../constants");
+const swagger_1 = require("@nestjs/swagger");
+const device_1 = require("../device");
 let ProjectController = class ProjectController {
     constructor(projectService) {
         this.projectService = projectService;
     }
-    create(body, lang, user) {
+    create(body, user, lang) {
         return this.projectService.create({ body, lang, user });
     }
-    findAll(query, lang, user) {
+    findAll(query, user, lang) {
         return this.projectService.findAll({ lang, query, user });
     }
-    findOne(param, lang, user) {
+    findOne(param, user, lang) {
         return this.projectService.findOne({ lang, param, user });
     }
-    update(param, body, lang, user) {
+    update(body, param, user, lang) {
         return this.projectService.update({ body, lang, param, user });
     }
-    remove(param, lang, user) {
+    remove(param, user, lang) {
         return this.projectService.remove({ lang, param, user });
     }
 };
 exports.ProjectController = ProjectController;
 __decorate([
     (0, common_1.Post)(),
+    (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
+    (0, swagger_1.ApiOperation)({ operationId: "CreateProject" }),
     __param(0, (0, common_1.Body)()),
-    __param(1, (0, constants_1.Lang)()),
-    __param(2, (0, auth_1.UserInstance)()),
+    __param(1, (0, auth_1.UserInstance)()),
+    __param(2, (0, constants_1.Lang)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [project_dto_1.CreateProjectBodyDto, Number, Object]),
+    __metadata("design:paramtypes", [project_dto_1.CreateProjectBodyDto, Object, Number]),
     __metadata("design:returntype", void 0)
 ], ProjectController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ operationId: "FindAllProject" }),
     __param(0, (0, common_1.Query)()),
-    __param(1, (0, constants_1.Lang)()),
-    __param(2, (0, auth_1.UserInstance)()),
+    __param(1, (0, auth_1.UserInstance)()),
+    __param(2, (0, constants_1.Lang)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [project_dto_1.FindAllProjectQueryDto, Number, Object]),
+    __metadata("design:paramtypes", [project_dto_1.FindAllProjectQueryDto, Object, Number]),
     __metadata("design:returntype", void 0)
 ], ProjectController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ operationId: "FindOneProject" }),
     __param(0, (0, common_1.Param)()),
-    __param(1, (0, constants_1.Lang)()),
-    __param(2, (0, auth_1.UserInstance)()),
+    __param(1, (0, auth_1.UserInstance)()),
+    __param(2, (0, constants_1.Lang)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [project_dto_1.FindOneProjectParamDto, Number, Object]),
+    __metadata("design:paramtypes", [project_dto_1.FindOneProjectParamDto, Object, Number]),
     __metadata("design:returntype", void 0)
 ], ProjectController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
-    __param(0, (0, common_1.Param)()),
-    __param(1, (0, common_1.Body)()),
-    __param(2, (0, constants_1.Lang)()),
-    __param(3, (0, auth_1.UserInstance)()),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ operationId: "UpdateProject" }),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Param)()),
+    __param(2, (0, auth_1.UserInstance)()),
+    __param(3, (0, constants_1.Lang)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [project_dto_1.UpdateProjectParamDto, project_dto_1.UpdateProjectBodyDto, Number, Object]),
+    __metadata("design:paramtypes", [project_dto_1.UpdateProjectBodyDto, project_dto_1.UpdateProjectParamDto, Object, Number]),
     __metadata("design:returntype", void 0)
 ], ProjectController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ operationId: "DeleteProject" }),
     __param(0, (0, common_1.Param)()),
-    __param(1, (0, constants_1.Lang)()),
-    __param(2, (0, auth_1.UserInstance)()),
+    __param(1, (0, auth_1.UserInstance)()),
+    __param(2, (0, constants_1.Lang)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [project_dto_1.DeleteProjectParamDto, Number, Object]),
+    __metadata("design:paramtypes", [project_dto_1.DeleteProjectParamDto, Object, Number]),
     __metadata("design:returntype", void 0)
 ], ProjectController.prototype, "remove", null);
 exports.ProjectController = ProjectController = __decorate([
     (0, common_1.Controller)('project'),
+    (0, swagger_1.ApiTags)('User Project'),
+    (0, swagger_1.ApiHeaders)(constants_1.DeviceHeaders),
+    (0, common_1.UseGuards)(auth_1.UserJwtGuard, device_1.UserDeviceGuard),
     __metadata("design:paramtypes", [project_service_1.ProjectService])
 ], ProjectController);
 //# sourceMappingURL=project.controller.js.map

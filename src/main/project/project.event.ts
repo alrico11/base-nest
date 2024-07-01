@@ -11,4 +11,4 @@ type DeletedProjectFilesEventType = {
 }
 
 export class UpdatedProjectEvent extends CompactClass<UpdatedProjectEventType> { public static key = "PROJECT.UPDATED" }
-export class DeletedProjectFilesEvent extends CompactClass<DeletedProjectFilesEventType> { public static key = "PROJECT.UPDATED" }
+export class DeletedProjectFilesEvent extends CompactClass<DeletedProjectFilesEventType> { public static key = "PROJECT.DELETED" }

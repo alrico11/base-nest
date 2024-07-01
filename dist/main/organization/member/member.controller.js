@@ -18,6 +18,8 @@ const member_service_1 = require("./member.service");
 const member_dto_1 = require("./member.dto");
 const constants_1 = require("../../../constants");
 const auth_1 = require("../../auth");
+const swagger_1 = require("@nestjs/swagger");
+const device_1 = require("../../device");
 let MemberController = class MemberController {
     constructor(memberService) {
         this.memberService = memberService;
@@ -38,6 +40,8 @@ let MemberController = class MemberController {
 exports.MemberController = MemberController;
 __decorate([
     (0, common_1.Post)('add-member'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
+    (0, swagger_1.ApiOperation)({ operationId: "CreateMemberOrganization" }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, constants_1.Lang)()),
@@ -48,6 +52,8 @@ __decorate([
 ], MemberController.prototype, "addMember", null);
 __decorate([
     (0, common_1.Delete)('remove-member'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ operationId: "DeleteMemberOrganization" }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, constants_1.Lang)()),
@@ -58,6 +64,8 @@ __decorate([
 ], MemberController.prototype, "removeMember", null);
 __decorate([
     (0, common_1.Post)('add-admin'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
+    (0, swagger_1.ApiOperation)({ operationId: "CreateAdminOrganization" }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, constants_1.Lang)()),
@@ -68,6 +76,8 @@ __decorate([
 ], MemberController.prototype, "addAdmin", null);
 __decorate([
     (0, common_1.Delete)('remove-admin'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ operationId: "DeleteAdminOrganization" }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, constants_1.Lang)()),
@@ -78,6 +88,9 @@ __decorate([
 ], MemberController.prototype, "removeAdmin", null);
 exports.MemberController = MemberController = __decorate([
     (0, common_1.Controller)('member'),
+    (0, swagger_1.ApiHeaders)(constants_1.DeviceHeaders),
+    (0, common_1.UseGuards)(auth_1.UserJwtGuard, device_1.UserDeviceGuard),
+    (0, swagger_1.ApiTags)("User Organization Member"),
     __metadata("design:paramtypes", [member_service_1.MemberService])
 ], MemberController);
 //# sourceMappingURL=member.controller.js.map

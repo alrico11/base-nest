@@ -1,7 +1,7 @@
-import { TagService } from './tag.service';
+import { User } from '@prisma/client';
 import { LangEnum } from 'src/constants';
 import { CreateTagBodyDto, CreateTagParamDto, DeleteTagParamDto, FindAllTagParamDto, FindAllTagQueryDto, UpdateTagBodyDto, UpdateTagParamDto } from './tag.dto';
-import { User } from '@prisma/client';
+import { TagService } from './tag.service';
 export declare class TagController {
     private readonly tagService;
     constructor(tagService: TagService);

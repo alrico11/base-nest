@@ -48,11 +48,13 @@ exports.LangObjects = {
         ORGANIZATION: "organisasi",
         COLLABORATOR: "kolaborator",
         PROJECT: "proyek",
+        TASK: "tugas"
     },
     EN: {
         ORGANIZATION: "organization",
         COLLABORATOR: "collaborator",
         PROJECT: "project",
+        TASK: "task"
     }
 };
 //# sourceMappingURL=lang.constant.js.map

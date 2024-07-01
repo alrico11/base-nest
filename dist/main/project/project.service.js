@@ -50,12 +50,14 @@ let ProjectService = class ProjectService {
             if (file) {
                 FileResource = await this.fileService.handleUploadObjectStorage({ fileName: file, prefix: this.config.env.OBJECT_STORAGE_PREFIX_PROJECT_FILE, user });
                 if (Array.isArray(FileResource) && FileResource.length > 0) {
-                    await prisma.projectFile.createMany({
-                        data: FileResource.map(({ id }) => ({
-                            projectId: project.id,
-                            resourceId: id
-                        }))
-                    });
+                    const { images, files } = FileResource.reduce((acc, resource) => {
+                        if (resource.fileName.includes(".webp"))
+                            acc.images.push({ resourceId: resource.id, projectId: project.id });
+                        acc.files.push({ resourceId: resource.id, projectId: project.id });
+                        return acc;
+                    }, { images: [], files: [] });
+                    await this.prisma.projectImage.createMany({ data: images });
+                    await this.prisma.projectFile.createMany({ data: files });
                 }
             }
             this.l.info({ message: `project with id ${project.id} created by userId ${user.id}` });
@@ -188,8 +190,10 @@ let ProjectService = class ProjectService {
                             prefix: this.config.env.OBJECT_STORAGE_PREFIX_PROJECT_FILE,
                             user
                         });
-                        if (!Array.isArray(newFileResource))
+                        if (!Array.isArray(newFileResource) && !newFileResource.fileName.includes("webp"))
                             await prisma.projectFile.create({ data: { resourceId: newFileResource.id, projectId: id } });
+                        if (!Array.isArray(newFileResource) && newFileResource.fileName.includes("webp"))
+                            await prisma.projectImage.create({ data: { resourceId: newFileResource.id, projectId: id } });
                     }
                 }));
             }

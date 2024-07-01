@@ -9,5 +9,5 @@ UpdatedProjectEvent.key = "PROJECT.UPDATED";
 class DeletedProjectFilesEvent extends _classes_1.CompactClass {
 }
 exports.DeletedProjectFilesEvent = DeletedProjectFilesEvent;
-DeletedProjectFilesEvent.key = "PROJECT.UPDATED";
+DeletedProjectFilesEvent.key = "PROJECT.DELETED";
 //# sourceMappingURL=project.event.js.map

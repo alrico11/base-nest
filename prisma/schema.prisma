@@ -50,6 +50,7 @@ model User {
   Organization                   Organization[]
   Project                        Project[]
   Tag                            Tag[]
+  UserDevice                     UserDevice[]
 
   @@map("user")
 }
@@ -149,20 +150,32 @@ model Device {
   fcmToken           String?
   fcmTokenLastUpdate DateTime? @db.Timestamptz(3)
   lastActive         DateTime  @default(now()) @db.Timestamptz(3)
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt          DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   AuthTokens AuthToken[]
+  UserDevice UserDevice[]
 
   @@map("device")
+}
+
+model UserDevice {
+  id        String   @id @default(uuid())
+  deviceId  String   @map("device_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  User      User     @relation(fields: [userId], references: [id])
+  Device    Device   @relation(fields: [deviceId], references: [id])
 }
 
 model Notification {
   id        Int       @id @default(autoincrement())
   scope     String
-  content   Json
-  readAt    DateTime  @map("read_at") @db.Timestamptz(3)
+  fcm       Json
+  data      Json
   userId    String    @map("user_id")
+  readAt    DateTime? @map("read_at") @db.Timestamptz(3)
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
@@ -390,33 +403,33 @@ model Task {
   id             String       @id @default(uuid())
   name           String
   description    String?
-  startDate      DateTime     @map("start_date") @db.Date
-  endDate        DateTime     @map("end_date") @db.Date
+  startDate      DateTime?    @map("start_date") @db.Date
+  endDate        DateTime?    @map("end_date") @db.Date
   status         TaskEnum
   priority       TaskPriority
   color          String?
   duration       Int?
+  projectId      String?      @map("project_id")
+  createdById    String       @map("creator_id")
+  doneById       String?      @map("done_by_id")
+  doneAt         DateTime?    @map("done_at")
+  editedById     String?      @map("edited_by_id")
+  organizationId String?      @map("organization_id")
   createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt      DateTime?    @map("deleted_at") @db.Timestamptz(3)
-  projectId      String       @map("project_id")
-  createdById    String       @map("creator_id")
-  doneById       String       @map("done_by_id")
-  doneAt         DateTime?    @map("done_at")
-  editedById     String       @map("edited_by_id")
-  organizationId String       @map("organization_id")
 
-  Project         Project          @relation(fields: [projectId], references: [id])
+  Project         Project?         @relation(fields: [projectId], references: [id])
   CreatedBy       User             @relation(name: "TaskCreatedByUser", fields: [createdById], references: [id])
-  EditedBy        User             @relation(name: "TaskEditedByUser", fields: [editedById], references: [id])
-  Organization    Organization     @relation(fields: [organizationId], references: [id])
+  EditedBy        User?            @relation(name: "TaskEditedByUser", fields: [editedById], references: [id])
+  Organization    Organization?    @relation(fields: [organizationId], references: [id])
   TaskComments    TaskComment[]
   TaskFiles       TaskFile[]
   TaskAssignees   TaskAssignee[]
   TaskPrequisites TaskPrequisite[] @relation(name: "TaskPrequisite")
   TaskParents     TaskPrequisite[] @relation(name: "TaskParent")
   TaskImages      TaskImage[]
-  ReminderTasks   ReminderTask[]
+  ReminderTasks   ReminderTask?
 
   @@map("task")
 }
@@ -549,16 +562,16 @@ enum IntervalReminder {
 }
 
 model Reminder {
-  id                 String         @id @default(uuid())
-  dateReminder       DateTime       @map("date_reminder") @db.Date
-  timeReminder       DateTime       @map("time_reminder") @db.Time()
-  interval           Int
-  alarm              Boolean        @default(false)
-  previousInvocation DateTime?      @db.Timestamptz(3)
-  nextInvocation     DateTime?      @db.Timestamptz(3)
-  createdAt          DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt          DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
-  deletedAt          DateTime?      @map("deleted_at") @db.Timestamptz(3)
+  id                 String           @id @default(uuid())
+  dateReminder       DateTime         @map("date_reminder") @db.Date
+  timeReminder       DateTime         @map("time_reminder") @db.Time()
+  interval           IntervalReminder
+  alarm              Boolean          @default(false)
+  previousInvocation DateTime?        @db.Timestamptz(3)
+  nextInvocation     DateTime?        @db.Timestamptz(3)
+  createdAt          DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt          DateTime?        @map("deleted_at") @db.Timestamptz(3)
   ReminderTasks      ReminderTask[]
   ReminderNotes      ReminderNote[]
 
@@ -567,7 +580,7 @@ model Reminder {
 
 model ReminderTask {
   reminderId String   @map("reminder_id")
-  taskId     String   @map("task_id")
+  taskId     String   @unique @map("task_id")
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   Reminder   Reminder @relation(fields: [reminderId], references: [id])
   Task       Task     @relation(fields: [taskId], references: [id])

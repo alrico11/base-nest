@@ -12,6 +12,7 @@ import { CollaboratorModule as MainProjectCollaboratorModule } from "./main/proj
 import { MemberModule as MainOrganizationMemberModule } from "./main/organization/member/member.module"
 import { ProjectModule as MainOrganizationProjectModule} from "./main/organization/project"
 import { CollaboratorModule as MainOrganizationProjectCollaboratorModule } from "./main/organization/project/collaborator"
+import { FileModule } from "./file"
 
 const AppImports: (Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference<any>)[] = [
   XConfigModule,
@@ -25,6 +26,7 @@ const AppImports: (Type<any> | DynamicModule | Promise<DynamicModule> | ForwardR
     duration: 60,
   }),
   LogModule,
+  FileModule,
   PrismaModule,
   //ON TESTING
   MainDeviceModule,
@@ -34,7 +36,6 @@ const AppImports: (Type<any> | DynamicModule | Promise<DynamicModule> | ForwardR
   MainOrganizationProjectModule,
   MainOrganizationProjectCollaboratorModule,
   MainOrganizationMemberModule,
-  
   //MAIN PROJECT
   MainProjectCollaboratorModule,
   MainProjectTagModule,

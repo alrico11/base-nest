@@ -1,36 +1,51 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
-import { User } from '@prisma/client';
-import { Lang, LangEnum } from 'src/constants';
-import { UserInstance } from '../auth';
-import { CreateProjectBodyDto, DeleteProjectParamDto, FindAllProjectQueryDto, FindOneProjectParamDto, UpdateProjectBodyDto, UpdateProjectParamDto } from './project.dto';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ProjectService } from './project.service';
+import { CreateProjectBodyDto, DeleteProjectParamDto, FindAllProjectQueryDto, FindOneProjectParamDto, UpdateProjectParamDto, UpdateProjectBodyDto } from './project.dto';
+import { UserInstance, UserJwtGuard } from 'src/main/auth';
+import { User } from '@prisma/client';
+import { DeviceHeaders, Lang, LangEnum } from 'src/constants';
+import { ApiHeaders, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { UserDeviceGuard } from 'src/main/device';
 
 @Controller('project')
+@ApiTags('User Project')
+@ApiHeaders(DeviceHeaders)
+@UseGuards(UserJwtGuard, UserDeviceGuard)
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) { }
 
   @Post()
-  create(@Body() body: CreateProjectBodyDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ operationId: "CreateProject" })
+  create(@Body() body: CreateProjectBodyDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
     return this.projectService.create({ body, lang, user });
   }
 
   @Get()
-  findAll(@Query() query: FindAllProjectQueryDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ operationId: "FindAllProject" })
+  findAll(@Query() query: FindAllProjectQueryDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
     return this.projectService.findAll({ lang, query, user });
   }
 
   @Get(':id')
-  findOne(@Param() param: FindOneProjectParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ operationId: "FindOneProject" })
+  findOne(@Param() param: FindOneProjectParamDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
     return this.projectService.findOne({ lang, param, user });
   }
 
   @Patch(':id')
-  update(@Param() param: UpdateProjectParamDto, @Body() body: UpdateProjectBodyDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ operationId: "UpdateProject" })
+  update(@Body() body: UpdateProjectBodyDto, @Param() param: UpdateProjectParamDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
     return this.projectService.update({ body, lang, param, user });
   }
 
   @Delete(':id')
-  remove(@Param() param: DeleteProjectParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ operationId: "DeleteProject" })
+  remove(@Param() param: DeleteProjectParamDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
     return this.projectService.remove({ lang, param, user });
   }
 }

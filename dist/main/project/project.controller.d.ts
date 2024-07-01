@@ -1,14 +1,14 @@
+import { ProjectService } from './project.service';
+import { CreateProjectBodyDto, DeleteProjectParamDto, FindAllProjectQueryDto, FindOneProjectParamDto, UpdateProjectParamDto, UpdateProjectBodyDto } from './project.dto';
 import { User } from '@prisma/client';
 import { LangEnum } from 'src/constants';
-import { CreateProjectBodyDto, DeleteProjectParamDto, FindAllProjectQueryDto, FindOneProjectParamDto, UpdateProjectBodyDto, UpdateProjectParamDto } from './project.dto';
-import { ProjectService } from './project.service';
 export declare class ProjectController {
     private readonly projectService;
     constructor(projectService: ProjectService);
-    create(body: CreateProjectBodyDto, lang: LangEnum, user: User): Promise<{
+    create(body: CreateProjectBodyDto, user: User, lang: LangEnum): Promise<{
         message: string;
     }>;
-    findAll(query: FindAllProjectQueryDto, lang: LangEnum, user: User): Promise<{
+    findAll(query: FindAllProjectQueryDto, user: User, lang: LangEnum): Promise<{
         limit: number;
         page: number;
         count: number;
@@ -28,7 +28,7 @@ export declare class ProjectController {
             }[];
         }[];
     }>;
-    findOne(param: FindOneProjectParamDto, lang: LangEnum, user: User): Promise<{
+    findOne(param: FindOneProjectParamDto, user: User, lang: LangEnum): Promise<{
         message: string;
         data: {
             detailsProject: {
@@ -43,10 +43,10 @@ export declare class ProjectController {
             }[];
         };
     }>;
-    update(param: UpdateProjectParamDto, body: UpdateProjectBodyDto, lang: LangEnum, user: User): Promise<{
+    update(body: UpdateProjectBodyDto, param: UpdateProjectParamDto, user: User, lang: LangEnum): Promise<{
         message: string;
     }>;
-    remove(param: DeleteProjectParamDto, lang: LangEnum, user: User): Promise<{
+    remove(param: DeleteProjectParamDto, user: User, lang: LangEnum): Promise<{
         message: string;
     }>;
 }

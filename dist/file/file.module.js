@@ -18,6 +18,7 @@ let FileModule = class FileModule {
 };
 exports.FileModule = FileModule;
 exports.FileModule = FileModule = __decorate([
+    (0, common_1.Global)(),
     (0, common_1.Module)({
         imports: [
             platform_express_1.MulterModule.registerAsync({ useClass: multer_config_service_1.MulterConfigService })

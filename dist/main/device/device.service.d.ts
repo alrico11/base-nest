@@ -23,6 +23,7 @@ export declare class DeviceService {
             fcmToken: string | null;
             fcmTokenLastUpdate: Date | null;
             lastActive: Date;
+            createdAt: Date;
             updatedAt: Date;
             deletedAt: Date | null;
             deviceId?: undefined;
@@ -38,6 +39,7 @@ export declare class DeviceService {
             fcmToken: string | null;
             fcmTokenLastUpdate: Date | null;
             lastActive: Date;
+            createdAt: Date;
             updatedAt: Date;
             deletedAt: Date | null;
         };

@@ -1,6 +1,6 @@
 import { User } from "@prisma/client";
 import { LangEnum } from "src/constants";
-import { AddAdminProjectCollaboratorBodyDto, AddAdminProjectCollaboratorParamDto, CreateProjectCollaboratorBodyDto, CreateProjectCollaboratorParamDto } from "./collaborator..dto";
+import { AddAdminProjectCollaboratorBodyDto, AddAdminProjectCollaboratorParamDto, CreateProjectCollaboratorBodyDto, CreateProjectCollaboratorParamDto } from "./collaborator.dto";
 
 export interface ICreateProjectCollaborator {
     body: CreateProjectCollaboratorBodyDto

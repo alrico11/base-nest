@@ -1,6 +1,6 @@
 import { User } from '@prisma/client';
 import { LangEnum } from 'src/constants';
-import { AddAdminProjectCollaboratorBodyDto, AddAdminProjectCollaboratorParamDto, CreateProjectCollaboratorBodyDto, CreateProjectCollaboratorParamDto, RemoveAdminProjectCollaboratorBodyDto, RemoveAdminProjectCollaboratorParamDto, RemoveProjectCollaboratorBodyDto, RemoveProjectCollaboratorParamDto } from './collaborator..dto';
+import { AddAdminProjectCollaboratorBodyDto, AddAdminProjectCollaboratorParamDto, CreateProjectCollaboratorBodyDto, CreateProjectCollaboratorParamDto, RemoveAdminProjectCollaboratorBodyDto, RemoveAdminProjectCollaboratorParamDto, RemoveProjectCollaboratorBodyDto, RemoveProjectCollaboratorParamDto } from './collaborator.dto';
 import { CollaboratorService } from './collaborator.service';
 export declare class CollaboratorController {
     private readonly collaboratorService;
@@ -14,7 +14,7 @@ export declare class CollaboratorController {
     removeAdmin(body: RemoveAdminProjectCollaboratorBodyDto, param: RemoveAdminProjectCollaboratorParamDto, lang: LangEnum, user: User): Promise<{
         message: string;
     }>;
-    removeMember(body: RemoveProjectCollaboratorBodyDto, param: RemoveProjectCollaboratorParamDto, lang: LangEnum, user: User): Promise<{
+    removeCollaborator(body: RemoveProjectCollaboratorBodyDto, param: RemoveProjectCollaboratorParamDto, lang: LangEnum, user: User): Promise<{
         message: string;
     }>;
 }

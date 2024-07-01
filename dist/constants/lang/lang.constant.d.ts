@@ -45,10 +45,12 @@ export declare const LangObjects: {
         ORGANIZATION: string;
         COLLABORATOR: string;
         PROJECT: string;
+        TASK: string;
     };
     EN: {
         ORGANIZATION: string;
         COLLABORATOR: string;
         PROJECT: string;
+        TASK: string;
     };
 };

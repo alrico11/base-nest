@@ -46,10 +46,12 @@ export const LangObjects = {
         ORGANIZATION: "organisasi",
         COLLABORATOR: "kolaborator",
         PROJECT: "proyek",
+        TASK: "tugas"
     },
     EN: {
         ORGANIZATION: "organization",
         COLLABORATOR: "collaborator",
         PROJECT: "project",
+        TASK: "task"
     }
 }

@@ -18,6 +18,8 @@ const project_service_1 = require("./project.service");
 const project_dto_1 = require("./project.dto");
 const auth_1 = require("../../auth");
 const constants_1 = require("../../../constants");
+const swagger_1 = require("@nestjs/swagger");
+const device_1 = require("../../device");
 let ProjectController = class ProjectController {
     constructor(projectService) {
         this.projectService = projectService;
@@ -41,6 +43,8 @@ let ProjectController = class ProjectController {
 exports.ProjectController = ProjectController;
 __decorate([
     (0, common_1.Post)(),
+    (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
+    (0, swagger_1.ApiOperation)({ operationId: "CreateProjectOrganization" }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, auth_1.UserInstance)()),
@@ -51,6 +55,8 @@ __decorate([
 ], ProjectController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ operationId: "FindAllProjectOrganization" }),
     __param(0, (0, common_1.Query)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, auth_1.UserInstance)()),
@@ -61,6 +67,8 @@ __decorate([
 ], ProjectController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ operationId: "FindOneProjectOrganization" }),
     __param(0, (0, common_1.Param)()),
     __param(1, (0, auth_1.UserInstance)()),
     __param(2, (0, constants_1.Lang)()),
@@ -70,6 +78,8 @@ __decorate([
 ], ProjectController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ operationId: "UpdateProjectOrganization" }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, auth_1.UserInstance)()),
@@ -80,6 +90,8 @@ __decorate([
 ], ProjectController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ operationId: "DeleteProjectOrganization" }),
     __param(0, (0, common_1.Param)()),
     __param(1, (0, auth_1.UserInstance)()),
     __param(2, (0, constants_1.Lang)()),
@@ -88,7 +100,10 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ProjectController.prototype, "remove", null);
 exports.ProjectController = ProjectController = __decorate([
-    (0, common_1.Controller)(':organizationId/project'),
+    (0, common_1.Controller)('organization/:organizationId/project'),
+    (0, swagger_1.ApiHeaders)(constants_1.DeviceHeaders),
+    (0, swagger_1.ApiTags)('User Organization Project'),
+    (0, common_1.UseGuards)(auth_1.UserJwtGuard, device_1.UserDeviceGuard),
     __metadata("design:paramtypes", [project_service_1.ProjectService])
 ], ProjectController);
 //# sourceMappingURL=project.controller.js.map

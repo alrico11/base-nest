@@ -62,16 +62,16 @@ declare const FindAllProjectQueryDto_base: import("@anatine/zod-nestjs").ZodDtoS
     search: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     orderBy: "createdAt";
-    orderDirection: "asc" | "desc";
-    page: number;
     limit: number;
+    page: number;
+    orderDirection: "asc" | "desc";
     search?: string | undefined;
 }, {
     orderBy?: "createdAt" | undefined;
     search?: string | undefined;
-    orderDirection?: "asc" | "desc" | undefined;
-    page?: number | undefined;
     limit?: number | undefined;
+    page?: number | undefined;
+    orderDirection?: "asc" | "desc" | undefined;
 }>>;
 export declare class FindAllProjectQueryDto extends FindAllProjectQueryDto_base {
 }

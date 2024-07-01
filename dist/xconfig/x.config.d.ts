@@ -20,6 +20,7 @@ declare const zEnvValidationSchema: z.ZodObject<{
     OBJECT_STORAGE_PREFIX_ORGANIZATION: z.ZodString;
     OBJECT_STORAGE_PREFIX_PROJECT: z.ZodString;
     OBJECT_STORAGE_PREFIX_PROJECT_FILE: z.ZodString;
+    OBJECT_STORAGE_PREFIX_TASK: z.ZodString;
     OBJECT_STORAGE_PREFIX_ADMIN: z.ZodString;
     TMP_FILE_PATH: z.ZodString;
     CDN_PATH_URL: z.ZodString;
@@ -29,9 +30,9 @@ declare const zEnvValidationSchema: z.ZodObject<{
     BLURHASH_COMPONENT_Y: z.ZodNumber;
     MAX_CHILD_RESOURCE: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
-    DATABASE_URL: string;
     NODE_ENV: "PRODUCTION" | "DEVELOPMENT" | "LOCAL";
     APP_PORT: number;
+    DATABASE_URL: string;
     USER_JWT_SECRET: string;
     DEVICE_JWT_SECRET: string;
     OBJECT_STORAGE_HOST: string;
@@ -48,6 +49,7 @@ declare const zEnvValidationSchema: z.ZodObject<{
     OBJECT_STORAGE_PREFIX_ORGANIZATION: string;
     OBJECT_STORAGE_PREFIX_PROJECT: string;
     OBJECT_STORAGE_PREFIX_PROJECT_FILE: string;
+    OBJECT_STORAGE_PREFIX_TASK: string;
     OBJECT_STORAGE_PREFIX_ADMIN: string;
     TMP_FILE_PATH: string;
     CDN_PATH_URL: string;
@@ -57,9 +59,9 @@ declare const zEnvValidationSchema: z.ZodObject<{
     BLURHASH_COMPONENT_Y: number;
     MAX_CHILD_RESOURCE: number;
 }, {
-    DATABASE_URL: string;
     NODE_ENV: "PRODUCTION" | "DEVELOPMENT" | "LOCAL";
     APP_PORT: number;
+    DATABASE_URL: string;
     USER_JWT_SECRET: string;
     DEVICE_JWT_SECRET: string;
     OBJECT_STORAGE_HOST: string;
@@ -76,6 +78,7 @@ declare const zEnvValidationSchema: z.ZodObject<{
     OBJECT_STORAGE_PREFIX_ORGANIZATION: string;
     OBJECT_STORAGE_PREFIX_PROJECT: string;
     OBJECT_STORAGE_PREFIX_PROJECT_FILE: string;
+    OBJECT_STORAGE_PREFIX_TASK: string;
     OBJECT_STORAGE_PREFIX_ADMIN: string;
     TMP_FILE_PATH: string;
     CDN_PATH_URL: string;
@@ -92,9 +95,9 @@ export declare class XConfig {
     env: Env;
     constructor(configService: ConfigService);
     static validate(env: unknown): {
-        DATABASE_URL: string;
         NODE_ENV: "PRODUCTION" | "DEVELOPMENT" | "LOCAL";
         APP_PORT: number;
+        DATABASE_URL: string;
         USER_JWT_SECRET: string;
         DEVICE_JWT_SECRET: string;
         OBJECT_STORAGE_HOST: string;
@@ -111,6 +114,7 @@ export declare class XConfig {
         OBJECT_STORAGE_PREFIX_ORGANIZATION: string;
         OBJECT_STORAGE_PREFIX_PROJECT: string;
         OBJECT_STORAGE_PREFIX_PROJECT_FILE: string;
+        OBJECT_STORAGE_PREFIX_TASK: string;
         OBJECT_STORAGE_PREFIX_ADMIN: string;
         TMP_FILE_PATH: string;
         CDN_PATH_URL: string;

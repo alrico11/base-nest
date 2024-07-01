@@ -8,7 +8,7 @@ import { LogService } from "src/log";
 import { PrismaService } from "src/prisma";
 import { dotToObject } from "src/utils/string";
 import { XConfig } from "src/xconfig";
-import { ICreateProject, IFindAllProject, IFindAllProjectCollaborator, IFindOneProject, IRemoveProject, IUpdateProject, ProjectRole } from "./project.@types";
+import { ICreateProject, IFindAllProject, IFindAllProjectCollaborator, IFindOneProject, IRemoveProject, IResource, IUpdateProject, ProjectRole } from "./project.@types";
 import { DeletedProjectFilesEvent, UpdatedProjectEvent } from "./project.event";
 
 @Injectable()
@@ -39,12 +39,13 @@ export class ProjectService {
       if (file) {
         FileResource = await this.fileService.handleUploadObjectStorage({ fileName: file, prefix: this.config.env.OBJECT_STORAGE_PREFIX_PROJECT_FILE, user });
         if (Array.isArray(FileResource) && FileResource.length > 0) {
-          await prisma.projectFile.createMany({
-            data: FileResource.map(({ id }) => ({
-              projectId: project.id,
-              resourceId: id
-            }))
-          });
+          const { images, files } = FileResource.reduce<{ images: IResource[]; files: IResource[]; }>((acc, resource) => {
+            if (resource.fileName.includes(".webp")) acc.images.push({ resourceId: resource.id, projectId: project.id });
+            acc.files.push({ resourceId: resource.id, projectId: project.id });
+            return acc;
+          }, { images: [], files: [] } as { images: IResource[], files: IResource[] });
+          await this.prisma.projectImage.createMany({ data: images })
+          await this.prisma.projectFile.createMany({ data: files })
         }
       }
       this.l.info({ message: `project with id ${project.id} created by userId ${user.id}` })
@@ -189,7 +190,8 @@ export class ProjectService {
               prefix: this.config.env.OBJECT_STORAGE_PREFIX_PROJECT_FILE,
               user
             });
-            if (!Array.isArray(newFileResource)) await prisma.projectFile.create({ data: { resourceId: newFileResource.id, projectId: id } });
+            if (!Array.isArray(newFileResource) && !newFileResource.fileName.includes("webp")) await prisma.projectFile.create({ data: { resourceId: newFileResource.id, projectId: id } });
+            if (!Array.isArray(newFileResource) && newFileResource.fileName.includes("webp")) await prisma.projectImage.create({ data: { resourceId: newFileResource.id, projectId: id } });
           }
         }));
       }

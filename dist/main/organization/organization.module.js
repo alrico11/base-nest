@@ -8,22 +8,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrganizationModule = void 0;
 const common_1 = require("@nestjs/common");
-const file_1 = require("../../file");
-const tag_module_1 = require("../tag/tag.module");
-const departement_module_1 = require("./departement/departement.module");
-const job_module_1 = require("./job/job.module");
 const organization_controller_1 = require("./organization.controller");
 const organization_listener_1 = require("./organization.listener");
 const organization_service_1 = require("./organization.service");
-const position_module_1 = require("./position/position.module");
-const project_module_1 = require("./project/project.module");
-const sop_module_1 = require("./sop/sop.module");
 let OrganizationModule = class OrganizationModule {
 };
 exports.OrganizationModule = OrganizationModule;
 exports.OrganizationModule = OrganizationModule = __decorate([
     (0, common_1.Module)({
-        imports: [file_1.FileModule, departement_module_1.DepartementModule, position_module_1.PositionModule, job_module_1.JobModule, sop_module_1.SopModule, project_module_1.ProjectModule, tag_module_1.TagModule],
         controllers: [organization_controller_1.OrganizationController],
         providers: [organization_service_1.OrganizationService, organization_listener_1.OrganizationListener],
     })

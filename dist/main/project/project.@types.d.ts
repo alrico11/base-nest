@@ -1,6 +1,10 @@
 import { User } from "@prisma/client";
 import { LangEnum } from "src/constants";
 import { CreateProjectBodyDto, DeleteProjectParamDto, FindAllProjectCollaboratorParamDto, FindAllProjectCollaboratorQueryDto, FindAllProjectQueryDto, FindOneProjectParamDto, UpdateProjectBodyDto, UpdateProjectParamDto } from "./project.dto";
+export interface IResource {
+    resourceId: string;
+    projectId: string;
+}
 export interface ICreateProject {
     body: CreateProjectBodyDto;
     user: User;

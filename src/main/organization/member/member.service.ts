@@ -10,7 +10,6 @@ export class MemberService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly l: LogService,
-    private readonly organization: OrganizationService
   ) { }
 
   async addMember({ body, lang, param: { id }, user }: ICreateMember) {

@@ -13,6 +13,7 @@ const collaborator_1 = require("./main/project/collaborator");
 const member_module_1 = require("./main/organization/member/member.module");
 const project_1 = require("./main/organization/project");
 const collaborator_2 = require("./main/organization/project/collaborator");
+const file_1 = require("./file");
 const AppImports = [
     xconfig_1.XConfigModule,
     event_emitter_1.EventEmitterModule.forRoot({
@@ -25,6 +26,7 @@ const AppImports = [
         duration: 60,
     }),
     log_1.LogModule,
+    file_1.FileModule,
     prisma_1.PrismaModule,
     device_1.DeviceModule,
     organization_module_1.OrganizationModule,

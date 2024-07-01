@@ -14,12 +14,10 @@ const common_1 = require("@nestjs/common");
 const constants_1 = require("../../../constants");
 const log_1 = require("../../../log");
 const prisma_1 = require("../../../prisma");
-const organization_service_1 = require("../organization.service");
 let MemberService = class MemberService {
-    constructor(prisma, l, organization) {
+    constructor(prisma, l) {
         this.prisma = prisma;
         this.l = l;
-        this.organization = organization;
     }
     async addMember({ body, lang, param: { id }, user }) {
         const { userId } = body;
@@ -134,7 +132,6 @@ exports.MemberService = MemberService;
 exports.MemberService = MemberService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_1.PrismaService,
-        log_1.LogService,
-        organization_service_1.OrganizationService])
+        log_1.LogService])
 ], MemberService);
 //# sourceMappingURL=member.service.js.map

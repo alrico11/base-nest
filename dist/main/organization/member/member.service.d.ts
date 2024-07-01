@@ -1,12 +1,10 @@
 import { LogService } from 'src/log';
 import { PrismaService } from 'src/prisma';
-import { OrganizationService } from '../organization.service';
 import { IAddAdmin, ICheckRole, ICreateMember, IRemoveAdmin, IRemoveMember } from './member.@types';
 export declare class MemberService {
     private readonly prisma;
     private readonly l;
-    private readonly organization;
-    constructor(prisma: PrismaService, l: LogService, organization: OrganizationService);
+    constructor(prisma: PrismaService, l: LogService);
     addMember({ body, lang, param: { id }, user }: ICreateMember): Promise<{
         message: string;
     }>;

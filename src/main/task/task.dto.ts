@@ -1,0 +1,44 @@
+import { createZodDto } from "@anatine/zod-nestjs";
+import { IntervalReminder, TaskEnum, TaskPriority } from "@prisma/client";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import { zDateFormat } from "src/constants";
+import { FindAllQueryDtoBaseSchema } from "src/constants/findAll-query.dto";
+import { FindOneParamDtoBaseSchema } from "src/constants/findOne-param.dto";
+import { zTimeFormat } from "src/constants/zTimeFormat";
+import { z } from "zod";
+dayjs.extend(utc);
+
+const CreateReminderBodyDtoSchema = z.object({
+    alarm: z.boolean().default(false),
+    interval: z.nativeEnum(IntervalReminder),
+    startDate: zDateFormat.default(dayjs.utc().format('YYYY-MM-DD')),
+    time: zTimeFormat.default(dayjs().format('HH:mm'))
+});
+
+const CreateTaskBodyDtoSchema = z.object({
+    name: z.string(),
+    description: z.string().optional(),
+    assigneeUserIds: z.array(z.string()).optional(),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
+    status: z.nativeEnum(TaskEnum),
+    priority: z.nativeEnum(TaskPriority),
+    color: z.string().optional(),
+    duration: z.number().default(0),
+    projectId: z.string().optional(),
+    files: z.array(z.string()).optional(),
+    reminder: CreateReminderBodyDtoSchema.optional()
+});
+
+const FindAllTaskQueryDtoSchema = FindAllQueryDtoBaseSchema
+
+const UpdateTaskBodyDtoSchema = CreateTaskBodyDtoSchema
+const UpdateTaskParamDtoSchema = FindOneParamDtoBaseSchema
+
+export class CreateTaskBodyDto extends createZodDto(CreateTaskBodyDtoSchema) { }
+export class UpdateTaskBodyDto extends createZodDto(UpdateTaskBodyDtoSchema) { }
+export class UpdateTaskParamDto extends createZodDto(UpdateTaskParamDtoSchema) { }
+export class DeleteTaskParamDto extends createZodDto(UpdateTaskParamDtoSchema) { }
+export class FindOneTaskParamDto extends createZodDto(UpdateTaskParamDtoSchema) { }
+export class FindAllTaskQueryDto extends createZodDto(FindAllTaskQueryDtoSchema) { }
