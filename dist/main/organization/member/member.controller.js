@@ -87,7 +87,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], MemberController.prototype, "removeAdmin", null);
 exports.MemberController = MemberController = __decorate([
-    (0, common_1.Controller)('member'),
+    (0, common_1.Controller)('organization/:id/member'),
     (0, swagger_1.ApiHeaders)(constants_1.DeviceHeaders),
     (0, common_1.UseGuards)(auth_1.UserJwtGuard, device_1.UserDeviceGuard),
     (0, swagger_1.ApiTags)("User Organization Member"),

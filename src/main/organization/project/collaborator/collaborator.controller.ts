@@ -1,15 +1,15 @@
-import { Controller, Post, Delete, Body, Param, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Body, Controller, Delete, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
+import { ApiHeaders, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { DeviceHeaders, Lang, LangEnum } from 'src/constants';
 import { UserInstance, UserJwtGuard } from 'src/main/auth';
-import { ApiHeaders, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserDeviceGuard } from 'src/main/device';
 import { AddAdminProjectCollaboratorBodyDto, AddAdminProjectCollaboratorParamDto, CreateProjectCollaboratorBodyDto, CreateProjectCollaboratorParamDto, RemoveAdminProjectCollaboratorBodyDto, RemoveAdminProjectCollaboratorParamDto, RemoveProjectCollaboratorBodyDto, RemoveProjectCollaboratorParamDto } from './collaborator.dto';
 import { CollaboratorService } from './collaborator.service';
 
-@Controller(':organizationId/collaborator')
 @ApiHeaders(DeviceHeaders)
 @ApiTags('User Organization Collaborator')
+@Controller('organization/:organizationId/project/:id/collaborator')
 @UseGuards(UserJwtGuard, UserDeviceGuard)
 export class CollaboratorController {
   constructor(private readonly collaboratorService: CollaboratorService) { }
@@ -41,4 +41,6 @@ export class CollaboratorController {
   removeCollaborator(@Body() body: RemoveProjectCollaboratorBodyDto, @Param() param: RemoveProjectCollaboratorParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.collaboratorService.removeCollaborator({ body, lang, param, user });
   }
+
+
 }

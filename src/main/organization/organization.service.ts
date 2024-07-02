@@ -97,11 +97,10 @@ export class OrganizationService {
       blurHash: Resource ? Resource.blurHash : undefined
     }
     const adminIds = new Set(OrganizationAdmin.map(({ userId }) => { return userId }))
-
     const detailUser = {
       id: user.id,
       name: user.name,
-      role: adminIds.has(id) ? EnumRoleOrganization.ADMIN : (Creator.id === user.id ? EnumRoleOrganization.OWNER : EnumRoleOrganization.MEMBER)
+      role: adminIds.has(user.id) ? EnumRoleOrganization.ADMIN : (Creator.id === user.id ? EnumRoleOrganization.OWNER : EnumRoleOrganization.MEMBER)
     }
 
     return { message: LangResponse({ key: 'fetched', object: 'organization', lang }), data: { detailOrganization, detailUser } }
@@ -159,7 +158,7 @@ export class OrganizationService {
   async findAllMember({ query, lang, param: { id }, user }: IFindAllMemberOrganization) {
     const { limit, orderBy, orderDirection, page } = query;
     const { result, ...rest } = await this.prisma.extended.organization.paginate({
-      where:{
+      where: {
         id, deletedAt: null,
         OR: [
           { creatorId: user.id },
@@ -191,6 +190,7 @@ export class OrganizationService {
       return {
         userDetails: {
           userId: user.id,
+          name: user.name,
           role: adminIds.has(user.id) ? EnumRoleOrganization.ADMIN : EnumRoleOrganization.MEMBER
         },
         members: [
@@ -206,19 +206,19 @@ export class OrganizationService {
         ]
       };
     })[0]
-    return { message: LangResponse({ key: "fetched", lang, object: "organization" }), data: data,...rest };
+    return { message: LangResponse({ key: "fetched", lang, object: "organization" }), data: data, ...rest };
   }
 
   async adminGuard({ organizationId, userId, lang }: ICheckRole) {
     const isAdmin = await this.prisma.organizationAdmin.findFirst({ where: { organizationId, userId } })
     const isOwner = await this.prisma.organization.findFirst({ where: { id: organizationId, creatorId: userId } })
-    if (!isAdmin && !isOwner) throw new HttpException(LangResponse({ key: "unauthorize", lang, object: "USER" }), HttpStatus.UNAUTHORIZED)
+    if (!isAdmin && !isOwner) throw new HttpException(LangResponse({ key: "unauthorize", lang, object: "user" }), HttpStatus.UNAUTHORIZED)
     return true
   }
 
   async ownerGuard({ organizationId, userId, lang }: ICheckRole) {
     const isOwner = await this.prisma.organization.findFirst({ where: { id: organizationId, creatorId: userId } })
-    if (!isOwner) throw new HttpException(LangResponse({ key: "unauthorize", lang, object: "USER" }), HttpStatus.UNAUTHORIZED)
+    if (!isOwner) throw new HttpException(LangResponse({ key: "unauthorize", lang, object: "user" }), HttpStatus.UNAUTHORIZED)
     return true
   }
 }

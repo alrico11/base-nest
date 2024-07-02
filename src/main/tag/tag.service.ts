@@ -15,21 +15,16 @@ export class TagService {
 
   async create({ body: { name }, lang, user }: ICreateTag) {
     const data = await this.prisma.tag.create({
-      data: {
-        name,
-        creatorId: user.id
-      }
+      data: { name, creatorId: user.id }
     })
-
     this.l.info({ message: `tag with id ${data.id} created by userid ${user.id}` })
-
     return { message: LangResponse({ key: "created", lang, object: "tag" }) };
   }
 
   async findAll({ lang, query, user }: IFindAllTag) {
     const { limit, orderBy, orderDirection, page, search } = query
     const { result, ...rest } = await this.prisma.extended.tag.paginate({
-      where: { deletedAt: null, name: { contains: search, mode: "insensitive" }, creatorId: user.id },
+      where: { deletedAt: null, name: { contains: search, mode: "insensitive" }, creatorId: user.id, organizationId: null },
       limit, page,
       orderBy: dotToObject({ orderBy, orderDirection })
     })
@@ -38,7 +33,7 @@ export class TagService {
   }
 
   async update({ body: { name }, lang, param: { id }, user }: IUpdateTag) {
-    const tagExist = await this.prisma.tag.findFirst({ where: { id, deletedAt: null } })
+    const tagExist = await this.prisma.tag.findFirst({ where: { id, deletedAt: null, organizationId: null } })
     if (!tagExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: 'tag' }), HttpStatus.NOT_FOUND)
     await this.prisma.tag.update({
       where: { id, deletedAt: null },
@@ -49,7 +44,7 @@ export class TagService {
   }
 
   async remove({ lang, param: { id }, user }: IRemoveTag) {
-    const tagExist = await this.prisma.tag.findFirst({ where: { id, deletedAt: null } })
+    const tagExist = await this.prisma.tag.findFirst({ where: { id, deletedAt: null, organizationId: null } })
     if (!tagExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: 'tag' }), HttpStatus.NOT_FOUND)
     await this.prisma.tag.update({
       where: { id, deletedAt: null },

@@ -7,11 +7,6 @@ export interface ICreateProjectCollaborator {
     param: CreateProjectCollaboratorParamDto;
     lang: LangEnum;
 }
-export interface ICheckRoleCollaborator {
-    projectId: string;
-    userId: string;
-    lang: LangEnum;
-}
 export interface IAddAdminProjectCollaborator {
     body: AddAdminProjectCollaboratorBodyDto;
     lang: LangEnum;

@@ -1,6 +1,6 @@
 import { User } from "@prisma/client";
 import { LangEnum } from "src/constants";
-import { CreateProjectBodyDto, CreateProjectParamDto, DeleteProjectParamDto, FindAllProjectParamDto, FindAllProjectQueryDto, FindOneProjectParamDto, UpdateProjectBodyDto, UpdateProjectParamDto } from "./project.dto";
+import { CreateProjectBodyDto, CreateProjectParamDto, DeleteProjectParamDto, FindAllProjectCollaboratorParamDto, FindAllProjectCollaboratorQueryDto, FindAllProjectParamDto, FindAllProjectQueryDto, FindOneProjectParamDto, UpdateProjectBodyDto, UpdateProjectParamDto } from "./project.dto";
 
 export interface ICreateProject {
     param : CreateProjectParamDto
@@ -33,4 +33,24 @@ export interface IRemoveProject {
     lang: LangEnum
     user: User
     param: DeleteProjectParamDto
+}
+
+export enum RolesEnum {
+    OWNER = "owner",
+    COLLABORATOR = "collaborator",
+    ADMIN = "admin",
+    MEMBER = "member"
+}
+
+export interface ICheckRoleCollaborator {
+    projectId: string
+    userId: string
+    lang: LangEnum
+}
+
+
+export interface IFindAllProjectCollaborator {
+    query: FindAllProjectCollaboratorQueryDto
+    lang: LangEnum
+    param: FindAllProjectCollaboratorParamDto
 }

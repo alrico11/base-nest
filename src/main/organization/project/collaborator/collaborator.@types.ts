@@ -9,11 +9,6 @@ export interface ICreateProjectCollaborator {
     lang: LangEnum
 }
 
-export interface ICheckRoleCollaborator {
-    projectId: string
-    userId: string
-    lang: LangEnum
-}
 
 export interface IAddAdminProjectCollaborator {
     body: AddAdminProjectCollaboratorBodyDto

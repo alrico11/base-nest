@@ -8,8 +8,9 @@ const CreateProjectCollaboratorBodyDtoSchema = z.object({
 })
 
 const CreateProjectCollaboratorParamDtoSchema = FindOneParamDtoBaseSchema.extend({
-    organizationId : z.string().uuid()
+    organizationId: z.string().uuid()
 })
+
 
 export class CreateProjectCollaboratorBodyDto extends createZodDto(CreateProjectCollaboratorBodyDtoSchema) { }
 export class CreateProjectCollaboratorParamDto extends createZodDto(CreateProjectCollaboratorParamDtoSchema) { }

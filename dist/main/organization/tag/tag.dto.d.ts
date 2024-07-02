@@ -18,23 +18,23 @@ declare const CreateTagParamDto_base: import("@anatine/zod-nestjs").ZodDtoStatic
 export declare class CreateTagParamDto extends CreateTagParamDto_base {
 }
 declare const FindAllTagQueryDto_base: import("@anatine/zod-nestjs").ZodDtoStatic<z.ZodObject<{
-    page: z.ZodDefault<z.ZodNumber>;
+    page: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
     limit: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
     orderBy: z.ZodDefault<z.ZodOptional<z.ZodEnum<["createdAt"]>>>;
     orderDirection: z.ZodDefault<z.ZodOptional<z.ZodEnum<["asc", "desc"]>>>;
     search: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    orderBy: "createdAt";
     page: number;
     limit: number;
+    orderBy: "createdAt";
     orderDirection: "asc" | "desc";
     search?: string | undefined;
 }, {
-    orderBy?: "createdAt" | undefined;
-    search?: string | undefined;
     page?: number | undefined;
     limit?: number | undefined;
+    orderBy?: "createdAt" | undefined;
     orderDirection?: "asc" | "desc" | undefined;
+    search?: string | undefined;
 }>>;
 export declare class FindAllTagQueryDto extends FindAllTagQueryDto_base {
 }

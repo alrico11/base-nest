@@ -62,6 +62,7 @@ export declare class OrganizationService {
         data: {
             userDetails: {
                 userId: string;
+                name: string;
                 role: EnumRoleOrganization;
             };
             members: {

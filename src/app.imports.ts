@@ -9,7 +9,7 @@ import { OrganizationModule as MainOrganizationModule } from "./main/organizatio
 import { TagModule as MainProjectTagModule } from "./main/tag/tag.module"
 import { TagModule as MainOrganizationTagModule } from "./main/organization/tag"
 import { CollaboratorModule as MainProjectCollaboratorModule } from "./main/project/collaborator"
-import { MemberModule as MainOrganizationMemberModule } from "./main/organization/member/member.module"
+import { MemberModule as MainOrganizationMemberModule } from "./main/organization/member"
 import { ProjectModule as MainOrganizationProjectModule } from "./main/organization/project"
 import { CollaboratorModule as MainOrganizationProjectCollaboratorModule } from "./main/organization/project/collaborator"
 import { FileModule } from "./file"

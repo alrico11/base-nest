@@ -26,10 +26,7 @@ let TagService = class TagService {
     }
     async create({ body: { name }, lang, user }) {
         const data = await this.prisma.tag.create({
-            data: {
-                name,
-                creatorId: user.id
-            }
+            data: { name, creatorId: user.id }
         });
         this.l.info({ message: `tag with id ${data.id} created by userid ${user.id}` });
         return { message: (0, constants_1.LangResponse)({ key: "created", lang, object: "tag" }) };
@@ -37,7 +34,7 @@ let TagService = class TagService {
     async findAll({ lang, query, user }) {
         const { limit, orderBy, orderDirection, page, search } = query;
         const { result, ...rest } = await this.prisma.extended.tag.paginate({
-            where: { deletedAt: null, name: { contains: search, mode: "insensitive" }, creatorId: user.id },
+            where: { deletedAt: null, name: { contains: search, mode: "insensitive" }, creatorId: user.id, organizationId: null },
             limit, page,
             orderBy: (0, string_1.dotToObject)({ orderBy, orderDirection })
         });
@@ -45,7 +42,7 @@ let TagService = class TagService {
         return { message: (0, constants_1.LangResponse)({ key: "fetched", lang, object: "tag" }), data: data, ...rest };
     }
     async update({ body: { name }, lang, param: { id }, user }) {
-        const tagExist = await this.prisma.tag.findFirst({ where: { id, deletedAt: null } });
+        const tagExist = await this.prisma.tag.findFirst({ where: { id, deletedAt: null, organizationId: null } });
         if (!tagExist)
             throw new common_1.HttpException((0, constants_1.LangResponse)({ key: "notFound", lang, object: 'tag' }), common_1.HttpStatus.NOT_FOUND);
         await this.prisma.tag.update({
@@ -56,7 +53,7 @@ let TagService = class TagService {
         return { message: (0, constants_1.LangResponse)({ key: "updated", lang, object: "tag" }) };
     }
     async remove({ lang, param: { id }, user }) {
-        const tagExist = await this.prisma.tag.findFirst({ where: { id, deletedAt: null } });
+        const tagExist = await this.prisma.tag.findFirst({ where: { id, deletedAt: null, organizationId: null } });
         if (!tagExist)
             throw new common_1.HttpException((0, constants_1.LangResponse)({ key: "notFound", lang, object: 'tag' }), common_1.HttpStatus.NOT_FOUND);
         await this.prisma.tag.update({

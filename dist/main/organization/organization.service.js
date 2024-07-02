@@ -110,7 +110,7 @@ let OrganizationService = class OrganizationService {
         const detailUser = {
             id: user.id,
             name: user.name,
-            role: adminIds.has(id) ? organization__types_1.EnumRoleOrganization.ADMIN : (Creator.id === user.id ? organization__types_1.EnumRoleOrganization.OWNER : organization__types_1.EnumRoleOrganization.MEMBER)
+            role: adminIds.has(user.id) ? organization__types_1.EnumRoleOrganization.ADMIN : (Creator.id === user.id ? organization__types_1.EnumRoleOrganization.OWNER : organization__types_1.EnumRoleOrganization.MEMBER)
         };
         return { message: (0, constants_1.LangResponse)({ key: 'fetched', object: 'organization', lang }), data: { detailOrganization, detailUser } };
     }
@@ -200,6 +200,7 @@ let OrganizationService = class OrganizationService {
             return {
                 userDetails: {
                     userId: user.id,
+                    name: user.name,
                     role: adminIds.has(user.id) ? organization__types_1.EnumRoleOrganization.ADMIN : organization__types_1.EnumRoleOrganization.MEMBER
                 },
                 members: [
@@ -221,13 +222,13 @@ let OrganizationService = class OrganizationService {
         const isAdmin = await this.prisma.organizationAdmin.findFirst({ where: { organizationId, userId } });
         const isOwner = await this.prisma.organization.findFirst({ where: { id: organizationId, creatorId: userId } });
         if (!isAdmin && !isOwner)
-            throw new common_1.HttpException((0, constants_1.LangResponse)({ key: "unauthorize", lang, object: "USER" }), common_1.HttpStatus.UNAUTHORIZED);
+            throw new common_1.HttpException((0, constants_1.LangResponse)({ key: "unauthorize", lang, object: "user" }), common_1.HttpStatus.UNAUTHORIZED);
         return true;
     }
     async ownerGuard({ organizationId, userId, lang }) {
         const isOwner = await this.prisma.organization.findFirst({ where: { id: organizationId, creatorId: userId } });
         if (!isOwner)
-            throw new common_1.HttpException((0, constants_1.LangResponse)({ key: "unauthorize", lang, object: "USER" }), common_1.HttpStatus.UNAUTHORIZED);
+            throw new common_1.HttpException((0, constants_1.LangResponse)({ key: "unauthorize", lang, object: "user" }), common_1.HttpStatus.UNAUTHORIZED);
         return true;
     }
 };

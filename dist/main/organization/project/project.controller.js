@@ -14,12 +14,12 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProjectController = void 0;
 const common_1 = require("@nestjs/common");
-const project_service_1 = require("./project.service");
-const project_dto_1 = require("./project.dto");
-const auth_1 = require("../../auth");
-const constants_1 = require("../../../constants");
 const swagger_1 = require("@nestjs/swagger");
+const constants_1 = require("../../../constants");
+const auth_1 = require("../../auth");
 const device_1 = require("../../device");
+const project_dto_1 = require("./project.dto");
+const project_service_1 = require("./project.service");
 let ProjectController = class ProjectController {
     constructor(projectService) {
         this.projectService = projectService;
@@ -38,6 +38,9 @@ let ProjectController = class ProjectController {
     }
     remove(param, user, lang) {
         return this.projectService.remove({ lang, param, user });
+    }
+    findAllCollaborator(query, lang, param) {
+        return this.projectService.findAllCollaborator({ lang, param, query });
     }
 };
 exports.ProjectController = ProjectController;
@@ -99,6 +102,17 @@ __decorate([
     __metadata("design:paramtypes", [project_dto_1.DeleteProjectParamDto, Object, Number]),
     __metadata("design:returntype", void 0)
 ], ProjectController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Get)(':id/collaborator'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ operationId: 'FindAllCollaboratorFromProject' }),
+    __param(0, (0, common_1.Query)()),
+    __param(1, (0, constants_1.Lang)()),
+    __param(2, (0, common_1.Param)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [project_dto_1.FindAllProjectCollaboratorQueryDto, Number, project_dto_1.FindAllProjectCollaboratorParamDto]),
+    __metadata("design:returntype", void 0)
+], ProjectController.prototype, "findAllCollaborator", null);
 exports.ProjectController = ProjectController = __decorate([
     (0, common_1.Controller)('organization/:organizationId/project'),
     (0, swagger_1.ApiHeaders)(constants_1.DeviceHeaders),

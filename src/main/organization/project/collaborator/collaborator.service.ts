@@ -1,18 +1,22 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LangResponse } from 'src/constants';
+import { FileService } from 'src/file';
 import { LogService } from 'src/log';
 import { PrismaService } from 'src/prisma';
-import { IAddAdminProjectCollaborator, ICheckRoleCollaborator, ICreateProjectCollaborator, IRemoveAdminProjectCollaborator, IRemoveMemberProjectCollaborator } from './collaborator.@types';
+import { ProjectService } from '../project.service';
+import { IAddAdminProjectCollaborator, ICreateProjectCollaborator, IRemoveAdminProjectCollaborator, IRemoveMemberProjectCollaborator } from './collaborator.@types';
 
 @Injectable()
 export class CollaboratorService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly l: LogService
+    private readonly l: LogService,
+    private readonly projectService: ProjectService,
+    private readonly fileService: FileService
   ) { }
   async addCollaborator({ body, param: { id }, user, lang }: ICreateProjectCollaborator) {
     const { userId } = body
-    await this.adminGuard({ lang, projectId: id, userId: user.id })
+    await this.projectService.adminGuard({ lang, projectId: id, userId: user.id })
     const userExist = await this.prisma.user.findFirst({ where: { id: userId } });
     if (!userExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "collaborator" }), HttpStatus.NOT_FOUND)
     const collaboratorExist = await this.prisma.projectCollaborator.findFirst({ where: { userId: body.userId, projectId: id } })
@@ -30,7 +34,7 @@ export class CollaboratorService {
 
   async addAdmin({ body, lang, param: { id }, user }: IAddAdminProjectCollaborator) {
     const { userId } = body
-    await this.ownerGuard({ lang, projectId: id, userId: user.id })
+    await this.projectService.adminGuard({ lang, projectId: id, userId: user.id })
     const userExist = await this.prisma.user.findFirst({ where: { id: userId } });
     if (!userExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "user" }), HttpStatus.NOT_FOUND);
     const userJoined = await this.prisma.projectCollaborator.findFirst({ where: { projectId: id, userId } });
@@ -50,7 +54,7 @@ export class CollaboratorService {
 
   async removeAdmin({ body, lang, param: { id }, user }: IRemoveAdminProjectCollaborator) {
     const { userId } = body;
-    await this.adminGuard({ lang, projectId: id, userId: user.id })
+    await this.projectService.adminGuard({ lang, projectId: id, userId: user.id })
     const result = await this.prisma.$transaction(async (prisma) => {
       const userExist = await prisma.user.findFirst({ where: { id: userId } });
       if (!userExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "user" }), HttpStatus.NOT_FOUND);
@@ -81,7 +85,7 @@ export class CollaboratorService {
       const adminJoined = await prisma.projectAdmin.findFirst({ where: { projectId: id, userId } });
 
       if (userJoined)
-        await this.adminGuard({ lang, projectId: id, userId: user.id })
+        await this.projectService.adminGuard({ lang, projectId: id, userId: user.id })
       await prisma.projectCollaborator.delete({
         where: {
           projectId_userId: { projectId: id, userId }
@@ -89,7 +93,7 @@ export class CollaboratorService {
       });
 
       if (adminJoined)
-        await this.ownerGuard({ lang, projectId: id, userId: user.id })
+        await this.projectService.ownerGuard({ lang, projectId: id, userId: user.id })
       await prisma.projectCollaborator.delete({
         where: {
           projectId_userId: { projectId: id, userId }
@@ -104,18 +108,5 @@ export class CollaboratorService {
     this.l.info({ message: `userId ${userId} deleted successfully in projectId ${id} by user id${user.id}` });
     return result;
   }
-
-  async adminGuard({ projectId, userId, lang }: ICheckRoleCollaborator) {
-    const isAdmin = await this.prisma.projectAdmin.findFirst({ where: { projectId, userId } })
-    const isOwner = await this.prisma.project.findFirst({ where: { id: projectId, creatorId: userId } })
-    if (!isAdmin || !isOwner) throw new HttpException(LangResponse({ key: "unauthorize", lang, object: "collaborator" }), HttpStatus.UNAUTHORIZED)
-    return true
-  }
-
-  async ownerGuard({ projectId, userId, lang }: ICheckRoleCollaborator) {
-    const isOwner = await this.prisma.organization.findFirst({ where: { id: projectId, creatorId: userId } })
-    if (!isOwner) throw new HttpException(LangResponse({ key: "unauthorize", lang, object: "collaborator" }), HttpStatus.UNAUTHORIZED)
-    return true
-  }
-
+ 
 }

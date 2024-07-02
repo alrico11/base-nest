@@ -10,4 +10,8 @@ export interface ILang {
     key: LangKeys;
     object?: LangObjectType | string;
 }
+export interface ILangWord {
+    lang: LangEnum;
+    key: LangObjectType;
+}
 export {};

@@ -19,6 +19,7 @@ export declare const LangConstants: {
         notJoin: string;
         alreadyCollaborator: string;
         alreadyRegistered: string;
+        added: string;
     };
     EN: {
         created: string;
@@ -40,6 +41,7 @@ export declare const LangConstants: {
         notJoin: string;
         alreadyCollaborator: string;
         alreadRegistered: string;
+        added: string;
     };
 };
 export declare const LangObjects: {
@@ -53,10 +55,12 @@ export declare const LangObjects: {
         login: string;
         logout: string;
         tag: string;
+        member: string;
+        admin: string;
+        owner: string;
     };
     EN: {
         organization: string;
-        collaborator: string;
         project: string;
         task: string;
         user: string;
@@ -64,5 +68,9 @@ export declare const LangObjects: {
         login: string;
         logout: string;
         tag: string;
+        member: string;
+        admin: string;
+        collaborator: string;
+        owner: string;
     };
 };

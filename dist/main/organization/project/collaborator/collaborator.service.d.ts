@@ -1,10 +1,14 @@
+import { FileService } from 'src/file';
 import { LogService } from 'src/log';
 import { PrismaService } from 'src/prisma';
-import { IAddAdminProjectCollaborator, ICheckRoleCollaborator, ICreateProjectCollaborator, IRemoveAdminProjectCollaborator, IRemoveMemberProjectCollaborator } from './collaborator.@types';
+import { ProjectService } from '../project.service';
+import { IAddAdminProjectCollaborator, ICreateProjectCollaborator, IRemoveAdminProjectCollaborator, IRemoveMemberProjectCollaborator } from './collaborator.@types';
 export declare class CollaboratorService {
     private readonly prisma;
     private readonly l;
-    constructor(prisma: PrismaService, l: LogService);
+    private readonly projectService;
+    private readonly fileService;
+    constructor(prisma: PrismaService, l: LogService, projectService: ProjectService, fileService: FileService);
     addCollaborator({ body, param: { id }, user, lang }: ICreateProjectCollaborator): Promise<{
         message: string;
     }>;
@@ -17,6 +21,4 @@ export declare class CollaboratorService {
     removeCollaborator({ param: { id }, body: { userId }, user, lang }: IRemoveMemberProjectCollaborator): Promise<{
         message: string;
     }>;
-    adminGuard({ projectId, userId, lang }: ICheckRoleCollaborator): Promise<boolean>;
-    ownerGuard({ projectId, userId, lang }: ICheckRoleCollaborator): Promise<boolean>;
 }

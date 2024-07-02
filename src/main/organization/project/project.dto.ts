@@ -14,17 +14,28 @@ const CreateProjectBodyDtoSchema = z.object({
     goals: z.string().optional(),
     status: z.nativeEnum(ProjectStatus),
     thumbnail: z.string().optional(),
-    groupId: z.string().optional(),
+    tagId: z.string().optional(),
     file: z.array(z.string()).optional(),
 });
 
-const CreateProjectParamDtoSchema = FindOneParamDtoBaseSchema
+const CreateProjectParamDtoSchema = z.object({
+    organizationId: z.string().uuid()
+})
 
-const FindAllProjectQueryDtoSchema = FindAllQueryDtoBaseSchema
+const FindAllProjectQueryDtoSchema = FindAllQueryDtoBaseSchema.extend({
+    orderBy: z.enum(['createdAt','priority','updatedAt','name','createdAtLastChat']).optional().default('createdAt'),
+})
 
 const FindOneProjectParamDtoSchema = FindOneParamDtoBaseSchema.extend({
     organizationId: z.string().uuid()
 })
+
+const FindAllProjectCollaboratorQueryDtoSchema = FindAllQueryDtoBaseSchema
+const FindAllProjectCollaboratorParamDtoSchema = FindOneProjectParamDtoSchema.extend({
+    id: z.string().uuid()
+})
+export class FindAllProjectCollaboratorQueryDto extends createZodDto(FindAllProjectCollaboratorQueryDtoSchema) { }
+export class FindAllProjectCollaboratorParamDto extends createZodDto(FindAllProjectCollaboratorParamDtoSchema) { }
 
 export class CreateProjectBodyDto extends createZodDto(CreateProjectBodyDtoSchema) { }
 export class CreateProjectParamDto extends createZodDto(CreateProjectParamDtoSchema) { }

@@ -7,7 +7,7 @@ import { User } from '@prisma/client';
 import { ApiHeaders, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserDeviceGuard } from 'src/main/device';
 
-@Controller('member')
+@Controller('organization/:id/member')
 @ApiHeaders(DeviceHeaders)
 @UseGuards(UserJwtGuard, UserDeviceGuard)
 @ApiTags("User Organization Member")

@@ -14,9 +14,9 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CollaboratorController = void 0;
 const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
 const constants_1 = require("../../../../constants");
 const auth_1 = require("../../../auth");
-const swagger_1 = require("@nestjs/swagger");
 const device_1 = require("../../../device");
 const collaborator_dto_1 = require("./collaborator.dto");
 const collaborator_service_1 = require("./collaborator.service");
@@ -87,9 +87,9 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], CollaboratorController.prototype, "removeCollaborator", null);
 exports.CollaboratorController = CollaboratorController = __decorate([
-    (0, common_1.Controller)(':organizationId/collaborator'),
     (0, swagger_1.ApiHeaders)(constants_1.DeviceHeaders),
     (0, swagger_1.ApiTags)('User Organization Collaborator'),
+    (0, common_1.Controller)('organization/:organizationId/project/:id/collaborator'),
     (0, common_1.UseGuards)(auth_1.UserJwtGuard, device_1.UserDeviceGuard),
     __metadata("design:paramtypes", [collaborator_service_1.CollaboratorService])
 ], CollaboratorController);

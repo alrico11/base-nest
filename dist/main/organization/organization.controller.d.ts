@@ -56,6 +56,7 @@ export declare class OrganizationController {
         data: {
             userDetails: {
                 userId: string;
+                name: string;
                 role: import("./organization.@types").EnumRoleOrganization;
             };
             members: {

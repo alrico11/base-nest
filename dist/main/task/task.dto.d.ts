@@ -33,14 +33,14 @@ declare const CreateTaskBodyDto_base: import("@anatine/zod-nestjs").ZodDtoStatic
         startDate: z.ZodDefault<z.ZodEffects<z.ZodString, string, string>>;
         time: z.ZodDefault<z.ZodEffects<z.ZodString, string, string>>;
     }, "strip", z.ZodTypeAny, {
+        startDate: string;
         alarm: boolean;
         interval: "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY";
-        startDate: string;
         time: string;
     }, {
         interval: "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY";
-        alarm?: boolean | undefined;
         startDate?: string | undefined;
+        alarm?: boolean | undefined;
         time?: string | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
@@ -49,36 +49,36 @@ declare const CreateTaskBodyDto_base: import("@anatine/zod-nestjs").ZodDtoStatic
     priority: "LOW" | "MEDIUM" | "HIGH";
     duration: number;
     description?: string | undefined;
+    assigneeUserIds?: string[] | undefined;
+    startDate?: string | undefined;
+    endDate?: string | undefined;
+    color?: string | undefined;
+    projectId?: string | undefined;
+    files?: string[] | undefined;
     reminder?: {
+        startDate: string;
         alarm: boolean;
         interval: "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY";
-        startDate: string;
         time: string;
     } | undefined;
-    projectId?: string | undefined;
-    color?: string | undefined;
-    files?: string[] | undefined;
-    startDate?: string | undefined;
-    assigneeUserIds?: string[] | undefined;
-    endDate?: string | undefined;
 }, {
     status: "NEW" | "IN_PROGRESS" | "POSTPONED" | "WAITING_APPROVAL" | "DONE" | "CANCELLED";
     name: string;
     priority: "LOW" | "MEDIUM" | "HIGH";
     description?: string | undefined;
-    reminder?: {
-        interval: "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY";
-        alarm?: boolean | undefined;
-        startDate?: string | undefined;
-        time?: string | undefined;
-    } | undefined;
-    projectId?: string | undefined;
+    assigneeUserIds?: string[] | undefined;
+    startDate?: string | undefined;
+    endDate?: string | undefined;
     color?: string | undefined;
     duration?: number | undefined;
+    projectId?: string | undefined;
     files?: string[] | undefined;
-    startDate?: string | undefined;
-    assigneeUserIds?: string[] | undefined;
-    endDate?: string | undefined;
+    reminder?: {
+        interval: "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY";
+        startDate?: string | undefined;
+        alarm?: boolean | undefined;
+        time?: string | undefined;
+    } | undefined;
 }>>;
 export declare class CreateTaskBodyDto extends CreateTaskBodyDto_base {
 }
@@ -116,14 +116,14 @@ declare const UpdateTaskBodyDto_base: import("@anatine/zod-nestjs").ZodDtoStatic
         startDate: z.ZodDefault<z.ZodEffects<z.ZodString, string, string>>;
         time: z.ZodDefault<z.ZodEffects<z.ZodString, string, string>>;
     }, "strip", z.ZodTypeAny, {
+        startDate: string;
         alarm: boolean;
         interval: "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY";
-        startDate: string;
         time: string;
     }, {
         interval: "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY";
-        alarm?: boolean | undefined;
         startDate?: string | undefined;
+        alarm?: boolean | undefined;
         time?: string | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
@@ -132,36 +132,36 @@ declare const UpdateTaskBodyDto_base: import("@anatine/zod-nestjs").ZodDtoStatic
     priority: "LOW" | "MEDIUM" | "HIGH";
     duration: number;
     description?: string | undefined;
+    assigneeUserIds?: string[] | undefined;
+    startDate?: string | undefined;
+    endDate?: string | undefined;
+    color?: string | undefined;
+    projectId?: string | undefined;
+    files?: string[] | undefined;
     reminder?: {
+        startDate: string;
         alarm: boolean;
         interval: "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY";
-        startDate: string;
         time: string;
     } | undefined;
-    projectId?: string | undefined;
-    color?: string | undefined;
-    files?: string[] | undefined;
-    startDate?: string | undefined;
-    assigneeUserIds?: string[] | undefined;
-    endDate?: string | undefined;
 }, {
     status: "NEW" | "IN_PROGRESS" | "POSTPONED" | "WAITING_APPROVAL" | "DONE" | "CANCELLED";
     name: string;
     priority: "LOW" | "MEDIUM" | "HIGH";
     description?: string | undefined;
-    reminder?: {
-        interval: "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY";
-        alarm?: boolean | undefined;
-        startDate?: string | undefined;
-        time?: string | undefined;
-    } | undefined;
-    projectId?: string | undefined;
+    assigneeUserIds?: string[] | undefined;
+    startDate?: string | undefined;
+    endDate?: string | undefined;
     color?: string | undefined;
     duration?: number | undefined;
+    projectId?: string | undefined;
     files?: string[] | undefined;
-    startDate?: string | undefined;
-    assigneeUserIds?: string[] | undefined;
-    endDate?: string | undefined;
+    reminder?: {
+        interval: "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY";
+        startDate?: string | undefined;
+        alarm?: boolean | undefined;
+        time?: string | undefined;
+    } | undefined;
 }>>;
 export declare class UpdateTaskBodyDto extends UpdateTaskBodyDto_base {
 }
@@ -193,23 +193,23 @@ declare const FindOneTaskParamDto_base: import("@anatine/zod-nestjs").ZodDtoStat
 export declare class FindOneTaskParamDto extends FindOneTaskParamDto_base {
 }
 declare const FindAllTaskQueryDto_base: import("@anatine/zod-nestjs").ZodDtoStatic<z.ZodObject<{
-    page: z.ZodDefault<z.ZodNumber>;
+    page: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
     limit: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
     orderBy: z.ZodDefault<z.ZodOptional<z.ZodEnum<["createdAt"]>>>;
     orderDirection: z.ZodDefault<z.ZodOptional<z.ZodEnum<["asc", "desc"]>>>;
     search: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    orderBy: "createdAt";
-    limit: number;
     page: number;
+    limit: number;
+    orderBy: "createdAt";
     orderDirection: "asc" | "desc";
     search?: string | undefined;
 }, {
-    orderBy?: "createdAt" | undefined;
-    search?: string | undefined;
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
+    orderBy?: "createdAt" | undefined;
     orderDirection?: "asc" | "desc" | undefined;
+    search?: string | undefined;
 }>>;
 export declare class FindAllTaskQueryDto extends FindAllTaskQueryDto_base {
 }

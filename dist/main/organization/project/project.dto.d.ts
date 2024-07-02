@@ -1,4 +1,40 @@
 import { z } from "zod";
+declare const FindAllProjectCollaboratorQueryDto_base: import("@anatine/zod-nestjs").ZodDtoStatic<z.ZodObject<{
+    page: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
+    limit: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
+    orderBy: z.ZodDefault<z.ZodOptional<z.ZodEnum<["createdAt"]>>>;
+    orderDirection: z.ZodDefault<z.ZodOptional<z.ZodEnum<["asc", "desc"]>>>;
+    search: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    page: number;
+    limit: number;
+    orderBy: "createdAt";
+    orderDirection: "asc" | "desc";
+    search?: string | undefined;
+}, {
+    page?: number | undefined;
+    limit?: number | undefined;
+    orderBy?: "createdAt" | undefined;
+    orderDirection?: "asc" | "desc" | undefined;
+    search?: string | undefined;
+}>>;
+export declare class FindAllProjectCollaboratorQueryDto extends FindAllProjectCollaboratorQueryDto_base {
+}
+declare const FindAllProjectCollaboratorParamDto_base: import("@anatine/zod-nestjs").ZodDtoStatic<z.ZodObject<z.objectUtil.extendShape<z.objectUtil.extendShape<{
+    id: z.ZodString;
+}, {
+    organizationId: z.ZodString;
+}>, {
+    id: z.ZodString;
+}>, "strip", z.ZodTypeAny, {
+    id: string;
+    organizationId: string;
+}, {
+    id: string;
+    organizationId: string;
+}>>;
+export declare class FindAllProjectCollaboratorParamDto extends FindAllProjectCollaboratorParamDto_base {
+}
 declare const CreateProjectBodyDto_base: import("@anatine/zod-nestjs").ZodDtoStatic<z.ZodObject<{
     color: z.ZodOptional<z.ZodString>;
     name: z.ZodString;
@@ -16,71 +52,73 @@ declare const CreateProjectBodyDto_base: import("@anatine/zod-nestjs").ZodDtoSta
         CANCELLED: "CANCELLED";
     }>;
     thumbnail: z.ZodOptional<z.ZodString>;
-    groupId: z.ZodOptional<z.ZodString>;
+    tagId: z.ZodOptional<z.ZodString>;
     file: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
     status: "NEW" | "IN_PROGRESS" | "POSTPONED" | "WAITING_APPROVAL" | "DONE" | "CANCELLED";
     name: string;
     priority: string;
-    description?: string | undefined;
-    thumbnail?: string | undefined;
     color?: string | undefined;
+    description?: string | undefined;
     target?: string | undefined;
     budget?: number | undefined;
     goals?: string | undefined;
+    thumbnail?: string | undefined;
+    tagId?: string | undefined;
     file?: string[] | undefined;
-    groupId?: string | undefined;
 }, {
     status: "NEW" | "IN_PROGRESS" | "POSTPONED" | "WAITING_APPROVAL" | "DONE" | "CANCELLED";
     name: string;
     priority: string;
-    description?: string | undefined;
-    thumbnail?: string | undefined;
     color?: string | undefined;
+    description?: string | undefined;
     target?: string | undefined;
     budget?: number | undefined;
     goals?: string | undefined;
+    thumbnail?: string | undefined;
+    tagId?: string | undefined;
     file?: string[] | undefined;
-    groupId?: string | undefined;
 }>>;
 export declare class CreateProjectBodyDto extends CreateProjectBodyDto_base {
 }
 declare const CreateProjectParamDto_base: import("@anatine/zod-nestjs").ZodDtoStatic<z.ZodObject<{
-    id: z.ZodString;
+    organizationId: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    id: string;
+    organizationId: string;
 }, {
-    id: string;
+    organizationId: string;
 }>>;
 export declare class CreateProjectParamDto extends CreateProjectParamDto_base {
 }
-declare const FindAllProjectQueryDto_base: import("@anatine/zod-nestjs").ZodDtoStatic<z.ZodObject<{
-    page: z.ZodDefault<z.ZodNumber>;
+declare const FindAllProjectQueryDto_base: import("@anatine/zod-nestjs").ZodDtoStatic<z.ZodObject<z.objectUtil.extendShape<{
+    page: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
     limit: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
     orderBy: z.ZodDefault<z.ZodOptional<z.ZodEnum<["createdAt"]>>>;
     orderDirection: z.ZodDefault<z.ZodOptional<z.ZodEnum<["asc", "desc"]>>>;
     search: z.ZodOptional<z.ZodString>;
-}, "strip", z.ZodTypeAny, {
-    orderBy: "createdAt";
+}, {
+    orderBy: z.ZodDefault<z.ZodOptional<z.ZodEnum<["createdAt", "priority", "updatedAt", "name", "createdAtLastChat"]>>>;
+}>, "strip", z.ZodTypeAny, {
     page: number;
     limit: number;
+    orderBy: "createdAt" | "name" | "priority" | "updatedAt" | "createdAtLastChat";
     orderDirection: "asc" | "desc";
     search?: string | undefined;
 }, {
-    orderBy?: "createdAt" | undefined;
-    search?: string | undefined;
     page?: number | undefined;
     limit?: number | undefined;
+    orderBy?: "createdAt" | "name" | "priority" | "updatedAt" | "createdAtLastChat" | undefined;
     orderDirection?: "asc" | "desc" | undefined;
+    search?: string | undefined;
 }>>;
 export declare class FindAllProjectQueryDto extends FindAllProjectQueryDto_base {
 }
 declare const FindAllProjectParamDto_base: import("@anatine/zod-nestjs").ZodDtoStatic<z.ZodObject<{
-    id: z.ZodString;
+    organizationId: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    id: string;
+    organizationId: string;
 }, {
-    id: string;
+    organizationId: string;
 }>>;
 export declare class FindAllProjectParamDto extends FindAllProjectParamDto_base {
 }
@@ -127,32 +165,32 @@ declare const UpdateProjectBodyDto_base: import("@anatine/zod-nestjs").ZodDtoSta
         CANCELLED: "CANCELLED";
     }>;
     thumbnail: z.ZodOptional<z.ZodString>;
-    groupId: z.ZodOptional<z.ZodString>;
+    tagId: z.ZodOptional<z.ZodString>;
     file: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
     status: "NEW" | "IN_PROGRESS" | "POSTPONED" | "WAITING_APPROVAL" | "DONE" | "CANCELLED";
     name: string;
     priority: string;
-    description?: string | undefined;
-    thumbnail?: string | undefined;
     color?: string | undefined;
+    description?: string | undefined;
     target?: string | undefined;
     budget?: number | undefined;
     goals?: string | undefined;
+    thumbnail?: string | undefined;
+    tagId?: string | undefined;
     file?: string[] | undefined;
-    groupId?: string | undefined;
 }, {
     status: "NEW" | "IN_PROGRESS" | "POSTPONED" | "WAITING_APPROVAL" | "DONE" | "CANCELLED";
     name: string;
     priority: string;
-    description?: string | undefined;
-    thumbnail?: string | undefined;
     color?: string | undefined;
+    description?: string | undefined;
     target?: string | undefined;
     budget?: number | undefined;
     goals?: string | undefined;
+    thumbnail?: string | undefined;
+    tagId?: string | undefined;
     file?: string[] | undefined;
-    groupId?: string | undefined;
 }>>;
 export declare class UpdateProjectBodyDto extends UpdateProjectBodyDto_base {
 }

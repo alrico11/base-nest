@@ -17,6 +17,7 @@ exports.ProjectModule = ProjectModule = __decorate([
     (0, common_1.Module)({
         controllers: [project_controller_1.ProjectController],
         providers: [project_service_1.ProjectService],
+        exports: [project_service_1.ProjectService]
     })
 ], ProjectModule);
 //# sourceMappingURL=project.module.js.map
