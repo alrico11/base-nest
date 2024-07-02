@@ -48,13 +48,14 @@ let FileService = class FileService {
             throw new exceptions_1.HttpException({ message: 'file not found' }, enums_1.HttpStatus.NOT_FOUND);
         return filePath;
     }
-    async compressImage(filePath, options) {
+    async compressImage(filePath) {
         const parsedFilePath = (0, path_1.parse)(filePath);
         const outputFileDir = (0, path_1.join)(this.config.env.TMP_FILE_PATH, 'sharp');
         const outputFilePath = (0, path_1.join)(outputFileDir, `${parsedFilePath.name}.webp`);
         if (!(0, fs_1.existsSync)(outputFileDir))
             (0, fs_1.mkdirSync)(outputFileDir, { recursive: true });
-        const { data, info } = await (0, sharp_1.default)(filePath).resize(options?.width || this.config.env.DEFAULT_IMAGE_COMPRESSION_WIDTH, options?.height || this.config.env.DEFAULT_IMAGE_COMPRESSION_HEIGHT, { fit: 'cover', position: sharp_1.default.strategy.entropy, withoutEnlargement: true }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+        const { data, info } = await (0, sharp_1.default)(filePath)
+            .ensureAlpha().raw().toBuffer({ resolveWithObject: true });
         (0, sharp_1.default)(data, { raw: { width: info.width, height: info.height, channels: info.channels } }).toFile(outputFilePath);
         const blurHash = (0, blurhash_1.encode)(new Uint8ClampedArray(data), info.width, info.height, this.config.env.BLURHASH_COMPONENT_X, this.config.env.BLURHASH_COMPONENT_Y);
         return {
@@ -69,10 +70,10 @@ let FileService = class FileService {
         const { size } = (0, fs_1.statSync)(filePath);
         const objectKey = (0, path_1.join)(prefix, fileName || originalFileName);
         let metadata;
-        if (contentType.startsWith('image/')) {
+        if (contentType.includes('image')) {
             metadata = await (0, sharp_1.default)(filePath).metadata();
         }
-        await this.s3Client.send(new client_s3_1.PutObjectCommand({
+        const data = await this.s3Client.send(new client_s3_1.PutObjectCommand({
             Bucket: this.config.env.OBJECT_STORAGE_BUCKET,
             Key: objectKey,
             Body: (0, fs_1.readFileSync)(filePath),
@@ -120,7 +121,7 @@ let FileService = class FileService {
         return (0, url_1.resolve)(`${prefix}/`, fileName);
     }
     cdnUrl({ objectKey }) {
-        return (0, url_1.resolve)(`${this.config.env.CDN_BASE_URL}/`, objectKey);
+        return (0, url_1.resolve)(`${this.config.env.CDN_BASE_URL}`, objectKey);
     }
     isValidURL(url) {
         try {
@@ -140,14 +141,14 @@ let FileService = class FileService {
                 throw new Error('Unrecognized file type.');
             }
             let resource;
-            if (contentType === 'image/webp') {
+            if (contentType.includes("image")) {
                 const baseName = name.split('.').slice(0, -1).join('.');
-                const fileNameWebp = `${prefix}/${baseName}.webp`;
+                const fileNameWebp = `${baseName}.webp`;
                 resource = await this.resourceService.getResourceByObjectkey(fileNameWebp);
                 if (!resource) {
                     const filePath = this.findFile({ fileName: name, user });
                     const { blurHash, outputFilePath } = await this.compressImage(filePath);
-                    resource = await this.uploadToObjectStorage({ filePath: outputFilePath, fileName: name, prefix, blurHash, contentType });
+                    resource = await this.uploadToObjectStorage({ filePath: outputFilePath, fileName: fileNameWebp, prefix, blurHash, contentType });
                 }
             }
             else {

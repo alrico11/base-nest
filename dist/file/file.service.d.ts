@@ -2,7 +2,7 @@ import { Resource } from '@prisma/client';
 import { Response } from 'express';
 import { XConfig } from 'src/xconfig';
 import { Readable } from 'stream';
-import { CompressImageOption, ICDNUrl, IFileCompressUpload, IFindClosestSize, IFindFile, IGetImageDto, IGetTmpFile, IResolve, IUploadToObjectStorage } from './file.@types';
+import { ICDNUrl, IFileCompressUpload, IFindClosestSize, IFindFile, IGetImageDto, IGetTmpFile, IResolve, IUploadToObjectStorage } from './file.@types';
 import { ResourceService } from './file.resource.service';
 export declare class FileService {
     private readonly config;
@@ -14,7 +14,7 @@ export declare class FileService {
         fileName: string;
     };
     findFile({ user, fileName }: IFindFile): string;
-    compressImage(filePath: string, options?: CompressImageOption): Promise<{
+    compressImage(filePath: string): Promise<{
         outputFilePath: string;
         blurHash: string;
     }>;

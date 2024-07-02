@@ -50,13 +50,17 @@ let OrganizationService = class OrganizationService {
         this.l.info({
             message: `organization with id ${data.id} created successfully by userId ${user.id}`
         });
-        return { message: (0, constants_1.LangResponse)({ key: 'created', lang, object: 'ORGANIZATION' }) };
+        return { message: (0, constants_1.LangResponse)({ key: 'created', lang, object: 'organization' }) };
     }
-    async findAll({ lang, query }) {
+    async findAll({ lang, query, user }) {
         const { limit, orderBy, orderDirection, page, search } = query;
         const condition = {
             deletedAt: null,
             name: { contains: search },
+            OR: [
+                { creatorId: user.id },
+                { OrganizationMembers: { some: { userId: user.id } } }
+            ]
         };
         const { result, ...rest } = await this.prisma.extended.organization.paginate({
             where: condition,
@@ -67,52 +71,60 @@ let OrganizationService = class OrganizationService {
         });
         const data = result.map(({ description, id, name, Resource }) => {
             return {
-                id, name, description, thumbnail: Resource?.objectUrl, blurHash: Resource?.blurHash
+                id, name, description, thumbnail: Resource ? this.fileService.cdnUrl({ objectKey: Resource.objectKey }) : undefined, blurHash: Resource?.blurHash
             };
         });
-        return { message: (0, constants_1.LangResponse)({ key: 'fetched', lang, object: 'ORGANIZATION' }), data: data, ...rest };
+        return { message: (0, constants_1.LangResponse)({ key: 'fetched', lang, object: 'organization' }), data: data, ...rest };
     }
     async findOne({ lang, param: { id }, user }) {
         const organizationExist = await this.prisma.organization.findFirst({
             where: { id, deletedAt: null },
             include: {
                 Resource: true,
+                OrganizationMembers: {
+                    include: {
+                        User: true
+                    }
+                },
                 OrganizationAdmin: {
                     include: {
                         User: true
                     }
                 },
-                Creator: true
+                Creator: true,
             }
         });
         if (!organizationExist)
             throw new common_1.HttpException((0, constants_1.LangResponse)({ key: "notFound", lang, object: "ORGANIZATION" }), common_1.HttpStatus.NOT_FOUND);
-        const { OrganizationAdmin, Creator, description, name, Resource } = organizationExist;
-        const data = OrganizationAdmin.map(({ User }) => {
-            return {
-                organizationId: id,
-                isAdmin: user.id === User.id,
-                isOwner: user.id === Creator.id,
-                organizationName: name,
-                description,
-                thumbnail: Resource?.objectUrl,
-                blurHash: Resource?.blurHash
-            };
-        });
-        return { message: (0, constants_1.LangResponse)({ key: 'fetched', object: 'ORGANIZATION', lang }), data };
+        const { OrganizationAdmin, Creator, description, name, Resource, OrganizationMembers } = organizationExist;
+        if (OrganizationMembers.length === 0 && Creator.id !== user.id)
+            throw new common_1.HttpException((0, constants_1.LangResponse)({ key: "unauthorize", lang }), common_1.HttpStatus.UNAUTHORIZED);
+        const detailOrganization = {
+            id: organizationExist.id,
+            name,
+            description,
+            thumbnail: Resource ? this.fileService.cdnUrl({ objectKey: Resource.objectKey }) : undefined,
+            blurHash: Resource ? Resource.blurHash : undefined
+        };
+        const adminIds = new Set(OrganizationAdmin.map(({ userId }) => { return userId; }));
+        const detailUser = {
+            id: user.id,
+            name: user.name,
+            role: adminIds.has(id) ? organization__types_1.EnumRoleOrganization.ADMIN : (Creator.id === user.id ? organization__types_1.EnumRoleOrganization.OWNER : organization__types_1.EnumRoleOrganization.MEMBER)
+        };
+        return { message: (0, constants_1.LangResponse)({ key: 'fetched', object: 'organization', lang }), data: { detailOrganization, detailUser } };
     }
     async update({ body, lang, param: { id }, user }) {
         const { name, description, thumbnail } = body;
         let newResource;
         let oldResource;
+        await this.adminGuard({ lang, organizationId: id, userId: user.id });
         const organizationExist = await this.prisma.organization.findFirst({
             where: { id },
             include: { Resource: true }
         });
         if (!organizationExist)
-            throw new common_1.HttpException((0, constants_1.LangResponse)({ key: 'notFound', lang, object: 'ORGANIZATION' }), common_1.HttpStatus.NOT_FOUND);
-        if (organizationExist.creatorId !== user.id)
-            throw new common_1.HttpException((0, constants_1.LangResponse)({ key: "unauthorize", lang }), common_1.HttpStatus.UNAUTHORIZED);
+            throw new common_1.HttpException((0, constants_1.LangResponse)({ key: 'notFound', lang, object: 'organization' }), common_1.HttpStatus.NOT_FOUND);
         if (thumbnail) {
             const prefix = this.config.env.OBJECT_STORAGE_PREFIX_ORGANIZATION;
             newResource = await this.fileService.handleUploadObjectStorage({ fileName: thumbnail, prefix, user });
@@ -133,14 +145,15 @@ let OrganizationService = class OrganizationService {
         this.l.info({
             message: `organization with id ${id} udpated by userId ${user.id}`
         });
-        return { message: (0, constants_1.LangResponse)({ key: "updated", lang, object: "ORGANIZATION" }) };
+        return { message: (0, constants_1.LangResponse)({ key: "updated", lang, object: "organization" }) };
     }
     async remove({ param: { id }, lang, user }) {
+        await this.ownerGuard({ lang, organizationId: id, userId: user.id });
         const organizationExist = await this.prisma.organization.findFirst({
             where: { id, deletedAt: null },
         });
         if (!organizationExist)
-            throw new common_1.HttpException((0, constants_1.LangResponse)({ key: 'notFound', lang, object: 'ORGANIZATION' }), common_1.HttpStatus.NOT_FOUND);
+            throw new common_1.HttpException((0, constants_1.LangResponse)({ key: 'notFound', lang, object: 'organization' }), common_1.HttpStatus.NOT_FOUND);
         if (organizationExist.creatorId !== user.id)
             throw new common_1.HttpException((0, constants_1.LangResponse)({ key: "unauthorize", lang }), common_1.HttpStatus.UNAUTHORIZED);
         await this.prisma.organization.update({
@@ -150,12 +163,18 @@ let OrganizationService = class OrganizationService {
         this.l.info({
             message: `organization with id ${id} deleted successfully by userId ${user.id}`
         });
-        return { message: (0, constants_1.LangResponse)({ key: "deleted", lang, object: "ORGANIZATION" }) };
+        return { message: (0, constants_1.LangResponse)({ key: "deleted", lang, object: "organization" }) };
     }
     async findAllMember({ query, lang, param: { id }, user }) {
         const { limit, orderBy, orderDirection, page } = query;
         const { result, ...rest } = await this.prisma.extended.organization.paginate({
-            where: { id, deletedAt: null },
+            where: {
+                id, deletedAt: null,
+                OR: [
+                    { creatorId: user.id },
+                    { OrganizationMembers: { some: { userId: user.id } } }
+                ]
+            },
             orderBy: (0, string_1.dotToObject)({ orderBy, orderDirection }),
             limit, page,
             include: {
@@ -195,8 +214,21 @@ let OrganizationService = class OrganizationService {
                     ...members
                 ]
             };
-        });
-        return { message: (0, constants_1.LangResponse)({ key: "fetched", lang, object: "ORGANIZATION" }), data: data, ...rest };
+        })[0];
+        return { message: (0, constants_1.LangResponse)({ key: "fetched", lang, object: "organization" }), data: data, ...rest };
+    }
+    async adminGuard({ organizationId, userId, lang }) {
+        const isAdmin = await this.prisma.organizationAdmin.findFirst({ where: { organizationId, userId } });
+        const isOwner = await this.prisma.organization.findFirst({ where: { id: organizationId, creatorId: userId } });
+        if (!isAdmin && !isOwner)
+            throw new common_1.HttpException((0, constants_1.LangResponse)({ key: "unauthorize", lang, object: "USER" }), common_1.HttpStatus.UNAUTHORIZED);
+        return true;
+    }
+    async ownerGuard({ organizationId, userId, lang }) {
+        const isOwner = await this.prisma.organization.findFirst({ where: { id: organizationId, creatorId: userId } });
+        if (!isOwner)
+            throw new common_1.HttpException((0, constants_1.LangResponse)({ key: "unauthorize", lang, object: "USER" }), common_1.HttpStatus.UNAUTHORIZED);
+        return true;
     }
 };
 exports.OrganizationService = OrganizationService;

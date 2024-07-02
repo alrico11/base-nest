@@ -30,9 +30,9 @@ declare const zEnvValidationSchema: z.ZodObject<{
     BLURHASH_COMPONENT_Y: z.ZodNumber;
     MAX_CHILD_RESOURCE: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
+    DATABASE_URL: string;
     NODE_ENV: "PRODUCTION" | "DEVELOPMENT" | "LOCAL";
     APP_PORT: number;
-    DATABASE_URL: string;
     USER_JWT_SECRET: string;
     DEVICE_JWT_SECRET: string;
     OBJECT_STORAGE_HOST: string;
@@ -59,9 +59,9 @@ declare const zEnvValidationSchema: z.ZodObject<{
     BLURHASH_COMPONENT_Y: number;
     MAX_CHILD_RESOURCE: number;
 }, {
+    DATABASE_URL: string;
     NODE_ENV: "PRODUCTION" | "DEVELOPMENT" | "LOCAL";
     APP_PORT: number;
-    DATABASE_URL: string;
     USER_JWT_SECRET: string;
     DEVICE_JWT_SECRET: string;
     OBJECT_STORAGE_HOST: string;
@@ -95,9 +95,9 @@ export declare class XConfig {
     env: Env;
     constructor(configService: ConfigService);
     static validate(env: unknown): {
+        DATABASE_URL: string;
         NODE_ENV: "PRODUCTION" | "DEVELOPMENT" | "LOCAL";
         APP_PORT: number;
-        DATABASE_URL: string;
         USER_JWT_SECRET: string;
         DEVICE_JWT_SECRET: string;
         OBJECT_STORAGE_HOST: string;

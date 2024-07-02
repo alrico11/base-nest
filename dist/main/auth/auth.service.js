@@ -54,6 +54,7 @@ let AuthService = AuthService_1 = class AuthService {
         if (!existUser.password)
             throw new common_1.HttpException((0, constants_1.LangResponse)({ key: "unauthorize", lang }), common_1.HttpStatus.UNAUTHORIZED);
         const match = await (0, bcrypt_1.compare)(password, existUser.password);
+        console.log(match);
         if (!match)
             throw new common_1.HttpException((0, constants_1.LangResponse)({ key: "unauthorize", lang }), common_1.HttpStatus.UNAUTHORIZED);
         const { USER_JWT_SECRET } = this.config.env;

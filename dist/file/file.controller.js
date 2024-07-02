@@ -36,7 +36,7 @@ let FileController = class FileController {
 };
 exports.FileController = FileController;
 __decorate([
-    (0, common_1.Post)('user/file/upload'),
+    (0, common_1.Post)('file/upload'),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, swagger_1.ApiBody)(constants_1.FileFormData),
     (0, common_1.UseGuards)(auth_1.UserJwtGuard),

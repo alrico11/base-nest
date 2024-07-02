@@ -14,6 +14,8 @@ export class TagService {
   ) { }
 
   async create({ body: { name }, lang, user, param: { organizationId } }: ICreateTag) {
+    const organizationExist = await this.prisma.organization.findFirst({ where: { id: organizationId } })
+    if (!organizationExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "organization" }), HttpStatus.NOT_FOUND)
     const data = await this.prisma.tag.create({
       data: {
         name,

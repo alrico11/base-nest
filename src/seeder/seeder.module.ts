@@ -1,4 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Module } from '@nestjs/common/decorators';
+import { SeederService } from './seeder.service';
+import { XConfigModule } from 'src/xconfig';
+import { PrismaModule } from 'src/prisma';
 
-@Module({})
-export class SeederModule {}
+@Module({
+  imports: [XConfigModule,PrismaModule],
+  providers: [SeederService]
+})
+export class SeederModule { }

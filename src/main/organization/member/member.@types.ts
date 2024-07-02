@@ -30,8 +30,3 @@ export interface IRemoveAdmin {
     lang: LangEnum
 }
 
-export interface ICheckRole {
-    userId: string
-    organizationId: string
-    lang: LangEnum
-}

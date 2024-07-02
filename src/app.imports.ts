@@ -10,9 +10,12 @@ import { TagModule as MainProjectTagModule } from "./main/tag/tag.module"
 import { TagModule as MainOrganizationTagModule } from "./main/organization/tag"
 import { CollaboratorModule as MainProjectCollaboratorModule } from "./main/project/collaborator"
 import { MemberModule as MainOrganizationMemberModule } from "./main/organization/member/member.module"
-import { ProjectModule as MainOrganizationProjectModule} from "./main/organization/project"
+import { ProjectModule as MainOrganizationProjectModule } from "./main/organization/project"
 import { CollaboratorModule as MainOrganizationProjectCollaboratorModule } from "./main/organization/project/collaborator"
 import { FileModule } from "./file"
+import { AuthModule } from "./main/auth"
+import { UserModule } from "./main/user/user.module"
+import { SeederModule } from "./seeder"
 
 const AppImports: (Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference<any>)[] = [
   XConfigModule,
@@ -25,11 +28,14 @@ const AppImports: (Type<any> | DynamicModule | Promise<DynamicModule> | ForwardR
     points: 300,
     duration: 60,
   }),
+  SeederModule,
   LogModule,
   FileModule,
   PrismaModule,
   //ON TESTING
+  AuthModule,
   MainDeviceModule,
+  UserModule,
   //ORGANIZATION
   MainOrganizationModule,
   MainOrganizationTagModule,

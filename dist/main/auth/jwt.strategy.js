@@ -24,7 +24,7 @@ let UserJwtStrategy = class UserJwtStrategy extends (0, passport_1.PassportStrat
         super({
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: true,
-            secretOrKey: config.get('JWT_SECRET'),
+            secretOrKey: config.get('USER_JWT_SECRET'),
         });
         this.prisma = prisma;
     }

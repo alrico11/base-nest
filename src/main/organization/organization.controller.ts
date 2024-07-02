@@ -24,8 +24,8 @@ export class OrganizationController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ operationId: "FindAllOrganization" })
   @Get()
-  findAll(@Query() query: FindAllOrganizationQueryDto, @Lang() lang: LangEnum) {
-    return this.organizationService.findAll({ lang, query });
+  findAll(@Query() query: FindAllOrganizationQueryDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
+    return this.organizationService.findAll({ lang, query, user });
   }
 
   @HttpCode(HttpStatus.OK)
@@ -48,9 +48,11 @@ export class OrganizationController {
   remove(@Param() param: DeleteOrganizationParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.organizationService.remove({ lang, param, user });
   }
-  // organization/member
-  @Get('member')
-  findAllMember(@Query() query: FindAllMemberOrganizationQueryDto, @Param() param: FindAllMemberOrganizationParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
-    this.organizationService.findAllMember({ lang, param, query, user })
+  
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ operationId: "FindAllMember" })
+  @Get(':id/member')
+  findAllMember(@Query() query: FindAllMemberOrganizationQueryDto, @Param() param: FindAllMemberOrganizationParamDto,@Lang() lang: LangEnum, @UserInstance() user: User) {
+    return this.organizationService.findAllMember({ lang, param, query, user })
   }
 }

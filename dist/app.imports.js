@@ -14,6 +14,9 @@ const member_module_1 = require("./main/organization/member/member.module");
 const project_1 = require("./main/organization/project");
 const collaborator_2 = require("./main/organization/project/collaborator");
 const file_1 = require("./file");
+const auth_1 = require("./main/auth");
+const user_module_1 = require("./main/user/user.module");
+const seeder_1 = require("./seeder");
 const AppImports = [
     xconfig_1.XConfigModule,
     event_emitter_1.EventEmitterModule.forRoot({
@@ -25,10 +28,13 @@ const AppImports = [
         points: 300,
         duration: 60,
     }),
+    seeder_1.SeederModule,
     log_1.LogModule,
     file_1.FileModule,
     prisma_1.PrismaModule,
+    auth_1.AuthModule,
     device_1.DeviceModule,
+    user_module_1.UserModule,
     organization_module_1.OrganizationModule,
     tag_1.TagModule,
     project_1.ProjectModule,

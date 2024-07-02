@@ -15,7 +15,7 @@ datasource db {
 
 model User {
   id          String    @id @default(uuid())
-  username    String
+  username    String    @unique
   name        String
   email       String    @unique
   password    String?
@@ -167,6 +167,7 @@ model UserDevice {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   User      User     @relation(fields: [userId], references: [id])
   Device    Device   @relation(fields: [deviceId], references: [id])
+  @@map("user_device")
 }
 
 model Notification {
@@ -760,6 +761,7 @@ model Departement {
 
   Organization Organization @relation(fields: [organizationId], references: [id])
   Position     Position[]
+  @@map("departement")
 }
 
 model Position {
@@ -788,6 +790,7 @@ model Job {
 
   Position Position @relation(fields: [positionId], references: [id])
   Sop      Sop?
+  @@map("job")
 }
 
 model Sop {
@@ -798,6 +801,7 @@ model Sop {
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   Job Job @relation(fields: [job_id], references: [id])
+  @@map("sop")
 }
 
 model Log {
@@ -851,11 +855,11 @@ model District {
 model SubDistrict {
   code          String  @id @unique
   name          String
-  district_code String
+  districtCode String
   latitude      String?
   longitude     String?
 
-  district District @relation(fields: [district_code], references: [code])
+  district District @relation(fields: [districtCode], references: [code])
 
   @@map("indonesia_subdistricts")
 }

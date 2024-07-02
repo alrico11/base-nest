@@ -3,13 +3,14 @@ import { LangResponse } from 'src/constants';
 import { LogService } from 'src/log';
 import { PrismaService } from 'src/prisma';
 import { OrganizationService } from '../organization.service';
-import { IAddAdmin, ICheckRole, ICreateMember, IRemoveAdmin, IRemoveMember } from './member.@types';
+import { IAddAdmin, ICreateMember, IRemoveAdmin, IRemoveMember } from './member.@types';
 
 @Injectable()
 export class MemberService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly l: LogService,
+    private readonly organizationService: OrganizationService
   ) { }
 
   async addMember({ body, lang, param: { id }, user }: ICreateMember) {
@@ -20,7 +21,7 @@ export class MemberService {
       if (!userExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "member" }), HttpStatus.NOT_FOUND)
       const userJoined = await prisma.organizationMember.findFirst({ where: { organizationId: id, userId } });
       if (userJoined) throw new HttpException(LangResponse({ key: "alreadyJoin", lang, object: "member" }), HttpStatus.CONFLICT);
-      await this.adminGuard({ lang, organizationId: id, userId: user.id })
+      await this.organizationService.adminGuard({ lang, organizationId: id, userId: user.id })
       await prisma.organizationMember.create({
         data: {
           organizationId: id,
@@ -45,7 +46,7 @@ export class MemberService {
       const adminJoined = await prisma.organizationAdmin.findFirst({ where: { organizationId: id, userId } });
 
       if (userJoined)
-        await this.adminGuard({ lang, organizationId: id, userId: user.id })
+        await this.organizationService.adminGuard({ lang, organizationId: id, userId: user.id })
       await prisma.organizationMember.delete({
         where: {
           organizationId_userId: { organizationId: id, userId }
@@ -53,7 +54,7 @@ export class MemberService {
       });
 
       if (adminJoined)
-        await this.ownerGuard({ lang, organizationId: id, userId: user.id })
+        await this.organizationService.ownerGuard({ lang, organizationId: id, userId: user.id })
       await prisma.organizationAdmin.delete({
         where: {
           organizationId_userId: { organizationId: id, userId }
@@ -71,7 +72,7 @@ export class MemberService {
 
   async addAdmin({ body, lang, param: { id }, user }: IAddAdmin) {
     const { userId } = body;
-    await this.ownerGuard({ lang, organizationId: id, userId: user.id })
+    await this.organizationService.ownerGuard({ lang, organizationId: id, userId: user.id })
     const result = await this.prisma.$transaction(async (prisma) => {
       const userExist = await prisma.user.findFirst({ where: { id: userId } });
       if (!userExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "user" }), HttpStatus.NOT_FOUND);
@@ -97,7 +98,7 @@ export class MemberService {
 
   async removeAdmin({ body, lang, param: { id }, user }: IRemoveAdmin) {
     const { userId } = body;
-    await this.adminGuard({ lang, organizationId: id, userId: user.id })
+    await this.organizationService.adminGuard({ lang, organizationId: id, userId: user.id })
     const result = await this.prisma.$transaction(async (prisma) => {
       const userExist = await prisma.user.findFirst({ where: { id: userId } });
       if (!userExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "user" }), HttpStatus.NOT_FOUND);
@@ -118,16 +119,4 @@ export class MemberService {
     return result;
   }
 
-  async adminGuard({ organizationId, userId, lang }: ICheckRole) {
-    const isAdmin = await this.prisma.organizationAdmin.findFirst({ where: { organizationId, userId } })
-    const isOwner = await this.prisma.organization.findFirst({ where: { id: organizationId, creatorId: userId } })
-    if (!isAdmin || !isOwner) throw new HttpException(LangResponse({ key: "unauthorize", lang, object: "organization" }), HttpStatus.UNAUTHORIZED)
-    return true
-  }
-
-  async ownerGuard({ organizationId, userId, lang }: ICheckRole) {
-    const isOwner = await this.prisma.organization.findFirst({ where: { id: organizationId, creatorId: userId } })
-    if (!isOwner) throw new HttpException(LangResponse({ key: "unauthorize", lang, object: "organization" }), HttpStatus.UNAUTHORIZED)
-    return true
-  }
 }

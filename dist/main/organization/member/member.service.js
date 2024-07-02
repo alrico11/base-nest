@@ -14,10 +14,12 @@ const common_1 = require("@nestjs/common");
 const constants_1 = require("../../../constants");
 const log_1 = require("../../../log");
 const prisma_1 = require("../../../prisma");
+const organization_service_1 = require("../organization.service");
 let MemberService = class MemberService {
-    constructor(prisma, l) {
+    constructor(prisma, l, organizationService) {
         this.prisma = prisma;
         this.l = l;
+        this.organizationService = organizationService;
     }
     async addMember({ body, lang, param: { id }, user }) {
         const { userId } = body;
@@ -28,7 +30,7 @@ let MemberService = class MemberService {
             const userJoined = await prisma.organizationMember.findFirst({ where: { organizationId: id, userId } });
             if (userJoined)
                 throw new common_1.HttpException((0, constants_1.LangResponse)({ key: "alreadyJoin", lang, object: "member" }), common_1.HttpStatus.CONFLICT);
-            await this.adminGuard({ lang, organizationId: id, userId: user.id });
+            await this.organizationService.adminGuard({ lang, organizationId: id, userId: user.id });
             await prisma.organizationMember.create({
                 data: {
                     organizationId: id,
@@ -49,14 +51,14 @@ let MemberService = class MemberService {
             const userJoined = await prisma.organizationMember.findFirst({ where: { organizationId: id, userId } });
             const adminJoined = await prisma.organizationAdmin.findFirst({ where: { organizationId: id, userId } });
             if (userJoined)
-                await this.adminGuard({ lang, organizationId: id, userId: user.id });
+                await this.organizationService.adminGuard({ lang, organizationId: id, userId: user.id });
             await prisma.organizationMember.delete({
                 where: {
                     organizationId_userId: { organizationId: id, userId }
                 }
             });
             if (adminJoined)
-                await this.ownerGuard({ lang, organizationId: id, userId: user.id });
+                await this.organizationService.ownerGuard({ lang, organizationId: id, userId: user.id });
             await prisma.organizationAdmin.delete({
                 where: {
                     organizationId_userId: { organizationId: id, userId }
@@ -71,7 +73,7 @@ let MemberService = class MemberService {
     }
     async addAdmin({ body, lang, param: { id }, user }) {
         const { userId } = body;
-        await this.ownerGuard({ lang, organizationId: id, userId: user.id });
+        await this.organizationService.ownerGuard({ lang, organizationId: id, userId: user.id });
         const result = await this.prisma.$transaction(async (prisma) => {
             const userExist = await prisma.user.findFirst({ where: { id: userId } });
             if (!userExist)
@@ -96,7 +98,7 @@ let MemberService = class MemberService {
     }
     async removeAdmin({ body, lang, param: { id }, user }) {
         const { userId } = body;
-        await this.adminGuard({ lang, organizationId: id, userId: user.id });
+        await this.organizationService.adminGuard({ lang, organizationId: id, userId: user.id });
         const result = await this.prisma.$transaction(async (prisma) => {
             const userExist = await prisma.user.findFirst({ where: { id: userId } });
             if (!userExist)
@@ -114,24 +116,12 @@ let MemberService = class MemberService {
         this.l.info({ message: `userId ${userId} joined successfully in organizationId ${id} by user id${user.id}` });
         return result;
     }
-    async adminGuard({ organizationId, userId, lang }) {
-        const isAdmin = await this.prisma.organizationAdmin.findFirst({ where: { organizationId, userId } });
-        const isOwner = await this.prisma.organization.findFirst({ where: { id: organizationId, creatorId: userId } });
-        if (!isAdmin || !isOwner)
-            throw new common_1.HttpException((0, constants_1.LangResponse)({ key: "unauthorize", lang, object: "organization" }), common_1.HttpStatus.UNAUTHORIZED);
-        return true;
-    }
-    async ownerGuard({ organizationId, userId, lang }) {
-        const isOwner = await this.prisma.organization.findFirst({ where: { id: organizationId, creatorId: userId } });
-        if (!isOwner)
-            throw new common_1.HttpException((0, constants_1.LangResponse)({ key: "unauthorize", lang, object: "organization" }), common_1.HttpStatus.UNAUTHORIZED);
-        return true;
-    }
 };
 exports.MemberService = MemberService;
 exports.MemberService = MemberService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_1.PrismaService,
-        log_1.LogService])
+        log_1.LogService,
+        organization_service_1.OrganizationService])
 ], MemberService);
 //# sourceMappingURL=member.service.js.map

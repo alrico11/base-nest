@@ -3,7 +3,7 @@ import { FileService } from 'src/file';
 import { LogService } from 'src/log';
 import { PrismaService } from 'src/prisma';
 import { XConfig } from 'src/xconfig';
-import { EnumRoleOrganization, ICreateOrganization, IDeleteOrganization, IFindAllMemberOrganization, IFindAllOrganization, IFindOneOrganization, IUpdateOrganization } from './organization.@types';
+import { EnumRoleOrganization, ICheckRole, ICreateOrganization, IDeleteOrganization, IFindAllMemberOrganization, IFindAllOrganization, IFindOneOrganization, IUpdateOrganization } from './organization.@types';
 export declare class OrganizationService {
     private readonly prisma;
     private readonly fileService;
@@ -14,7 +14,7 @@ export declare class OrganizationService {
     create({ body, user, lang }: ICreateOrganization): Promise<{
         message: string;
     }>;
-    findAll({ lang, query }: IFindAllOrganization): Promise<{
+    findAll({ lang, query, user }: IFindAllOrganization): Promise<{
         limit: number;
         page: number;
         count: number;
@@ -25,21 +25,26 @@ export declare class OrganizationService {
             id: string;
             name: string;
             description: string | null;
-            thumbnail: string | null | undefined;
+            thumbnail: string | undefined;
             blurHash: string | null | undefined;
         }[];
     }>;
     findOne({ lang, param: { id }, user }: IFindOneOrganization): Promise<{
         message: string;
         data: {
-            organizationId: string;
-            isAdmin: boolean;
-            isOwner: boolean;
-            organizationName: string;
-            description: string | null;
-            thumbnail: string | null | undefined;
-            blurHash: string | null | undefined;
-        }[];
+            detailOrganization: {
+                id: string;
+                name: string;
+                description: string | null;
+                thumbnail: string | undefined;
+                blurHash: string | null | undefined;
+            };
+            detailUser: {
+                id: string;
+                name: string;
+                role: EnumRoleOrganization;
+            };
+        };
     }>;
     update({ body, lang, param: { id }, user }: IUpdateOrganization): Promise<{
         message: string;
@@ -67,6 +72,8 @@ export declare class OrganizationService {
                 blurHash: string | null | undefined;
                 updatedAt: Date;
             }[];
-        }[];
+        };
     }>;
+    adminGuard({ organizationId, userId, lang }: ICheckRole): Promise<boolean>;
+    ownerGuard({ organizationId, userId, lang }: ICheckRole): Promise<boolean>;
 }

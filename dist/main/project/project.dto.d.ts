@@ -23,24 +23,24 @@ declare const CreateProjectBodyDto_base: import("@anatine/zod-nestjs").ZodDtoSta
     name: string;
     priority: string;
     description?: string | undefined;
+    thumbnail?: string | undefined;
     color?: string | undefined;
     target?: string | undefined;
     budget?: number | undefined;
     goals?: string | undefined;
     file?: string[] | undefined;
-    thumbnail?: string | undefined;
     groupId?: string | undefined;
 }, {
     status: "NEW" | "IN_PROGRESS" | "POSTPONED" | "WAITING_APPROVAL" | "DONE" | "CANCELLED";
     name: string;
     priority: string;
     description?: string | undefined;
+    thumbnail?: string | undefined;
     color?: string | undefined;
     target?: string | undefined;
     budget?: number | undefined;
     goals?: string | undefined;
     file?: string[] | undefined;
-    thumbnail?: string | undefined;
     groupId?: string | undefined;
 }>>;
 export declare class CreateProjectBodyDto extends CreateProjectBodyDto_base {
@@ -53,15 +53,15 @@ declare const FindAllProjectQueryDto_base: import("@anatine/zod-nestjs").ZodDtoS
     search: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     orderBy: "createdAt";
-    limit: number;
     page: number;
+    limit: number;
     orderDirection: "asc" | "desc";
     search?: string | undefined;
 }, {
     orderBy?: "createdAt" | undefined;
     search?: string | undefined;
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     orderDirection?: "asc" | "desc" | undefined;
 }>>;
 export declare class FindAllProjectQueryDto extends FindAllProjectQueryDto_base {
@@ -108,24 +108,24 @@ declare const UpdateProjectBodyDto_base: import("@anatine/zod-nestjs").ZodDtoSta
     name: string;
     priority: string;
     description?: string | undefined;
+    thumbnail?: string | undefined;
     color?: string | undefined;
     target?: string | undefined;
     budget?: number | undefined;
     goals?: string | undefined;
     file?: string[] | undefined;
-    thumbnail?: string | undefined;
     groupId?: string | undefined;
 }, {
     status: "NEW" | "IN_PROGRESS" | "POSTPONED" | "WAITING_APPROVAL" | "DONE" | "CANCELLED";
     name: string;
     priority: string;
     description?: string | undefined;
+    thumbnail?: string | undefined;
     color?: string | undefined;
     target?: string | undefined;
     budget?: number | undefined;
     goals?: string | undefined;
     file?: string[] | undefined;
-    thumbnail?: string | undefined;
     groupId?: string | undefined;
 }>>;
 export declare class UpdateProjectBodyDto extends UpdateProjectBodyDto_base {
@@ -165,15 +165,15 @@ declare const FindAllProjectCollaboratorQueryDto_base: import("@anatine/zod-nest
     search: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     orderBy: "createdAt";
-    limit: number;
     page: number;
+    limit: number;
     orderDirection: "asc" | "desc";
     search?: string | undefined;
 }, {
     orderBy?: "createdAt" | undefined;
     search?: string | undefined;
-    limit?: number | undefined;
     page?: number | undefined;
+    limit?: number | undefined;
     orderDirection?: "asc" | "desc" | undefined;
 }>>;
 export declare class FindAllProjectCollaboratorQueryDto extends FindAllProjectCollaboratorQueryDto_base {

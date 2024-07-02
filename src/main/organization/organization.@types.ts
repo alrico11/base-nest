@@ -29,6 +29,7 @@ export interface ICreateOrganization {
 export interface IFindAllOrganization {
     query: FindAllOrganizationQueryDto
     lang: LangEnum
+    user: User
 }
 
 export interface IFindOneOrganization {
@@ -50,9 +51,8 @@ export interface IDeleteOrganization {
     user: User
 }
 
-export interface IsAdmin {
+export interface ICheckRole {
     userId: string
     organizationId: string
     lang: LangEnum
 }
-export interface IsOwner extends IsAdmin { }

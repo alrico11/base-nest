@@ -32,7 +32,6 @@ export class AuthService {
         where: { deletedAt: null, email: decodedId?.email },
       });
     }
-
     if (!email || !password) throw new HttpException(LangResponse({ key: "badRequest", lang }), HttpStatus.BAD_REQUEST)
     const existUser = await this.prisma.user.findFirst({
       where: { deletedAt: null, email: email.toLowerCase() },
@@ -40,6 +39,7 @@ export class AuthService {
     if (!existUser) throw new HttpException(LangResponse({ key: "unauthorize", lang }), HttpStatus.UNAUTHORIZED);
     if (!existUser.password) throw new HttpException(LangResponse({ key: "unauthorize", lang }), HttpStatus.UNAUTHORIZED);
     const match = await compare(password, existUser.password);
+    console.log(match)
     if (!match) throw new HttpException(LangResponse({ key: "unauthorize", lang }), HttpStatus.UNAUTHORIZED);
     const { USER_JWT_SECRET } = this.config.env;
     const token = sign({ id: existUser.id }, USER_JWT_SECRET, {});

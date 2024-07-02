@@ -8,7 +8,7 @@ export declare class OrganizationController {
     create(body: CreateOrganizationBodyDto, lang: LangEnum, user: User): Promise<{
         message: string;
     }>;
-    findAll(query: FindAllOrganizationQueryDto, lang: LangEnum): Promise<{
+    findAll(query: FindAllOrganizationQueryDto, lang: LangEnum, user: User): Promise<{
         limit: number;
         page: number;
         count: number;
@@ -19,21 +19,26 @@ export declare class OrganizationController {
             id: string;
             name: string;
             description: string | null;
-            thumbnail: string | null | undefined;
+            thumbnail: string | undefined;
             blurHash: string | null | undefined;
         }[];
     }>;
     findOne(param: FindOneOrganizationParamDto, lang: LangEnum, user: User): Promise<{
         message: string;
         data: {
-            organizationId: string;
-            isAdmin: boolean;
-            isOwner: boolean;
-            organizationName: string;
-            description: string | null;
-            thumbnail: string | null | undefined;
-            blurHash: string | null | undefined;
-        }[];
+            detailOrganization: {
+                id: string;
+                name: string;
+                description: string | null;
+                thumbnail: string | undefined;
+                blurHash: string | null | undefined;
+            };
+            detailUser: {
+                id: string;
+                name: string;
+                role: import("./organization.@types").EnumRoleOrganization;
+            };
+        };
     }>;
     update(param: UpdateOrganizationParamDto, body: UpdateOrganizationBodyDto, user: User, lang: LangEnum): Promise<{
         message: string;
@@ -41,5 +46,26 @@ export declare class OrganizationController {
     remove(param: DeleteOrganizationParamDto, lang: LangEnum, user: User): Promise<{
         message: string;
     }>;
-    findAllMember(query: FindAllMemberOrganizationQueryDto, param: FindAllMemberOrganizationParamDto, lang: LangEnum, user: User): void;
+    findAllMember(query: FindAllMemberOrganizationQueryDto, param: FindAllMemberOrganizationParamDto, lang: LangEnum, user: User): Promise<{
+        limit: number;
+        page: number;
+        count: number;
+        exceedCount: boolean;
+        exceedTotalPages: boolean;
+        message: string;
+        data: {
+            userDetails: {
+                userId: string;
+                role: import("./organization.@types").EnumRoleOrganization;
+            };
+            members: {
+                name: string;
+                userId: string;
+                role: import("./organization.@types").EnumRoleOrganization;
+                thumbnail: string | undefined;
+                blurHash: string | null | undefined;
+                updatedAt: Date;
+            }[];
+        };
+    }>;
 }

@@ -12,7 +12,7 @@ async function bootstrap() {
         const NODE_ENV = configService.get('NODE_ENV');
         if (NODE_ENV !== "PRODUCTION") {
             const config = new swagger_1.DocumentBuilder()
-                .setTitle('Laparaga')
+                .setTitle('Kolabora')
                 .setVersion('0.0.1')
                 .addBearerAuth()
                 .setExternalDoc('Postman Collection', '/api-docs-json')

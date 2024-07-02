@@ -13,7 +13,7 @@ async function bootstrap() {
 
     if (NODE_ENV !== "PRODUCTION") {
       const config = new DocumentBuilder()
-        .setTitle('Laparaga')
+        .setTitle('Kolabora')
         .setVersion('0.0.1')
         .addBearerAuth()
         .setExternalDoc('Postman Collection', '/api-docs-json')

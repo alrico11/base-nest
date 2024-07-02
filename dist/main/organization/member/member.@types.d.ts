@@ -25,8 +25,3 @@ export interface IRemoveAdmin {
     user: User;
     lang: LangEnum;
 }
-export interface ICheckRole {
-    userId: string;
-    organizationId: string;
-    lang: LangEnum;
-}

@@ -18,6 +18,7 @@ export declare const LangConstants: {
         alreadyJoin: string;
         notJoin: string;
         alreadyCollaborator: string;
+        alreadyRegistered: string;
     };
     EN: {
         created: string;
@@ -38,19 +39,30 @@ export declare const LangConstants: {
         alreadyJoin: string;
         notJoin: string;
         alreadyCollaborator: string;
+        alreadRegistered: string;
     };
 };
 export declare const LangObjects: {
     ID: {
-        ORGANIZATION: string;
-        COLLABORATOR: string;
-        PROJECT: string;
-        TASK: string;
+        organization: string;
+        collaborator: string;
+        project: string;
+        task: string;
+        user: string;
+        device: string;
+        login: string;
+        logout: string;
+        tag: string;
     };
     EN: {
-        ORGANIZATION: string;
-        COLLABORATOR: string;
-        PROJECT: string;
-        TASK: string;
+        organization: string;
+        collaborator: string;
+        project: string;
+        task: string;
+        user: string;
+        device: string;
+        login: string;
+        logout: string;
+        tag: string;
     };
 };

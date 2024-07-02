@@ -27,8 +27,8 @@ let OrganizationController = class OrganizationController {
     create(body, lang, user) {
         return this.organizationService.create({ body, lang, user });
     }
-    findAll(query, lang) {
-        return this.organizationService.findAll({ lang, query });
+    findAll(query, lang, user) {
+        return this.organizationService.findAll({ lang, query, user });
     }
     findOne(param, lang, user) {
         return this.organizationService.findOne({ param, lang, user });
@@ -40,7 +40,7 @@ let OrganizationController = class OrganizationController {
         return this.organizationService.remove({ lang, param, user });
     }
     findAllMember(query, param, lang, user) {
-        this.organizationService.findAllMember({ lang, param, query, user });
+        return this.organizationService.findAllMember({ lang, param, query, user });
     }
 };
 exports.OrganizationController = OrganizationController;
@@ -61,8 +61,9 @@ __decorate([
     (0, common_1.Get)(),
     __param(0, (0, common_1.Query)()),
     __param(1, (0, constants_1.Lang)()),
+    __param(2, (0, auth_1.UserInstance)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [organization_dto_1.FindAllOrganizationQueryDto, Number]),
+    __metadata("design:paramtypes", [organization_dto_1.FindAllOrganizationQueryDto, Number, Object]),
     __metadata("design:returntype", void 0)
 ], OrganizationController.prototype, "findAll", null);
 __decorate([
@@ -100,7 +101,9 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], OrganizationController.prototype, "remove", null);
 __decorate([
-    (0, common_1.Get)('member'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ operationId: "FindAllMember" }),
+    (0, common_1.Get)(':id/member'),
     __param(0, (0, common_1.Query)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, constants_1.Lang)()),

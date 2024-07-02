@@ -12,7 +12,7 @@ import sharp from 'sharp';
 import { XConfig } from 'src/xconfig';
 import { Readable } from 'stream';
 import { resolve } from 'url';
-import { CompressImageOption, ICDNUrl, IFileCompressUpload, IFindClosestSize, IFindFile, IGetImageDto, IGetTmpFile, IResolve, IUploadToObjectStorage } from './file.@types';
+import { ICDNUrl, IFileCompressUpload, IFindClosestSize, IFindFile, IGetImageDto, IGetTmpFile, IResolve, IUploadToObjectStorage } from './file.@types';
 import { ResourceService } from './file.resource.service';
 
 @Injectable()
@@ -44,17 +44,14 @@ export class FileService {
     return filePath
   }
 
-  async compressImage(filePath: string, options?: CompressImageOption) {
+  async compressImage(filePath: string) {
     const parsedFilePath = parse(filePath);
     const outputFileDir = join(this.config.env.TMP_FILE_PATH, 'sharp');
     const outputFilePath = join(outputFileDir, `${parsedFilePath.name}.webp`);
 
     if (!existsSync(outputFileDir)) mkdirSync(outputFileDir, { recursive: true });
-    const { data, info } = await sharp(filePath).resize(
-      options?.width || this.config.env.DEFAULT_IMAGE_COMPRESSION_WIDTH,
-      options?.height || this.config.env.DEFAULT_IMAGE_COMPRESSION_HEIGHT,
-      { fit: 'cover', position: sharp.strategy.entropy, withoutEnlargement: true }
-    ).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    const { data, info } = await sharp(filePath)
+    .ensureAlpha().raw().toBuffer({ resolveWithObject: true });
     sharp(data, { raw: { width: info.width, height: info.height, channels: info.channels } }).toFile(outputFilePath);
     const blurHash = encode(
       new Uint8ClampedArray(data),
@@ -78,18 +75,16 @@ export class FileService {
     const objectKey = join(prefix, fileName || originalFileName);
 
     let metadata;
-    if (contentType.startsWith('image/')) {
+    if (contentType.includes('image')) {
       metadata = await sharp(filePath).metadata();
     }
-
-    await this.s3Client.send(new PutObjectCommand({
+    const data = await this.s3Client.send(new PutObjectCommand({
       Bucket: this.config.env.OBJECT_STORAGE_BUCKET,
       Key: objectKey,
       Body: readFileSync(filePath),
       ACL: 'public-read',
       ContentType: contentType,
     }));
-
     const resource = await this.resourceService.add({
       blurHash: contentType.startsWith('image/') ? blurHash : undefined,
       objectKey: objectKey,
@@ -133,7 +128,7 @@ export class FileService {
   }
 
   cdnUrl({ objectKey }: ICDNUrl) {
-    return resolve(`${this.config.env.CDN_BASE_URL}/`, objectKey)
+    return resolve(`${this.config.env.CDN_BASE_URL}`, objectKey)
   }
 
   isValidURL(url: unknown) {
@@ -154,14 +149,14 @@ export class FileService {
         throw new Error('Unrecognized file type.');
       }
       let resource;
-      if (contentType === 'image/webp') {
+      if (contentType.includes("image")) {
         const baseName = name.split('.').slice(0, -1).join('.');
-        const fileNameWebp = `${prefix}/${baseName}.webp`;
+        const fileNameWebp = `${baseName}.webp`;
         resource = await this.resourceService.getResourceByObjectkey(fileNameWebp);
         if (!resource) {
           const filePath = this.findFile({ fileName: name, user });
           const { blurHash, outputFilePath } = await this.compressImage(filePath);
-          resource = await this.uploadToObjectStorage({ filePath: outputFilePath, fileName: name, prefix, blurHash, contentType });
+          resource = await this.uploadToObjectStorage({ filePath: outputFilePath, fileName: fileNameWebp, prefix, blurHash, contentType });
         }
       } else {
         const filePath = this.findFile({ fileName: name, user });
@@ -183,7 +178,6 @@ export class FileService {
     if (height && width) {
       const fileNameWebp = fileName.split('.').slice(0, -1).join('.') + `_size=${width}x${height}.webp`;
       const newObjectKey = `${prefix}/${fileNameWebp}`
-      // prefix/filename_size=90x80.webp
       const readableStream = body as Readable;
       const chunks: Buffer[] = [];
       for await (const chunk of readableStream) { chunks.push(chunk) }
