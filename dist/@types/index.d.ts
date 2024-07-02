@@ -1,4 +1,0 @@
-export * from './any-object.@types';
-export * from './ability.@types';
-export * from './global.@types';
-export * from './prisma.@types';

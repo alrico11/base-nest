@@ -1,5 +1,0 @@
-export * from './member.@types';
-export * from './member.controller';
-export * from './member.dto';
-export * from './member.module';
-export * from './member.service';

@@ -1,7 +1,0 @@
-export * from './device.controller';
-export * from './device.decorator';
-export * from './device.dto';
-export * from './device.module';
-export * from './device.service';
-export * from './device.guard';
-export * from './device.@types';
