@@ -13,7 +13,9 @@ export class ProjectListener {
         this.ee.emit(ResourceEditedEvent.key, new ResourceEditedEvent({ newResource, oldResource }))
     }
     @OnEvent(DeletedProjectFilesEvent.key)
-    handleDeletedProjectFilesEvent({ data: { oldResource } }: DeletedProjectFilesEvent) {
-        this.ee.emit(ResourceDeletedEvent.key, new ResourceDeletedEvent({ oldResource }))
+    handleDeletedProjectFilesEvent({ data }: DeletedProjectFilesEvent) {
+        const { oldResourceImages, oldResourceFiles } = data
+        if (oldResourceImages || Array.isArray(oldResourceImages)) this.ee.emit(ResourceDeletedEvent.key, new ResourceDeletedEvent({ oldResource: oldResourceImages }))
+        if (oldResourceFiles || Array.isArray(oldResourceFiles)) this.ee.emit(ResourceDeletedEvent.key, new ResourceDeletedEvent({ oldResource: oldResourceFiles }))
     }
 }

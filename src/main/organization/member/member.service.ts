@@ -16,7 +16,7 @@ export class MemberService {
   async addMember({ body, lang, param: { id }, user }: ICreateMember) {
     const { userId } = body;
     const userExist = await this.prisma.user.findFirst({ where: { id: userId } });
-    if (!userExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "member" }), HttpStatus.NOT_FOUND)
+    if (!userExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "user" }), HttpStatus.NOT_FOUND)
     const userJoined = await this.prisma.organizationMember.findFirst({ where: { organizationId: id, userId } });
     if (userJoined) throw new HttpException(LangResponse({ key: "alreadyJoin", lang, object: "member" }), HttpStatus.CONFLICT);
     await this.organizationService.adminGuard({ lang, organizationId: id, userId: user.id })
@@ -34,7 +34,7 @@ export class MemberService {
   async removeMember({ param: { id }, body: { userId }, user, lang }: IRemoveMember) {
     const result = await this.prisma.$transaction(async (prisma) => {
       const userExist = await prisma.user.findFirst({ where: { id: userId } });
-      if (!userExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "member" }), HttpStatus.NOT_FOUND);
+      if (!userExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "user" }), HttpStatus.NOT_FOUND);
       const userJoined = await prisma.organizationMember.findFirst({ where: { organizationId: id, userId } });
       const adminJoined = await prisma.organizationAdmin.findFirst({ where: { organizationId: id, userId } });
       if (userJoined)

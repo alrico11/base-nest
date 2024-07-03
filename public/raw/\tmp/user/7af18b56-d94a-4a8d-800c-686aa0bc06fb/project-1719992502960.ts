@@ -7,8 +7,7 @@ type UpdatedProjectEventType = {
 }
 
 type DeletedProjectFilesEventType = {
-    oldResourceImages: Resource | Resource[] | undefined
-    oldResourceFiles: Resource | Resource[] | undefined
+    oldResource: Resource | Resource[]
 }
 
 export class UpdatedProjectEvent extends CompactClass<UpdatedProjectEventType> { public static key = "PROJECT.UPDATED" }

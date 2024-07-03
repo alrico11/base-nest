@@ -14,13 +14,16 @@ const CreateProjectBodyDtoSchema = z.object({
     goals: z.string().optional(),
     status: z.nativeEnum(ProjectStatus),
     thumbnail: z.string().optional(),
-    groupId: z.string().optional(),
-    file: z.array(z.string()).optional(),
+    tagId: z.string().optional(),
+    files: z.array(z.string()).optional(),
 });
 
 const CreateProjectParamDtoSchema = FindOneParamDtoBaseSchema
 
-const FindAllProjectQueryDtoSchema = FindAllQueryDtoBaseSchema
+const FindAllProjectQueryDtoSchema = FindAllQueryDtoBaseSchema.extend({
+    orderBy: z.enum(['createdAt', 'priority', 'updatedAt', 'name', 'createdAtLastChat']).optional().default('createdAt'),
+    tagId : z.string().uuid().optional()
+})
 const FindOneProjectParamDtoSchema = FindOneParamDtoBaseSchema
 const FindAllProjectCollaboratorQueryDtoSchema = FindAllQueryDtoBaseSchema
 

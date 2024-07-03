@@ -15,6 +15,7 @@ export interface IUploadToObjectStorage {
     contentType: string
     filePath: string
     prefix: string
+    originalName : string
     fileName?: string
     blurHash?: string
 }

@@ -9,19 +9,19 @@ import { zTimeFormat } from "src/constants/zTimeFormat";
 import { z } from "zod";
 dayjs.extend(utc);
 
-const CreateReminderBodyDtoSchema = z.object({
+export const CreateReminderBodyDtoSchema = z.object({
     alarm: z.boolean().default(false),
     interval: z.nativeEnum(IntervalReminder),
-    startDate: zDateFormat.default(dayjs.utc().format('YYYY-MM-DD')),
-    time: zTimeFormat.default(dayjs().format('HH:mm'))
+    startDate: zDateFormat,
+    time: zTimeFormat
 });
 
 const CreateTaskBodyDtoSchema = z.object({
     name: z.string(),
     description: z.string().optional(),
     assigneeUserIds: z.array(z.string()).optional(),
-    startDate: z.string().optional(),
-    endDate: z.string().optional(),
+    startDate: zDateFormat.optional(),
+    endDate: zDateFormat.optional(),
     status: z.nativeEnum(TaskEnum),
     priority: z.nativeEnum(TaskPriority),
     color: z.string().optional(),

@@ -1,21 +1,22 @@
 import { DynamicModule, ForwardReference, Type } from "@nestjs/common"
 import { EventEmitterModule } from "@nestjs/event-emitter"
 import { RateLimiterModule } from "nestjs-rate-limiter"
-import { PrismaModule } from "./prisma"
-import { DeviceModule as MainDeviceModule } from "./main/device"
+import { FileModule } from "./file"
 import { LogModule } from "./log"
-import { XConfigModule } from "./xconfig"
-import { OrganizationModule as MainOrganizationModule } from "./main/organization/organization.module"
-import { TagModule as MainProjectTagModule } from "./main/tag/tag.module"
-import { TagModule as MainOrganizationTagModule } from "./main/organization/tag"
-import { CollaboratorModule as MainProjectCollaboratorModule } from "./main/project/collaborator"
+import { AuthModule } from "./main/auth"
+import { DeviceModule as MainDeviceModule } from "./main/device"
 import { MemberModule as MainOrganizationMemberModule } from "./main/organization/member"
+import { OrganizationModule as MainOrganizationModule } from "./main/organization/organization.module"
 import { ProjectModule as MainOrganizationProjectModule } from "./main/organization/project"
 import { CollaboratorModule as MainOrganizationProjectCollaboratorModule } from "./main/organization/project/collaborator"
-import { FileModule } from "./file"
-import { AuthModule } from "./main/auth"
+import { TagModule as MainOrganizationTagModule } from "./main/organization/tag"
+import { CollaboratorModule as MainProjectCollaboratorModule } from "./main/project/collaborator"
+import { TagModule as MainProjectTagModule } from "./main/tag/tag.module"
+import { TaskModule as MainTaskModule } from "./main/task"
 import { UserModule } from "./main/user/user.module"
+import { PrismaModule } from "./prisma"
 import { SeederModule } from "./seeder"
+import { XConfigModule } from "./xconfig"
 
 const AppImports: (Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference<any>)[] = [
   XConfigModule,
@@ -45,6 +46,8 @@ const AppImports: (Type<any> | DynamicModule | Promise<DynamicModule> | ForwardR
   //MAIN PROJECT
   MainProjectCollaboratorModule,
   MainProjectTagModule,
+  //MAIN
+  MainTaskModule
 ]
 
 export default AppImports

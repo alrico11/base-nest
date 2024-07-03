@@ -39,7 +39,6 @@ export class AuthService {
     if (!existUser) throw new HttpException(LangResponse({ key: "unauthorize", lang }), HttpStatus.UNAUTHORIZED);
     if (!existUser.password) throw new HttpException(LangResponse({ key: "unauthorize", lang }), HttpStatus.UNAUTHORIZED);
     const match = await compare(password, existUser.password);
-    console.log(match)
     if (!match) throw new HttpException(LangResponse({ key: "unauthorize", lang }), HttpStatus.UNAUTHORIZED);
     const { USER_JWT_SECRET } = this.config.env;
     const token = sign({ id: existUser.id }, USER_JWT_SECRET, {});

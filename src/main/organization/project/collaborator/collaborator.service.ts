@@ -12,15 +12,14 @@ export class CollaboratorService {
     private readonly prisma: PrismaService,
     private readonly l: LogService,
     private readonly projectService: ProjectService,
-    private readonly fileService: FileService
   ) { }
   async addCollaborator({ body, param: { id }, user, lang }: ICreateProjectCollaborator) {
     const { userId } = body
     await this.projectService.adminGuard({ lang, projectId: id, userId: user.id })
     const userExist = await this.prisma.user.findFirst({ where: { id: userId } });
-    if (!userExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "collaborator" }), HttpStatus.NOT_FOUND)
+    if (!userExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "user" }), HttpStatus.NOT_FOUND)
     const collaboratorExist = await this.prisma.projectCollaborator.findFirst({ where: { userId: body.userId, projectId: id } })
-    if (!collaboratorExist) throw new HttpException(LangResponse({ key: "alreadyJoin", lang, object: "alreadyCollaborator" }), HttpStatus.CONFLICT)
+    if (collaboratorExist) throw new HttpException(LangResponse({ key: "alreadyCollaborator", lang }), HttpStatus.CONFLICT)
     await this.prisma.projectCollaborator.create({
       data: {
         ...body,
@@ -79,7 +78,7 @@ export class CollaboratorService {
   async removeCollaborator({ param: { id }, body: { userId }, user, lang }: IRemoveMemberProjectCollaborator) {
     const result = await this.prisma.$transaction(async (prisma) => {
       const userExist = await prisma.user.findFirst({ where: { id: userId } });
-      if (!userExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "collaborator" }), HttpStatus.NOT_FOUND);
+      if (!userExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "user" }), HttpStatus.NOT_FOUND);
 
       const userJoined = await prisma.projectCollaborator.findFirst({ where: { projectId: id, userId } });
       const adminJoined = await prisma.projectAdmin.findFirst({ where: { projectId: id, userId } });
@@ -100,7 +99,7 @@ export class CollaboratorService {
         }
       });
 
-      if (!adminJoined && !userJoined) throw new HttpException(LangResponse({ key: "notJoin", lang, object: "collaborator" }), HttpStatus.BAD_REQUEST);
+      if (!adminJoined && !userJoined) throw new HttpException(LangResponse({ key: "notJoin", lang }), HttpStatus.BAD_REQUEST);
 
       return { message: LangResponse({ key: "deleted", lang, object: 'collaborator' }) };
     });

@@ -11,18 +11,18 @@ export class ReminderService {
     private readonly l: LogService
   ) { }
   async create({ reminder }: ICreateReminder) {
-    await this.prisma.reminder.create({
+    const data = await this.prisma.reminder.create({
       data: { ...reminder }
     })
-    return true
+    return data
   }
 
   async update({ reminder, reminderId }: IUpdateReminder) {
-    await this.prisma.reminder.update({
+    const data = await this.prisma.reminder.update({
       where: { id: reminderId },
       data: { ...reminder }
     })
-    true
+    return data
   }
 
   async removeReminderTask({ reminderId, taskId }: IDeleteReminderTask) {

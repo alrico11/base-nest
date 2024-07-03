@@ -34,6 +34,12 @@ export class ProjectController {
   findOne(@Param() param: FindOneProjectParamDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
     return this.projectService.findOne({ lang, param, user });
   }
+  @Get(':id/detail')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ operationId: "FindOneProjectOrganization" })
+  findDetail(@Param() param: FindOneProjectParamDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
+    return this.projectService.findDetail({ lang, param, user });
+  }
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)

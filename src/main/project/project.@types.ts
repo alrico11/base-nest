@@ -44,8 +44,8 @@ export interface IFindAllProjectCollaborator {
     param: FindAllProjectCollaboratorParamDto
 }
 
-export enum ProjectRole {
-    ADMIN = "admin",
-    COLLABORATOR = "collaborator",
-    OWNER = "owner"
+export interface ICheckRoleCollaborator {
+    projectId: string
+    userId: string
+    lang: LangEnum
 }

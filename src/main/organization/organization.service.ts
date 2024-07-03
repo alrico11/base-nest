@@ -2,13 +2,13 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Prisma, Resource } from '@prisma/client';
 import dayjs from 'dayjs';
-import { LangResponse } from 'src/constants';
+import { LangResponse, LangWord } from 'src/constants';
 import { FileService } from 'src/file';
 import { LogService } from 'src/log';
 import { PrismaService } from 'src/prisma';
 import { dotToObject } from 'src/utils/string';
 import { XConfig } from 'src/xconfig';
-import { EnumRoleOrganization, ICheckRole, ICreateOrganization, IDeleteOrganization, IFindAllMemberOrganization, IFindAllOrganization, IFindOneOrganization, IUpdateOrganization } from './organization.@types';
+import { ICheckRole, ICreateOrganization, IDeleteOrganization, IFindAllMemberOrganization, IFindAllOrganization, IFindOneOrganization, IUpdateOrganization } from './organization.@types';
 import { OrganizationUpdatedEvent } from './organization.event';
 
 @Injectable()
@@ -100,7 +100,7 @@ export class OrganizationService {
     const detailUser = {
       id: user.id,
       name: user.name,
-      role: adminIds.has(user.id) ? EnumRoleOrganization.ADMIN : (Creator.id === user.id ? EnumRoleOrganization.OWNER : EnumRoleOrganization.MEMBER)
+      role: adminIds.has(user.id) ? LangWord({ key: "admin", lang }) : (Creator.id === user.id ? LangWord({ key: "owner", lang }) : LangWord({ key: "member", lang }))
     }
 
     return { message: LangResponse({ key: 'fetched', object: 'organization', lang }), data: { detailOrganization, detailUser } }
@@ -181,7 +181,7 @@ export class OrganizationService {
         return {
           userId: id,
           name: name,
-          role: adminIds.has(id) ? EnumRoleOrganization.ADMIN : EnumRoleOrganization.MEMBER,
+          role: adminIds.has(id) ? LangWord({ key: "admin", lang }) : LangWord({ key: "member", lang }),
           thumbnail: Resource?.objectKey ? this.fileService.cdnUrl({ objectKey: Resource.objectKey }) : undefined,
           blurHash: Resource?.blurHash,
           updatedAt: updatedAt
@@ -191,13 +191,13 @@ export class OrganizationService {
         userDetails: {
           userId: user.id,
           name: user.name,
-          role: adminIds.has(user.id) ? EnumRoleOrganization.ADMIN : EnumRoleOrganization.MEMBER
+          role: adminIds.has(user.id) ? LangWord({ key: "admin", lang }) : LangWord({ key: "member", lang })
         },
         members: [
           {
             name: Creator.name,
             userId: Creator.id,
-            role: EnumRoleOrganization.OWNER,
+            role: LangWord({ key: "owner", lang }),
             thumbnail: Resource?.objectKey ? this.fileService.cdnUrl({ objectKey: Resource.objectKey }) : undefined,
             blurHash: Resource?.blurHash,
             updatedAt: Creator.updatedAt,

@@ -51,7 +51,7 @@ export class FileService {
 
     if (!existsSync(outputFileDir)) mkdirSync(outputFileDir, { recursive: true });
     const { data, info } = await sharp(filePath)
-    .ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+      .ensureAlpha().raw().toBuffer({ resolveWithObject: true });
     sharp(data, { raw: { width: info.width, height: info.height, channels: info.channels } }).toFile(outputFilePath);
     const blurHash = encode(
       new Uint8ClampedArray(data),
@@ -65,7 +65,7 @@ export class FileService {
     };
   }
 
-  async uploadToObjectStorage({ filePath, prefix, fileName, blurHash, contentType }: IUploadToObjectStorage) {
+  async uploadToObjectStorage({ filePath, prefix, fileName, blurHash, contentType, originalName }: IUploadToObjectStorage) {
     if (!existsSync(filePath)) {
       throw new HttpException({ message: 'File not found' }, HttpStatus.NOT_FOUND);
     }
@@ -88,11 +88,11 @@ export class FileService {
     const resource = await this.resourceService.add({
       blurHash: contentType.startsWith('image/') ? blurHash : undefined,
       objectKey: objectKey,
-      fileName: fileName || originalFileName,
+      fileName: originalName,
       fileType: contentType,
       fileSize: size,
       metadata: metadata,
-      objectUrl: this.resolve({ fileName: fileName || originalFileName, prefix }),
+      objectUrl: this.resolve({ fileName: originalFileName, prefix }),
     });
 
     return resource;
@@ -140,6 +140,12 @@ export class FileService {
     }
   }
 
+  parseFilename(filename: string) {
+    const baseName = filename.split('.').slice(0, -1).join('.');
+    const parsedName = `${baseName}`;
+    return parsedName
+  }
+
   async handleUploadObjectStorage({ fileName, user, prefix }: IFileCompressUpload) {
     const fileNames = Array.isArray(fileName) ? fileName : [fileName];
     const resources: Resource[] = [];
@@ -156,11 +162,11 @@ export class FileService {
         if (!resource) {
           const filePath = this.findFile({ fileName: name, user });
           const { blurHash, outputFilePath } = await this.compressImage(filePath);
-          resource = await this.uploadToObjectStorage({ filePath: outputFilePath, fileName: fileNameWebp, prefix, blurHash, contentType });
+          resource = await this.uploadToObjectStorage({ filePath: outputFilePath, fileName: fileNameWebp, prefix, blurHash, contentType, originalName: name });
         }
       } else {
         const filePath = this.findFile({ fileName: name, user });
-        resource = await this.uploadToObjectStorage({ filePath, fileName: name, prefix, contentType });
+        resource = await this.uploadToObjectStorage({ filePath, fileName: name, prefix, contentType, originalName: name });
       }
       resources.push(resource);
     }

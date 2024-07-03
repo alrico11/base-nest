@@ -5,8 +5,8 @@ import { FindOneParamDtoBaseSchema } from "src/constants/findOne-param.dto";
 import { z } from "zod";
 
 const CreateProjectBodyDtoSchema = z.object({
-    color: z.string().optional(),
     name: z.string(),
+    color: z.string().optional(),
     description: z.string().optional(),
     priority: z.string(),
     target: z.string().optional(),
@@ -15,7 +15,7 @@ const CreateProjectBodyDtoSchema = z.object({
     status: z.nativeEnum(ProjectStatus),
     thumbnail: z.string().optional(),
     tagId: z.string().optional(),
-    file: z.array(z.string()).optional(),
+    files: z.array(z.string()).optional(),
 });
 
 const CreateProjectParamDtoSchema = z.object({
@@ -23,7 +23,8 @@ const CreateProjectParamDtoSchema = z.object({
 })
 
 const FindAllProjectQueryDtoSchema = FindAllQueryDtoBaseSchema.extend({
-    orderBy: z.enum(['createdAt','priority','updatedAt','name','createdAtLastChat']).optional().default('createdAt'),
+    orderBy: z.enum(['createdAt', 'priority', 'updatedAt', 'name', 'createdAtLastChat']).optional().default('createdAt'),
+    tagId: z.string().uuid().optional()
 })
 
 const FindOneProjectParamDtoSchema = FindOneParamDtoBaseSchema.extend({
@@ -32,8 +33,10 @@ const FindOneProjectParamDtoSchema = FindOneParamDtoBaseSchema.extend({
 
 const FindAllProjectCollaboratorQueryDtoSchema = FindAllQueryDtoBaseSchema
 const FindAllProjectCollaboratorParamDtoSchema = FindOneProjectParamDtoSchema.extend({
-    id: z.string().uuid()
 })
+
+export class FindAllProjectTagParamDto extends createZodDto(FindAllProjectCollaboratorParamDtoSchema) { }
+
 export class FindAllProjectCollaboratorQueryDto extends createZodDto(FindAllProjectCollaboratorQueryDtoSchema) { }
 export class FindAllProjectCollaboratorParamDto extends createZodDto(FindAllProjectCollaboratorParamDtoSchema) { }
 

@@ -1,6 +1,9 @@
 import { User } from "@prisma/client";
 import { LangEnum } from "src/constants";
-import { CreateTaskBodyDto, DeleteTaskParamDto, FindAllTaskQueryDto, FindOneTaskParamDto, UpdateTaskBodyDto, UpdateTaskParamDto } from "./task.dto";
+import { CreateReminderBodyDtoSchema, CreateTaskBodyDto, DeleteTaskParamDto, FindAllTaskQueryDto, FindOneTaskParamDto, UpdateTaskBodyDto, UpdateTaskParamDto } from "./task.dto";
+import { z } from "zod";
+
+export type ReminderType = z.infer<typeof CreateReminderBodyDtoSchema>;
 
 export interface ICreateTask {
     user: User

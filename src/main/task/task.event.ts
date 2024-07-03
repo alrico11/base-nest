@@ -7,8 +7,8 @@ type UpdatedTaskEventType = {
 }
 
 type DeletedFilesTaskEventType = {
-    oldResourceImages: Resource | Resource[] | undefined
-    oldResourceFiles: Resource | Resource[] | undefined
+    oldResourceImages: Resource[]
+    oldResourceFiles: Resource[]
 }
 
 export class UpdatedTaskEvent extends CompactClass<UpdatedTaskEventType> { public static key = "TASK.UPDATED" }

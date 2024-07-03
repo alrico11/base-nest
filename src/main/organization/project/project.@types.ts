@@ -3,14 +3,14 @@ import { LangEnum } from "src/constants";
 import { CreateProjectBodyDto, CreateProjectParamDto, DeleteProjectParamDto, FindAllProjectCollaboratorParamDto, FindAllProjectCollaboratorQueryDto, FindAllProjectParamDto, FindAllProjectQueryDto, FindOneProjectParamDto, UpdateProjectBodyDto, UpdateProjectParamDto } from "./project.dto";
 
 export interface ICreateProject {
-    param : CreateProjectParamDto
+    param: CreateProjectParamDto
     body: CreateProjectBodyDto
     user: User
     lang: LangEnum
 }
 
 export interface IFindAllProject {
-    param : FindAllProjectParamDto
+    param: FindAllProjectParamDto
     lang: LangEnum
     user: User
     query: FindAllProjectQueryDto
