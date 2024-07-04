@@ -5,13 +5,13 @@ import dayjs from 'dayjs';
 import utc from "dayjs/plugin/utc";
 import { LangResponse } from 'src/constants';
 import { FileService } from 'src/file';
-import { ReminderService } from 'src/main/reminder/reminder.service';
 import { PrismaService } from 'src/prisma';
 import { dotToObject } from 'src/utils/string';
 import { XConfig } from 'src/xconfig';
-import { ProjectService } from '../project.service';
 import { ICreateTask, IFindAllTask, IFindOneTask, IRemoveTask, IUpdateTask, ReminderType } from './task.@types';
 import { DeletedFilesTaskEvent } from './task.event';
+import { ReminderService } from 'src/main/reminder/reminder.service';
+import { OrganizationService } from '../organization.service';
 
 dayjs.extend(utc);
 @Injectable()
@@ -21,26 +21,26 @@ export class TaskService {
     private readonly fileService: FileService,
     private readonly config: XConfig,
     private readonly reminderService: ReminderService,
-    private readonly projectService: ProjectService,
+    private readonly organizationService: OrganizationService,
     private readonly ee: EventEmitter2
   ) { }
 
-  async create({ body, lang, user, param }: ICreateTask) {
-    await this.projectService.adminGuard({ lang, projectId: param.projectId, userId: user.id })
-    const { assigneeUserIds, files, reminder, startDate, endDate, projectId, ...rest } = body;
+  async create({ body, lang, user, param: { organizationId } }: ICreateTask) {
+    await this.organizationService.adminGuard({ lang, organizationId, userId: user.id })
+    const { assigneeUserIds, files, reminder, startDate, endDate, ...rest } = body;
     let Resource: Resource | Resource[] | undefined;
     await this.prisma.$transaction(async (prisma) => {
       const task = await prisma.task.create({
         data: {
           ...rest,
-          projectId: projectId,
+          organizationId,
           startDate: startDate ? dayjs.utc(startDate).toDate() : undefined,
           endDate: endDate ? dayjs.utc(endDate).toDate() : undefined,
           createdById: user.id,
         }
       });
       if (assigneeUserIds) {
-        this.projectService.checkProjectCollaborator({ lang, userIds: assigneeUserIds, projectId })
+        this.organizationService.checkMemberOrganization({ lang, organizationId, userIds: assigneeUserIds })
         await prisma.taskAssignee.createMany({
           data: assigneeUserIds.map((userId) => ({ taskId: task.id, userId, })),
         })
@@ -79,10 +79,10 @@ export class TaskService {
     return { message: LangResponse({ key: "created", lang, object: "task" }) };
   }
 
-  async findAll({ lang, query, user, param: { projectId } }: IFindAllTask) {
+  async findAll({ lang, query, user, param: { organizationId } }: IFindAllTask) {
     const { limit, orderBy, orderDirection, page, search } = query
     const { result, ...rest } = await this.prisma.extended.task.paginate({
-      where: { projectId, deletedAt: null, createdById: user.id, name: { contains: search, mode: "insensitive" } },
+      where: { organizationId, deletedAt: null, createdById: user.id, name: { contains: search, mode: "insensitive" } },
       limit, page,
       orderBy: dotToObject({ orderBy, orderDirection }),
       include: { TaskAssignees: { include: { User: { include: { Resource: true } } } } }
@@ -109,9 +109,9 @@ export class TaskService {
     return { message: LangResponse({ key: "fetched", lang, object: "task" }), data: data, ...rest };
   }
 
-  async findOne({ lang, param: { id, projectId }, user }: IFindOneTask) {
+  async findOne({ lang, param: { id, organizationId }, user }: IFindOneTask) {
     const taskExist = await this.prisma.task.findFirst({
-      where: { id, createdById: user.id, projectId },
+      where: { id, createdById: user.id, organizationId },
       include: {
         TaskAssignees: { include: { User: { include: { Resource: true } } } },
         ReminderTasks: { include: { Reminder: true } },
@@ -142,12 +142,11 @@ export class TaskService {
     return { message: LangResponse({ key: "fetched", lang, object: "task" }), data };
   }
 
-  async update({ body, lang, param, user }: IUpdateTask) {
-    const { id } = param
-    await this.projectService.adminGuard({ lang, projectId: param.projectId, userId: user.id })
-    const { reminder, assigneeUserIds, files, startDate, projectId, endDate, ...rest } = body;
+  async update({ body, lang, param: { id, organizationId }, user }: IUpdateTask) {
+    await this.organizationService.adminGuard({ lang, organizationId, userId: user.id })
+    const { reminder, assigneeUserIds, files, startDate, endDate, projectId, ...rest } = body;
     const taskExist = await this.prisma.task.findFirst({
-      where: { projectId, id, createdById: user.id },
+      where: { organizationId, id, createdById: user.id },
       include: {
         TaskFiles: { include: { Resource: true } },
         TaskImages: { include: { Resource: true } },
@@ -176,7 +175,7 @@ export class TaskService {
         }
       }
       if (assigneeUserIds && assigneeUserIds.length > 0) {
-        this.projectService.checkProjectCollaborator({ lang, userIds: assigneeUserIds, projectId: param.projectId })
+        this.organizationService.checkMemberOrganization({ lang, organizationId, userIds: assigneeUserIds })
         const assigneeIds = new Set(TaskAssignees.map(({ userId }) => userId));
         assigneeIds.add(createdById);
         const data = assigneeUserIds
@@ -221,6 +220,7 @@ export class TaskService {
           startDate: startDate ? dayjs.utc(startDate).toDate() : undefined,
           endDate: endDate ? dayjs.utc(endDate).toDate() : undefined,
           editedById: user.id,
+          projectId: !taskExist.projectId ? projectId : undefined
         }
       });
     });
@@ -228,9 +228,9 @@ export class TaskService {
     return { message: LangResponse({ key: "updated", lang, object: "task" }) };
   }
 
-  async remove({ lang, param: { id, projectId }, user }: IRemoveTask) {
-    await this.projectService.adminGuard({ lang, projectId, userId: user.id })
-    const taskExist = await this.prisma.task.findFirst({ where: { id, createdById: user.id, projectId } })
+  async remove({ lang, param: { id, organizationId }, user }: IRemoveTask) {
+    await this.organizationService.adminGuard({ lang, organizationId, userId: user.id })
+    const taskExist = await this.prisma.task.findFirst({ where: { organizationId, id, createdById: user.id } })
     if (!taskExist) throw new HttpException(LangResponse({ key: "deleted", lang, object: "task" }), HttpStatus.NOT_FOUND)
     await this.prisma.task.update({ where: { id, deletedAt: null }, data: { deletedAt: dayjs().toISOString() } })
     return { message: LangResponse({ key: "deleted", lang, object: "task" }) };

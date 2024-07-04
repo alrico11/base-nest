@@ -11,12 +11,15 @@ import { ProjectModule as MainOrganizationProjectModule } from "./main/organizat
 import { CollaboratorModule as MainOrganizationProjectCollaboratorModule } from "./main/organization/project/collaborator"
 import { TagModule as MainOrganizationTagModule } from "./main/organization/tag"
 import { CollaboratorModule as MainProjectCollaboratorModule } from "./main/project/collaborator"
-import { TagModule as MainProjectTagModule } from "./main/tag/tag.module"
+import { TagModule as MainTagModule } from "./main/tag/tag.module"
 import { TaskModule as MainTaskModule } from "./main/task"
 import { UserModule } from "./main/user/user.module"
 import { PrismaModule } from "./prisma"
 import { SeederModule } from "./seeder"
 import { XConfigModule } from "./xconfig"
+import { TaskModule as MainProjectTaskModule } from "./main/project/task"
+import { TaskModule as MainOrganizationTaskModule } from "./main/organization/task"
+import { TaskModule as MainOrganizationProjectTaskModule } from "./main/organization/project/task"
 
 const AppImports: (Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference<any>)[] = [
   XConfigModule,
@@ -37,17 +40,32 @@ const AppImports: (Type<any> | DynamicModule | Promise<DynamicModule> | ForwardR
   AuthModule,
   MainDeviceModule,
   UserModule,
+  
   //ORGANIZATION
   MainOrganizationModule,
   MainOrganizationTagModule,
-  MainOrganizationProjectModule,
-  MainOrganizationProjectCollaboratorModule,
   MainOrganizationMemberModule,
+  MainOrganizationTaskModule,
+  
+  //Main Organization Project
+  MainOrganizationProjectCollaboratorModule,
+  MainOrganizationProjectModule,
+  MainOrganizationProjectTaskModule,
+  // organization project note
+  // organization project activitylog
+
   //MAIN PROJECT
   MainProjectCollaboratorModule,
-  MainProjectTagModule,
+  MainProjectTaskModule,
+  // project note
+  // activity log
+
   //MAIN
-  MainTaskModule
+  MainTagModule,
+  MainTaskModule,
+  //note
+  //comment
+  //chat
 ]
 
 export default AppImports

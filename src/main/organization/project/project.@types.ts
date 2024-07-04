@@ -54,3 +54,10 @@ export interface IFindAllProjectCollaborator {
     lang: LangEnum
     param: FindAllProjectCollaboratorParamDto
 }
+
+export interface ICheckProjectCollaborator {
+    userIds: string[]
+    projectId: string
+    organizationId: string
+    lang: LangEnum
+}

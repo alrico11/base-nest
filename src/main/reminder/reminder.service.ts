@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import dayjs from 'dayjs';
 import { LogService } from 'src/log';
 import { PrismaService } from 'src/prisma';
-import { ICreateReminder, IDeleteReminderNote, IDeleteReminderTask, IUpdateReminder } from './reminder.@types';
+import { ICreateReminder, ICreateReminderNote, IDeleteReminderNote, IDeleteReminderTask, IUpdateReminder, IUpdateReminderNote } from './reminder.@types';
 
 @Injectable()
 export class ReminderService {
@@ -10,17 +10,23 @@ export class ReminderService {
     private readonly prisma: PrismaService,
     private readonly l: LogService
   ) { }
-  async create({ reminder }: ICreateReminder) {
+  async create({ reminder, task }: ICreateReminder) {
     const data = await this.prisma.reminder.create({
       data: { ...reminder }
     })
+    await this.prisma.reminderTask.create({ data: { reminderId: data.id, taskId: task.id } })
     return data
   }
 
-  async update({ reminder, reminderId }: IUpdateReminder) {
+  async update({ reminder, task }: IUpdateReminder) {
+    const { id, ...rest } = reminder
     const data = await this.prisma.reminder.update({
-      where: { id: reminderId },
-      data: { ...reminder }
+      where: { id },
+      data: { ...rest }
+    })
+    await this.prisma.reminderTask.update({
+      where: { taskId: task.id },
+      data: { reminderId: id, taskId: task.id }
     })
     return data
   }
@@ -45,5 +51,29 @@ export class ReminderService {
       where: { reminderId_noteId: { reminderId, noteId } }
     })
     return true
+  }
+
+  async createReminderNote({ reminder, note }: ICreateReminderNote) {
+    const data = await this.prisma.reminder.create({
+      data: { ...reminder }
+    })
+    await this.prisma.reminderNote.create({ data: { reminderId: data.id, noteId: note.id } })
+    return data
+  }
+  async updateReminderNote({ reminder, note }: IUpdateReminderNote) {
+    const { id, ...rest } = reminder
+    const data = await this.prisma.reminder.update({
+      where: { id },
+      data: { ...rest }
+    })
+    await this.prisma.reminderNote.update({
+      where: {
+        reminderId_noteId: {
+          noteId: note.id, reminderId: reminder.id
+        }
+      },
+      data: { reminderId: id, noteId: note.id }
+    })
+    return data
   }
 }

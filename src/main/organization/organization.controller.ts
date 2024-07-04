@@ -53,6 +53,6 @@ export class OrganizationController {
   @ApiOperation({ operationId: "FindAllMember" })
   @Get(':id/member')
   findAllMember(@Query() query: FindAllMemberOrganizationQueryDto, @Param() param: FindAllMemberOrganizationParamDto,@Lang() lang: LangEnum, @UserInstance() user: User) {
-    return this.organizationService.findAllMember({ lang, param, query, user })
+    return this.organizationService.findAllMemberOrganization({ lang, param, query, user })
   }
 }

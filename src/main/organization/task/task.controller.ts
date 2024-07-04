@@ -1,24 +1,24 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { Lang, LangEnum } from 'src/constants';
-import { UserInstance, UserJwtGuard } from '../auth';
-import { CreateTaskBodyDto, DeleteTaskParamDto, FindAllTaskQueryDto, FindOneTaskParamDto, UpdateTaskBodyDto, UpdateTaskParamDto } from './task.dto';
+import { CreateTaskBodyDto, CreateTaskParamDto, DeleteTaskParamDto, FindAllTaskParamDto, FindAllTaskQueryDto, FindOneTaskParamDto, UpdateTaskBodyDto, UpdateTaskParamDto } from './task.dto';
 import { TaskService } from './task.service';
-import { UserDeviceGuard } from '../device';
+import { UserInstance, UserJwtGuard } from 'src/main/auth';
 
-@Controller('task')
-@UseGuards(UserJwtGuard, UserDeviceGuard)
+@Controller('organization/:organizationId/task')
+// @UseGuards(UserJwtGuard, UserDeviceGuard)
+@UseGuards(UserJwtGuard)
 export class TaskController {
   constructor(private readonly taskService: TaskService) { }
 
   @Post()
-  create(@Body() body: CreateTaskBodyDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
-    return this.taskService.create({ body, lang, user });
+  create(@Param() param: CreateTaskParamDto, @Body() body: CreateTaskBodyDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
+    return this.taskService.create({ body, lang, user, param });
   }
 
   @Get()
-  findAll(@Query() query: FindAllTaskQueryDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
-    return this.taskService.findAll({ lang, query, user });
+  findAll(@Param() param: FindAllTaskParamDto, @Query() query: FindAllTaskQueryDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
+    return this.taskService.findAll({ lang, query, user, param });
   }
 
   @Get(':id')

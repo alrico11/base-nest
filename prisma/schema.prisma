@@ -501,7 +501,7 @@ model TaskImage {
 model Note {
   id                String             @id @default(uuid())
   title             String
-  description       String
+  description       String?
   ProjectNotes      ProjectNote[]
   NoteProjects      NoteProject[]
   NoteOrganizations NoteOrganization[]

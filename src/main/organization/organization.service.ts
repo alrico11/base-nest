@@ -8,7 +8,7 @@ import { LogService } from 'src/log';
 import { PrismaService } from 'src/prisma';
 import { dotToObject } from 'src/utils/string';
 import { XConfig } from 'src/xconfig';
-import { ICheckRole, ICreateOrganization, IDeleteOrganization, IFindAllMemberOrganization, IFindAllOrganization, IFindOneOrganization, IUpdateOrganization } from './organization.@types';
+import { ICheckMemberOrganization, ICheckRole, ICreateOrganization, IDeleteOrganization, IFindAllMemberOrganization, IFindAllOrganization, IFindOneOrganization, IUpdateOrganization } from './organization.@types';
 import { OrganizationUpdatedEvent } from './organization.event';
 
 @Injectable()
@@ -155,7 +155,7 @@ export class OrganizationService {
     return { message: LangResponse({ key: "deleted", lang, object: "organization" }) };
   }
 
-  async findAllMember({ query, lang, param: { id }, user }: IFindAllMemberOrganization) {
+  async findAllMemberOrganization({ query, lang, param: { id }, user }: IFindAllMemberOrganization) {
     const { limit, orderBy, orderDirection, page } = query;
     const { result, ...rest } = await this.prisma.extended.organization.paginate({
       where: {
@@ -207,6 +207,22 @@ export class OrganizationService {
       };
     })[0]
     return { message: LangResponse({ key: "fetched", lang, object: "organization" }), data: data, ...rest };
+  }
+
+  async checkMemberOrganization({ organizationId, userIds, lang }: ICheckMemberOrganization) {
+    const organization = await this.prisma.organization.findFirst({
+      where: { id: organizationId },
+      include: { OrganizationMembers: true }
+    })
+    if (!organization) throw new HttpException(LangResponse({ key: "notFound", lang, object: "organization" }), HttpStatus.NOT_FOUND)
+    const { OrganizationMembers, creatorId } = organization
+    const memberIds = new Set(OrganizationMembers.map(({ userId }) => { return userId }))
+    memberIds.add(creatorId)
+    userIds.map((id) => {
+      if (!memberIds.has(id)) throw new HttpException(LangResponse({ key: "notFound", lang, object: "organization" }), HttpStatus.NOT_FOUND)
+      return true
+    })
+    return true
   }
 
   async adminGuard({ organizationId, userId, lang }: ICheckRole) {

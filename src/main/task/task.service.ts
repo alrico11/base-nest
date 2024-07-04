@@ -26,15 +26,15 @@ export class TaskService {
   async create({ body, lang, user }: ICreateTask) {
     const { assigneeUserIds, files, reminder, startDate, endDate, ...rest } = body;
     let Resource: Resource | Resource[] | undefined;
-
-    const taskData = {
-      ...rest,
-      startDate: startDate ? dayjs.utc(startDate).toDate() : undefined,
-      endDate: endDate ? dayjs.utc(endDate).toDate() : undefined,
-      createdById: user.id,
-    };
     await this.prisma.$transaction(async (prisma) => {
-      const task = await prisma.task.create({ data: taskData });
+      const task = await prisma.task.create({
+        data: {
+          ...rest,
+          startDate: startDate ? dayjs.utc(startDate).toDate() : undefined,
+          endDate: endDate ? dayjs.utc(endDate).toDate() : undefined,
+          createdById: user.id,
+        }
+      });
       if (assigneeUserIds) await prisma.taskAssignee.createMany({
         data: assigneeUserIds.map((userId) => ({ taskId: task.id, userId, })),
       });
@@ -59,15 +59,15 @@ export class TaskService {
         const { alarm, interval, startDate, time } = reminder;
         const hour = parseInt(time.split(':')[0])
         const minutes = parseInt(time.split(':')[1])
-        const reminderData = await this.reminderService.create({
+        await this.reminderService.create({
+          task,
           reminder: {
             dateReminder: dayjs.utc(startDate).toDate(),
             interval,
-            timeReminder: dayjs().set('hour', hour).set('minute', minutes).toDate(),
+            timeReminder: dayjs().set('hour', hour).set('minute', minutes).set('second', 0).toDate(),
             alarm,
           },
         });
-        await prisma.reminderTask.create({ data: { reminderId: reminderData.id, taskId: task.id } })
       }
     });
     return { message: LangResponse({ key: "created", lang, object: "task" }) };
@@ -138,49 +138,89 @@ export class TaskService {
   }
 
   async update({ body, lang, param: { id }, user }: IUpdateTask) {
-    const { reminder, assigneeUserIds, files, } = body
+    const { reminder, assigneeUserIds, files, startDate, endDate, projectId, ...rest } = body;
     const taskExist = await this.prisma.task.findFirst({
       where: { id, createdById: user.id },
       include: {
         TaskFiles: { include: { Resource: true } },
-        TaskImages: { include: { Resource: true } }
+        TaskImages: { include: { Resource: true } },
+        TaskAssignees: true,
+        ReminderTasks: { include: { Reminder: true } }
       },
-    })
-    if (!taskExist) throw new HttpException(LangResponse({ key: "deleted", lang, object: "task" }), HttpStatus.NOT_FOUND)
-
-    if (files?.length === 0) {
-      const oldResourceFiles = taskExist.TaskFiles.map(({ Resource }) => { return Resource })
-      const oldResourceImages = taskExist.TaskImages.map(({ Resource }) => { return Resource })
-      if (oldResourceFiles.length > 0) await this.prisma.taskFile.deleteMany({ where: { taskId: id } })
-      if (oldResourceImages.length > 0) await this.prisma.taskImage.deleteMany({ where: { taskId: id } })
-      this.ee.emit(DeletedFilesTaskEvent.key, new DeletedFilesTaskEvent({ oldResourceFiles, oldResourceImages }))
-    }
-
-    if (files && files.length > 0) {
-      const objectKeyFiles = new Set(taskExist.TaskFiles.map(({ Resource }) => Resource.fileName));
-      const objectKeyImages = new Set(taskExist.TaskImages.map(({ Resource }) => Resource.fileName))
-      await Promise.all(files.map(async (fileName) => {
-        const fileExists = [...objectKeyFiles, ...objectKeyImages].some(key => key.includes(this.fileService.parseFilename(fileName)));
-        if (!fileExists) {
-          const newFileResource = await this.fileService.handleUploadObjectStorage({
-            fileName,
-            prefix: this.config.env.OBJECT_STORAGE_PREFIX_PROJECT_FILE,
-            user
+    });
+    if (!taskExist) throw new HttpException(LangResponse({ key: "deleted", lang, object: "task" }), HttpStatus.NOT_FOUND);
+    const { ReminderTasks, TaskFiles, TaskAssignees, TaskImages, createdById } = taskExist;
+    await this.prisma.$transaction(async (prisma) => {
+      if (reminder && reminder as ReminderType) {
+        const { alarm, interval, startDate, time } = reminder;
+        const hour = parseInt(time.split(':')[0]);
+        const minutes = parseInt(time.split(':')[1]);
+        if (ReminderTasks) {
+          await this.reminderService.update({ reminder: ReminderTasks.Reminder, task: taskExist });
+        } else {
+          await this.reminderService.create({
+            reminder: {
+              dateReminder: dayjs.utc(startDate).toDate(),
+              interval,
+              timeReminder: dayjs().set('hour', hour).set('minute', minutes).set('second', 0).toDate(),
+              alarm,
+            }, task: taskExist
           });
-          !Array.isArray(newFileResource) && !newFileResource.fileType.includes("image")
-            ? await this.prisma.taskFile.create({ data: { resourceId: newFileResource.id, taskId: id } })
-            : !Array.isArray(newFileResource) && newFileResource.fileType.includes("image") ?
-              await this.prisma.taskImage.create({ data: { resourceId: newFileResource.id, taskId: id } }) : undefined
         }
-      }));
-    }
-    await this.prisma.task.update({
-      where: { id, deletedAt: null },
-      data: { ...body }
-    })
+      }
+      if (assigneeUserIds && assigneeUserIds.length > 0) {
+        const assigneeIds = new Set(TaskAssignees.map(({ userId }) => userId));
+        assigneeIds.add(createdById);
+        const data = assigneeUserIds
+          .filter((userId) => !assigneeIds.has(userId))
+          .map((userId) => ({ taskId: id, userId }));
 
-    return `This action updates a #${id} task`;
+        if (data.length > 0) await prisma.taskAssignee.createMany({ data });
+      }
+      if (assigneeUserIds?.length === 0) await prisma.taskAssignee.deleteMany({ where: { taskId: id } });
+      if (files?.length === 0) {
+        const oldResourceFiles = TaskFiles.map(({ Resource }) => Resource);
+        const oldResourceImages = TaskImages.map(({ Resource }) => Resource);
+        if (oldResourceFiles.length > 0) await prisma.taskFile.deleteMany({ where: { taskId: id } });
+        if (oldResourceImages.length > 0) await prisma.taskImage.deleteMany({ where: { taskId: id } });
+        this.ee.emit(DeletedFilesTaskEvent.key, new DeletedFilesTaskEvent({ oldResourceFiles, oldResourceImages }));
+      }
+      if (files && files.length > 0) {
+        const objectKeyFiles = new Set(TaskFiles.map(({ Resource }) => Resource.fileName));
+        const objectKeyImages = new Set(TaskImages.map(({ Resource }) => Resource.fileName));
+        await Promise.all(files.map(async (fileName) => {
+          const fileExists = [...objectKeyFiles, ...objectKeyImages].some(key => key.includes(this.fileService.parseFilename(fileName)));
+          if (!fileExists) {
+            const newFileResource = await this.fileService.handleUploadObjectStorage({
+              fileName,
+              prefix: this.config.env.OBJECT_STORAGE_PREFIX_PROJECT_FILE,
+              user
+            });
+            if (!Array.isArray(newFileResource)) {
+              if (!newFileResource.fileType.includes("image")) {
+                await prisma.taskFile.create({ data: { resourceId: newFileResource.id, taskId: id } });
+              } else if (newFileResource.fileType.includes("image")) {
+                await prisma.taskImage.create({ data: { resourceId: newFileResource.id, taskId: id } });
+              }
+            }
+          }
+        }));
+      }
+      await prisma.task.update({
+        where: { id, deletedAt: null },
+        data: {
+          ...rest,
+          startDate: startDate ? dayjs.utc(startDate).toDate() : undefined,
+          endDate: endDate ? dayjs.utc(endDate).toDate() : undefined,
+          editedById: user.id,
+          projectId: !taskExist.projectId ? projectId : undefined
+        }
+      });
+    });
+
+    return { message: LangResponse({ key: "updated", lang, object: "task" }) };
   }
+
 
   async remove({ lang, param: { id }, user }: IRemoveTask) {
     const taskExist = await this.prisma.task.findFirst({ where: { id, createdById: user.id } })

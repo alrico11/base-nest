@@ -8,7 +8,7 @@ import { LogService } from "src/log";
 import { PrismaService } from "src/prisma";
 import { dotToObject } from "src/utils/string";
 import { XConfig } from "src/xconfig";
-import { ICheckRoleCollaborator, ICreateProject, IFindAllProject, IFindAllProjectCollaborator, IFindOneProject, IRemoveProject, IUpdateProject } from "./project.@types";
+import { ICheckProjectCollaborator, ICheckRoleCollaborator, ICreateProject, IFindAllProject, IFindAllProjectCollaborator, IFindOneProject, IRemoveProject, IUpdateProject } from "./project.@types";
 import { DeletedProjectFilesEvent, UpdatedProjectEvent } from "./project.event";
 
 @Injectable()
@@ -340,6 +340,22 @@ export class ProjectService {
   async ownerGuard({ projectId, userId, lang }: ICheckRoleCollaborator) {
     const isOwner = await this.prisma.project.findFirst({ where: { id: projectId, creatorId: userId } })
     if (!isOwner) throw new HttpException(LangResponse({ key: "unauthorize", lang, object: "collaborator" }), HttpStatus.UNAUTHORIZED)
+    return true
+  }
+
+  async checkProjectCollaborator({ organizationId, userIds, lang, projectId }: ICheckProjectCollaborator) {
+    const project = await this.prisma.project.findFirst({
+      where: { id: projectId, organizationId },
+      include: { ProjectCollaborators: true }
+    })
+    if (!project) throw new HttpException(LangResponse({ key: "notFound", lang, object: "project" }), HttpStatus.NOT_FOUND)
+    const { ProjectCollaborators, creatorId } = project
+    const memberIds = new Set(ProjectCollaborators.map(({ userId }) => { return userId }))
+    memberIds.add(creatorId)
+    userIds.map((id) => {
+      if (!memberIds.has(id)) throw new HttpException(LangResponse({ key: "notFound", lang, object: "project" }), HttpStatus.NOT_FOUND)
+      return true
+    })
     return true
   }
 }

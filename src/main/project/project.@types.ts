@@ -49,3 +49,9 @@ export interface ICheckRoleCollaborator {
     userId: string
     lang: LangEnum
 }
+
+export interface ICheckProjectCollaborator {
+    userIds: string[]
+    projectId: string
+    lang: LangEnum
+}
