@@ -277,7 +277,7 @@ model ProjectTag {
   Project Project @relation(fields: [projectId], references: [id])
   Tag     Tag     @relation(fields: [tagId], references: [id])
 
-  @@id([tagId,projectId])
+  @@id([tagId, projectId])
   @@map("project_tag")
 }
 
@@ -502,6 +502,10 @@ model Note {
   id                String             @id @default(uuid())
   title             String
   description       String?
+  creatorId         String             @map("user_id")
+  createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt         DateTime?          @map("deleted_at") @db.Timestamptz(3)
   ProjectNotes      ProjectNote[]
   NoteProjects      NoteProject[]
   NoteOrganizations NoteOrganization[]

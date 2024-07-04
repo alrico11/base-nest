@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma';
-import { ICreateNote } from './note.@types';
+import { ICreateNote, IFindAllNote } from './note.@types';
 import { ReminderService } from '../reminder/reminder.service';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc'
@@ -15,7 +15,7 @@ export class NoteService {
   ) { }
   async create({ body, lang, user }: ICreateNote) {
     const { reminder, ...data } = body
-    const note = await this.prisma.note.create({ data })
+    const note = await this.prisma.note.create({ data: { creatorId: user.id,...data } })
     if (reminder) {
       const { startDate, time, ...rest } = reminder
       const hours = parseInt(time.split(':')[0])
@@ -32,7 +32,10 @@ export class NoteService {
     return { message: LangResponse({ key: "created", lang, object: "note" }) };
   }
 
-  // findAll() {
+  // async findAll({ lang, query, user }: IFindAllNote) {
+  //   const { } = this.prisma.extended.note.paginate({
+  //     where: {}
+  //   })
   //   return `This action returns all note`;
   // }
 
