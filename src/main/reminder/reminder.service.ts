@@ -60,7 +60,7 @@ export class ReminderService {
     await this.prisma.reminderNote.create({ data: { reminderId: data.id, noteId: note.id } })
     return data
   }
-  async updateReminderNote({ reminder, note }: IUpdateReminderNote) {
+  async updateReminderNote({ reminder, note, reminderNote }: IUpdateReminderNote) {
     const { id, ...rest } = reminder
     const data = await this.prisma.reminder.update({
       where: { id },
@@ -69,7 +69,7 @@ export class ReminderService {
     await this.prisma.reminderNote.update({
       where: {
         reminderId_noteId: {
-          noteId: note.id, reminderId: reminder.id
+          noteId: note.id, reminderId: reminderNote.reminderId
         }
       },
       data: { reminderId: id, noteId: note.id }

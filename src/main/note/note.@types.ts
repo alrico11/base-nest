@@ -1,6 +1,6 @@
 import { User } from "@prisma/client";
-import { CreateNoteBodyDto, FindAllNoteQueryDto } from "./note.dto";
 import { LangEnum } from "src/constants";
+import { CreateNoteBodyDto, DeleteNoteParamDto, FindAllNoteQueryDto, UpdateNoteBodyDto, UpdateNoteParamDto } from "./note.dto";
 
 export interface ICreateNote {
     body: CreateNoteBodyDto
@@ -8,9 +8,21 @@ export interface ICreateNote {
     lang: LangEnum
 }
 
-
 export interface IFindAllNote {
     query: FindAllNoteQueryDto
+    user: User
+    lang: LangEnum
+}
+
+export interface IUpdateNote {
+    param: UpdateNoteParamDto
+    body: UpdateNoteBodyDto
+    user: User
+    lang: LangEnum
+}
+
+export interface IDeleteNote {
+    param: DeleteNoteParamDto
     user: User
     lang: LangEnum
 }

@@ -1,4 +1,4 @@
-import { Note, Prisma, Reminder, Task } from "@prisma/client";
+import { Note, Prisma, Reminder, ReminderNote, Task } from "@prisma/client";
 
 export type CreateReminderInput = Prisma.ReminderCreateInput
 export type UpdateReminderInput = Prisma.ReminderUpdateInput
@@ -28,6 +28,7 @@ export interface ICreateReminderNote {
 }
 
 export interface IUpdateReminderNote {
-    reminder: Reminder
+    reminderNote: ReminderNote
+    reminder: CreateReminderInput
     note: Note
 }

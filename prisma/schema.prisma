@@ -51,6 +51,7 @@ model User {
   Project                        Project[]
   Tag                            Tag[]
   UserDevice                     UserDevice[]
+  Note                           Note[]
 
   @@map("user")
 }
@@ -506,10 +507,11 @@ model Note {
   createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt         DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt         DateTime?          @map("deleted_at") @db.Timestamptz(3)
+  User              User               @relation(fields: [creatorId], references: [id])
   ProjectNotes      ProjectNote[]
   NoteProjects      NoteProject[]
   NoteOrganizations NoteOrganization[]
-  ReminderNotes     ReminderNote[]
+  ReminderNotes     ReminderNote?
 
   @@map("note")
 }
@@ -597,7 +599,7 @@ model ReminderTask {
 
 model ReminderNote {
   reminderId String   @map("reminder_id")
-  noteId     String   @map("note_id")
+  noteId     String   @unique @map("note_id")
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   Reminder   Reminder @relation(fields: [reminderId], references: [id])
   Note       Note     @relation(fields: [noteId], references: [id])

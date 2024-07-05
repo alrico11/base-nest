@@ -2,6 +2,7 @@ import { createZodDto } from "@anatine/zod-nestjs";
 import { IntervalReminder } from "@prisma/client";
 import { zDateFormat } from "src/constants";
 import { FindAllQueryDtoBaseSchema } from "src/constants/findAll-query.dto";
+import { FindOneParamDtoBaseSchema } from "src/constants/findOne-param.dto";
 import { zTimeFormat } from "src/constants/zTimeFormat";
 import { z } from "zod";
 
@@ -20,3 +21,10 @@ export class CreateNoteBodyDto extends createZodDto(CreateNoteBodyDtoSchema) { }
 
 const FindAllNoteQueryDtoSchema = FindAllQueryDtoBaseSchema
 export class FindAllNoteQueryDto extends createZodDto(FindAllNoteQueryDtoSchema) { }
+
+const UpdateNoteParamDtoSchema = FindOneParamDtoBaseSchema
+const UpdateNoteBodyDtoSchema = CreateNoteBodyDtoSchema
+export class UpdateNoteParamDto extends createZodDto(UpdateNoteParamDtoSchema) { }
+export class UpdateNoteBodyDto extends createZodDto(UpdateNoteBodyDtoSchema) { }
+
+export class DeleteNoteParamDto extends createZodDto(UpdateNoteParamDtoSchema) { }
