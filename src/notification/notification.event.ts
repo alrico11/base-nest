@@ -1,5 +1,6 @@
-import { User } from "@prisma/client"
+import { Reminder, User } from "@prisma/client"
 import { CompactClass } from "src/@classes"
+import { CollapseKey, FcmType } from "./notification.@types"
 
 const NOTIFICATION_KEY = "NOTIFICATION_USER"
 
@@ -9,9 +10,9 @@ export type FcmJson = {
 }
 
 export type DataJson = {
-    bookingId: string,
-    type: string,
-    collapseKey: string
+    data: any
+    type: FcmType,
+    collapseKey: CollapseKey
 }
 
 export type NotificationCreateEventType = {

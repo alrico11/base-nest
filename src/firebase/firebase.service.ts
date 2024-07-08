@@ -16,7 +16,7 @@ export class FirebaseService {
       data,
       android: { priority: 'high', ...android }
     }
-    await this.admin.messaging().sendEachForMulticast(message);
+    await this.admin.messaging().sendEachForMulticast(message)
   }
   async verifyToken(idToken: string): Promise<admin.auth.DecodedIdToken> {
     const decodedToken = await this.admin.auth().verifyIdToken(idToken);

@@ -69,8 +69,9 @@ export class TaskService {
           task,
           reminder: {
             dateReminder: dayjs.utc(startDate).toDate(),
-            interval,
             timeReminder: dayjs().set('hour', hour).set('minute', minutes).set('second', 0).toDate(),
+            nextInvocation: dayjs(startDate).set('hour', hour).set('minute', minutes).set('second', 0).toDate(),
+            interval,
             alarm,
           },
         });
@@ -168,6 +169,7 @@ export class TaskService {
             reminder: {
               dateReminder: dayjs.utc(startDate).toDate(),
               interval,
+              nextInvocation: dayjs.utc(startDate).set('hour', hour).set('minute', minutes).set('second', 0).toDate(),
               timeReminder: dayjs().set('hour', hour).set('minute', minutes).set('second', 0).toDate(),
               alarm,
             }, task: taskExist

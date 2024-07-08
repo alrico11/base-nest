@@ -1,1 +1,1 @@
-export const SCHEDULER_QUEUE_KEY = 'scheduler'
+export const SCHEDULER_QUEUE_KEY = 'SCHEDULER'

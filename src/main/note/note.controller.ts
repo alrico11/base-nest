@@ -1,11 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
 import { NoteService } from './note.service';
 import { Lang, LangEnum } from 'src/constants';
-import { UserInstance } from '../auth';
+import { UserInstance, UserJwtGuard } from '../auth';
 import { User } from '@prisma/client';
 import { DeleteNoteParamDto, FindAllNoteQueryDto, UpdateNoteBodyDto, UpdateNoteParamDto } from './note.dto';
+import { UserDeviceGuard } from '../device';
 
 @Controller('note')
+@UseGuards(UserJwtGuard)
+// @UseGuards(UserJwtGuard,UserDeviceGuard)
 export class NoteController {
   constructor(private readonly noteService: NoteService) { }
 

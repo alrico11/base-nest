@@ -1,6 +1,10 @@
 import { User } from "@prisma/client";
 import { NotificationParamDto, NotificationQueryDto } from "./notification.dto";
 import { LangEnum } from "src/constants";
+import { COLLAPSE_KEY_LIST, FCM_TYPE_LIST } from "src/firebase"
+
+export type CollapseKey = keyof typeof COLLAPSE_KEY_LIST
+export type FcmType = keyof typeof FCM_TYPE_LIST
 
 export interface IFindAll {
     query: NotificationQueryDto

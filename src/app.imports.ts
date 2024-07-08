@@ -20,6 +20,11 @@ import { XConfigModule } from "./xconfig"
 import { TaskModule as MainProjectTaskModule } from "./main/project/task"
 import { TaskModule as MainOrganizationTaskModule } from "./main/organization/task"
 import { TaskModule as MainOrganizationProjectTaskModule } from "./main/organization/project/task"
+import { ReminderModule as MainReminderModule, ReminderModule } from "./main/reminder/reminder.module"
+import { NoteModule as MainNoteModule } from "./main/note/note.module"
+import { SchedulerModule } from "./scheduler"
+import { NotificationModule } from "./notification"
+import { FirebaseModule } from "./firebase"
 
 const AppImports: (Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference<any>)[] = [
   XConfigModule,
@@ -36,17 +41,19 @@ const AppImports: (Type<any> | DynamicModule | Promise<DynamicModule> | ForwardR
   LogModule,
   FileModule,
   PrismaModule,
+  SchedulerModule,
+  NotificationModule,
   //ON TESTING
   AuthModule,
   MainDeviceModule,
   UserModule,
-  
+
   //ORGANIZATION
   MainOrganizationModule,
   MainOrganizationTagModule,
   MainOrganizationMemberModule,
   MainOrganizationTaskModule,
-  
+
   //Main Organization Project
   MainOrganizationProjectCollaboratorModule,
   MainOrganizationProjectModule,
@@ -63,6 +70,8 @@ const AppImports: (Type<any> | DynamicModule | Promise<DynamicModule> | ForwardR
   //MAIN
   MainTagModule,
   MainTaskModule,
+  MainReminderModule,
+  MainNoteModule,
   //note
   //comment
   //chat

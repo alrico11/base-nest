@@ -598,7 +598,7 @@ model ReminderTask {
 }
 
 model ReminderNote {
-  reminderId String   @map("reminder_id")
+  reminderId String   @unique @map("reminder_id")
   noteId     String   @unique @map("note_id")
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   Reminder   Reminder @relation(fields: [reminderId], references: [id])

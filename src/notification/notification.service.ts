@@ -14,12 +14,7 @@ export class NotificationService {
 
   async create({ data, fcm, user: { id }, scope }: INotificationCreate) {
     const notification = await this.prisma.notification.create({
-      data: {
-        data: data,
-        scope,
-        fcm: fcm,
-        userId: id
-      }
+      data: { data: data, scope, fcm: fcm, userId: id }
     })
     this.l.info({
       message: `notification create successfully with id ${notification.id} with user id ${id}`

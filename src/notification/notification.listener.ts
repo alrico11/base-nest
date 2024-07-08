@@ -17,7 +17,7 @@ export class NotificationListener {
     ) { }
     @OnEvent(NotificationCreateEvent.key)
     async handleNotificationEvent(notification: NotificationCreateEvent) {
-        const { fcm, user, data, scope } = notification.data
+        const { fcm, user, data, scope} = notification.data
         const { body, title } = fcm
         let tokens: string[] = []
         const token = await this.prisma.userDevice.findFirst({

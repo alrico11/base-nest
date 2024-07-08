@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { LangResponse } from 'src/constants';
+import { DateNow, LangResponse } from 'src/constants';
 import { PrismaService } from 'src/prisma';
 import { dotToObject } from 'src/utils/string';
 import { ReminderService } from '../reminder/reminder.service';
@@ -15,21 +15,32 @@ export class NoteService {
     private readonly reminderService: ReminderService
   ) { }
   async create({ body, lang, user }: ICreateNote) {
-    const { reminder, ...data } = body
-    const note = await this.prisma.note.create({ data: { creatorId: user.id, ...data } })
-    if (reminder) {
-      const { startDate, time, ...rest } = reminder
-      const hours = parseInt(time.split(':')[0])
-      const minutes = parseInt(time.split(':')[1])
-      this.reminderService.createReminderNote({
-        note,
-        reminder: {
-          dateReminder: dayjs.utc(startDate).toDate(),
-          timeReminder: dayjs().set('hour', hours).set('minute', minutes).set('second', 0).toDate(),
-          ...rest
-        }
-      })
-    }
+    const { reminder, ...data } = body;
+    await this.prisma.$transaction(async (prisma) => {
+      const note = await prisma.note.create({
+        data: { creatorId: user.id, ...data }
+      });
+      if (reminder) {
+        const { startDate, time, ...rest } = reminder;
+        DateNow({ date: startDate, time: time, lang })
+        const hour = parseInt(time.split(':')[0]);
+        const minutes = parseInt(time.split(':')[1]);
+        await this.reminderService.createReminderNote({
+          lang,
+          user,
+          db: prisma,
+          note,
+          reminder: {
+            dateReminder: dayjs.utc(startDate).toDate(),
+            timeReminder: dayjs(startDate).set('hour', hour).set('minute', minutes).set('second', 0).toDate(),
+            nextInvocation: dayjs(startDate).set('hour', hour).set('minute', minutes).set('second', 0).toDate(),
+            ...rest
+          }
+        });
+      }
+      return note;
+    });
+
     return { message: LangResponse({ key: "created", lang, object: "note" }) };
   }
 
@@ -63,47 +74,55 @@ export class NoteService {
   async update({ body, lang, param: { id }, user }: IUpdateNote) {
     const noteExist = await this.prisma.note.findFirst({
       where: { id, deletedAt: null, creatorId: user.id },
-      include: {
-        ReminderNotes: true,
+      include: { ReminderNotes: true }
+    });
+
+    if (!noteExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "note" }), HttpStatus.NOT_FOUND);
+    const { reminder, ...data } = body;
+    await this.prisma.$transaction(async (prisma) => {
+      const note = await prisma.note.update({
+        where: { id, creatorId: user.id },
+        data: { creatorId: user.id, ...data }
+      });
+      if (reminder) {
+        const { startDate, time, ...rest } = reminder;
+        DateNow({ date: startDate, time: time, lang })
+        const hours = parseInt(time.split(':')[0]);
+        const minutes = parseInt(time.split(':')[1]);
+        if (noteExist.ReminderNotes) {
+          await this.reminderService.updateReminderNote({
+            note,
+            reminderNote: noteExist.ReminderNotes,
+            reminder: {
+              dateReminder: dayjs.utc(startDate).toDate(),
+              timeReminder: dayjs(startDate).set('hour', hours).set('minute', minutes).set('second', 0).toDate(),
+              ...rest
+            }
+          });
+        } else {
+          await this.reminderService.createReminderNote({
+            lang, user, db: prisma, note,
+            reminder: {
+              dateReminder: dayjs.utc(startDate).toDate(),
+              timeReminder: dayjs(startDate).set('hour', hours).set('minute', minutes).set('second', 0).toDate(),
+              ...rest
+            }
+          });
+        }
+      } else if (noteExist.ReminderNotes?.reminderId) {
+        await this.reminderService.removeReminderNote({
+          noteId: note.id,
+          reminderId: noteExist.ReminderNotes?.reminderId
+        });
       }
-    })
-    if (!noteExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "note" }), HttpStatus.NOT_FOUND)
-    const { reminder, ...data } = body
-    const note = await this.prisma.note.update({ where: { id, creatorId: user.id }, data: { creatorId: user.id, ...data } })
-    if (reminder) {
-      const { startDate, time, ...rest } = reminder
-      const hours = parseInt(time.split(':')[0])
-      const minutes = parseInt(time.split(':')[1])
-      if (noteExist.ReminderNotes) await this.reminderService.updateReminderNote({
-        note,
-        reminderNote: noteExist.ReminderNotes,
-        reminder: {
-          dateReminder: dayjs.utc(startDate).toDate(),
-          timeReminder: dayjs().set('hour', hours).set('minute', minutes).set('second', 0).toDate(),
-          ...rest
-        }
-      })
-      if (!noteExist.ReminderNotes) await this.reminderService.createReminderNote({
-        note,
-        reminder: {
-          dateReminder: dayjs.utc(startDate).toDate(),
-          timeReminder: dayjs().set('hour', hours).set('minute', minutes).set('second', 0).toDate(),
-          ...rest
-        }
-      })
-    }
-    if (!reminder && noteExist.ReminderNotes?.reminderId) {
-      await this.reminderService.removeReminderNote({ noteId: note.id, reminderId: noteExist.ReminderNotes?.reminderId })
-    }
+      return note;
+    });
     return { message: LangResponse({ key: "updated", lang, object: "note" }) };
   }
-
   async remove({ lang, param: { id }, user }: IDeleteNote) {
     const noteExist = await this.prisma.note.findFirst({
       where: { id, deletedAt: null, creatorId: user.id },
-      include: {
-        ReminderNotes: true,
-      }
+      include: { ReminderNotes: true }
     })
     if (!noteExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "note" }), HttpStatus.NOT_FOUND)
     await this.prisma.note.update({
