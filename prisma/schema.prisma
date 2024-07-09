@@ -261,7 +261,6 @@ model Project {
   ProjectAdmins        ProjectAdmin[]
   ProjectImages        ProjectImage[]
   ProjectFiles         ProjectFile[]
-  ProjectNotes         ProjectNote[]
   Tasks                Task[]
   NoteProjects         NoteProject[]
   ChatRoomProjects     ChatRoomProject[]
@@ -356,20 +355,6 @@ model ProjectFile {
 
   @@id([projectId, resourceId])
   @@map("project_file")
-}
-
-model ProjectNote {
-  projectId String    @map("project_id")
-  noteId    String    @map("note_id")
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
-  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
-
-  Project Project @relation(fields: [projectId], references: [id])
-  Note    Note    @relation(fields: [noteId], references: [id])
-
-  @@id([projectId, noteId])
-  @@map("project_note")
 }
 
 model EventLog {
@@ -508,7 +493,6 @@ model Note {
   updatedAt         DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt         DateTime?          @map("deleted_at") @db.Timestamptz(3)
   User              User               @relation(fields: [creatorId], references: [id])
-  ProjectNotes      ProjectNote[]
   NoteProjects      NoteProject[]
   NoteOrganizations NoteOrganization[]
   ReminderNotes     ReminderNote?
@@ -546,7 +530,7 @@ model Comment {
   id                 String    @id @default(uuid())
   content            String
   authorId           String    @map("author_id")
-  referenceCommentId String    @map("reference_comment_id")
+  referenceCommentId String?    @map("reference_comment_id")
   createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt          DateTime? @map("deleted_at") @db.Timestamptz(3)
@@ -554,7 +538,7 @@ model Comment {
   TaskComment TaskComment[]
 
   Author        User      @relation(fields: [authorId], references: [id])
-  ParentComment Comment   @relation(name: "ReferenceComments", fields: [referenceCommentId], references: [id])
+  ParentComment Comment?   @relation(name: "ReferenceComments", fields: [referenceCommentId], references: [id])
   ChildComments Comment[] @relation(name: "ReferenceComments")
 
   @@map("comment")

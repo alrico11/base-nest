@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpStatus, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpStatus, HttpCode, Query } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserBodyDto } from './user.dto';
-import { UserJwtGuard } from '../auth';
+import { CreateUserBodyDto, FindAllUserQueryDto, FindOneUserParamDto, UpdateUserBodyDto } from './user.dto';
+import { UserInstance, UserJwtGuard } from '../auth';
 import { DeviceInstance, UserDeviceGuard } from '../device';
-import { Device } from '@prisma/client';
+import { Device, User } from '@prisma/client';
 import { DeviceHeaders, Lang, LangEnum } from 'src/constants';
 import { ApiHeaders, ApiOperation, ApiTags } from '@nestjs/swagger';
 
@@ -21,23 +21,31 @@ export class UserController {
     return this.userService.create({ body, device, lang });
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.userService.findAll();
-  // }
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ operationId: "FindAllUser" })
+  findAll(@Query() query: FindAllUserQueryDto, @Lang() lang: LangEnum) {
+    return this.userService.findAll({ lang, query });
+  }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.userService.findOne(+id);
-  // }
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ operationId: "FindOneUser" })
+  findOneDetail(@Param() param: FindOneUserParamDto, @Lang() lang: LangEnum) {
+    return this.userService.findOne({ lang, param });
+  }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.userService.update(+id, updateUserDto);
-  // }
+  @Patch()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ operationId: "UpdateUser" })
+  update(@UserInstance() user: User, @Body() body: UpdateUserBodyDto, @Lang() lang: LangEnum) {
+    return this.userService.update({ body, lang, user });
+  }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.userService.remove(+id);
-  // }
+  @Delete()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ operationId: "RemoveUser" })
+  remove(@UserInstance() user: User, @Lang() lang: LangEnum) {
+    return this.userService.remove({ lang, user });
+  }
 }

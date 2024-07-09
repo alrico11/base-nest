@@ -32,6 +32,9 @@ const zEnvValidationSchema = z.object({
     BLURHASH_COMPONENT_X: z.number({ coerce: true }),
     BLURHASH_COMPONENT_Y: z.number({ coerce: true }),
     MAX_CHILD_RESOURCE: z.number({ coerce: true }),
+    USER_RESET_TOKEN_EXPIRY: z.number({ coerce: true }),
+    EMAIL_ADDRESS : z.string(),
+    EMAIL_PASSWORD : z.string(),
 })
 
 export type IXConfig = z.infer<typeof zEnvValidationSchema>

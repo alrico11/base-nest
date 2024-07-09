@@ -1,34 +1,31 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { User } from '@prisma/client';
+import { Lang, LangEnum } from 'src/constants';
+import { UserInstance } from '../auth';
+import { CreateCommentTaskBodyDto, CreateCommentTaskParamDto, DeleteCommentTaskParamDto, FindAllCommentTaskParam, FindAllCommentTaskQuery, UpdateCommentTaskBodyDto, UpdateCommentTaskParamDto } from './comment.dto';
 import { CommentService } from './comment.service';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
 
-@Controller('comment')
+@Controller('task/:taskId/comment')
 export class CommentController {
-  constructor(private readonly commentService: CommentService) {}
+  constructor(private readonly commentService: CommentService) { }
 
   @Post()
-  create(@Body() createCommentDto: CreateCommentDto) {
-    return this.commentService.create(createCommentDto);
+  create(@Body() body: CreateCommentTaskBodyDto, @Param() param: CreateCommentTaskParamDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
+    return this.commentService.create({ body, lang, param, user });
   }
 
   @Get()
-  findAll() {
-    return this.commentService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.commentService.findOne(+id);
+  findAll(@Query() query: FindAllCommentTaskQuery, @Param() param: FindAllCommentTaskParam, @Lang() lang: LangEnum) {
+    return this.commentService.findAll({ lang, param, query });
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCommentDto: UpdateCommentDto) {
-    return this.commentService.update(+id, updateCommentDto);
+  update(@Param() param: UpdateCommentTaskParamDto, @Body() body: UpdateCommentTaskBodyDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
+    return this.commentService.update({ body, lang, param, user });
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.commentService.remove(+id);
+  remove(@Param('id') param: DeleteCommentTaskParamDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
+    return this.commentService.remove({ lang, param, user });
   }
 }

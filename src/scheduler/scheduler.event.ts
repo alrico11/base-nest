@@ -11,4 +11,14 @@ type SchedulerCreateReminderNoteEventType = {
     lang: LangEnum
 }
 
+type SchedulerUserResetTokenJob = {
+    expiry: number
+    user: User
+    token: string
+}
+
+export class SchedulerUserResetTokenJobEvent extends CompactClass<SchedulerUserResetTokenJob> {
+    public static key = `SCHEDULER_USER_JOB.CREATED`
+}
+
 export class SchedulerCreateReminderNoteEvent extends CompactClass<SchedulerCreateReminderNoteEventType> { public static key = "SCHEDULER_REMINDER_NOTE.CREATED" }

@@ -7,15 +7,14 @@ import { CreateNoteBodyDto, CreateNoteParamDto, NoteService } from 'src/main/not
 @Controller()
 export class NoteController {
   constructor(private readonly noteService: NoteService) { }
-  // NOTE MAIN UNDER PROJECT
-  @Post('project/:projectId/note')
-  projectCreateNote(@Param() param: CreateNoteParamDto, @Body() body: CreateNoteBodyDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
+  // NOTE UNDER ORGANIZATION 
+  @Post('organization/:organizationId/note')
+  OrganizationCreateNote(@Param() param: CreateNoteParamDto, @Body() body: CreateNoteBodyDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.noteService.create({ body, lang, user, param });
   }
 
-  @Get("project/:projectId/note")
-  projectFindAllNote(@Param() param: CreateNoteParamDto, @Body() body: CreateNoteBodyDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
+  @Get("organization/:organizationId/note")
+  organizationFindAllNote(@Param() param: CreateNoteParamDto, @Body() body: CreateNoteBodyDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.noteService.create({ body, lang, user, param });
   }
-
 }

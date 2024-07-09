@@ -17,10 +17,16 @@ const CreateNoteBodyDtoSchema = z.object({
     description: z.string().optional(),
     reminder: CreateReminderBodyDtoSchema.optional()
 })
+const CreateNoteParamDtoSchema = z.object({
+    projectId : z.string().uuid().optional(),
+    organizationId : z.string().uuid().optional()
+})
 export class CreateNoteBodyDto extends createZodDto(CreateNoteBodyDtoSchema) { }
+export class CreateNoteParamDto  extends createZodDto(CreateNoteParamDtoSchema) { }
 
 const FindAllNoteQueryDtoSchema = FindAllQueryDtoBaseSchema
 export class FindAllNoteQueryDto extends createZodDto(FindAllNoteQueryDtoSchema) { }
+export class FindAllNoteParamDto extends createZodDto(CreateNoteParamDtoSchema) { }
 
 const UpdateNoteParamDtoSchema = FindOneParamDtoBaseSchema
 const UpdateNoteBodyDtoSchema = CreateNoteBodyDtoSchema

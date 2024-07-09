@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
-import { NoteService } from './note.service';
-import { NoteController } from './note.controller';
 import { ReminderModule } from '../reminder/reminder.module';
+import { NoteController } from './note.controller';
+import { NoteService } from './note.service';
 
 @Module({
-  imports :[ReminderModule],
+  imports: [ReminderModule],
   controllers: [NoteController],
   providers: [NoteService],
+  exports: [NoteService]
 })
-export class NoteModule {}
+export class NoteModule { }
