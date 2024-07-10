@@ -28,7 +28,10 @@ const FindAllNoteQueryDtoSchema = FindAllQueryDtoBaseSchema
 export class FindAllNoteQueryDto extends createZodDto(FindAllNoteQueryDtoSchema) { }
 export class FindAllNoteParamDto extends createZodDto(CreateNoteParamDtoSchema) { }
 
-const UpdateNoteParamDtoSchema = FindOneParamDtoBaseSchema
+export const UpdateNoteParamDtoSchema = FindOneParamDtoBaseSchema.extend({
+    projectId : z.string().uuid().optional(),
+    organizationId : z.string().uuid().optional()
+})
 const UpdateNoteBodyDtoSchema = CreateNoteBodyDtoSchema
 export class UpdateNoteParamDto extends createZodDto(UpdateNoteParamDtoSchema) { }
 export class UpdateNoteBodyDto extends createZodDto(UpdateNoteBodyDtoSchema) { }

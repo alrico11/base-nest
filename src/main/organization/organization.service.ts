@@ -173,7 +173,7 @@ export class OrganizationService {
         Creator: { include: { Resource: true } }
       }
     });
-    const data = result.map(({ OrganizationAdmin, OrganizationMembers, Creator }) => {
+    const data = result.map(({ OrganizationAdmin, OrganizationMembers, Creator, creatorId }) => {
       const adminIds = new Set(OrganizationAdmin.map(({ userId }) => userId));
       const { Resource } = Creator
       const members = OrganizationMembers.map(({ User }) => {
@@ -191,7 +191,7 @@ export class OrganizationService {
         userDetails: {
           userId: user.id,
           name: user.name,
-          role: adminIds.has(user.id) ? LangWord({ key: "admin", lang }) : LangWord({ key: "member", lang })
+          role: adminIds.has(user.id) ? LangWord({ key: "admin", lang }) : creatorId === user.id ? LangWord({ key: "owner", lang }) : LangWord({ key: "member", lang })
         },
         members: [
           {
@@ -235,6 +235,15 @@ export class OrganizationService {
   async ownerGuard({ organizationId, userId, lang }: ICheckRole) {
     const isOwner = await this.prisma.organization.findFirst({ where: { id: organizationId, creatorId: userId } })
     if (!isOwner) throw new HttpException(LangResponse({ key: "unauthorize", lang, object: "user" }), HttpStatus.UNAUTHORIZED)
+    return true
+  }
+
+  async memberGuard({ lang, organizationId, userId }: ICheckRole) {
+    const organization = await this.prisma.organization.findFirst({ where: { id: organizationId, deletedAt: null }, include: { OrganizationMembers: true } })
+    if (!organization) throw new HttpException(LangResponse({ key: "notFound", lang, object: "organization" }), HttpStatus.NOT_FOUND)
+    const memberIds = new Set(organization.OrganizationMembers.map(({ userId }) => { return userId }))
+    memberIds.add(organization.creatorId)
+    if (!memberIds.has(userId)) throw new HttpException(LangResponse({ key: "unauthorize", lang, object: "user" }), HttpStatus.UNAUTHORIZED)
     return true
   }
 }

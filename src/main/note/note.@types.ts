@@ -1,6 +1,7 @@
 import { User } from "@prisma/client";
 import { LangEnum } from "src/constants";
-import { CreateNoteBodyDto, CreateNoteParamDto, DeleteNoteParamDto, FindAllNoteParamDto, FindAllNoteQueryDto, UpdateNoteBodyDto, UpdateNoteParamDto } from "./note.dto";
+import { CreateNoteBodyDto, CreateNoteParamDto, DeleteNoteParamDto, FindAllNoteParamDto, FindAllNoteQueryDto, UpdateNoteBodyDto, UpdateNoteParamDto, UpdateNoteParamDtoSchema } from "./note.dto";
+import { z } from "zod";
 
 export interface ICreateNote {
     body: CreateNoteBodyDto
@@ -27,4 +28,16 @@ export interface IDeleteNote {
     param: DeleteNoteParamDto
     user: User
     lang: LangEnum
+}
+
+export interface ICheckToHandle {
+    param: z.infer<typeof UpdateNoteParamDtoSchema>
+    user: User
+    lang: LangEnum
+}
+
+export interface ICheckMemberOrCollaborator {
+    organizationId? : string
+    projectId? : string
+    userId : string
 }

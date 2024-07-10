@@ -8,7 +8,8 @@ import { CreateOrganizationBodyDto, DeleteOrganizationParamDto, FindAllMemberOrg
 import { OrganizationService } from './organization.service';
 
 @ApiHeaders(DeviceHeaders)
-@UseGuards(UserJwtGuard, UserDeviceGuard)
+// @UseGuards(UserJwtGuard, UserDeviceGuard)
+@UseGuards(UserJwtGuard)
 @ApiTags("User Organization")
 @Controller('organization')
 export class OrganizationController {

@@ -61,10 +61,14 @@ export class TaskService {
         const minutes = parseInt(time.split(':')[1])
         await this.reminderService.create({
           task,
+          db: prisma,
+          lang,
+          user,
           reminder: {
             dateReminder: dayjs.utc(startDate).toDate(),
             interval,
             timeReminder: dayjs().set('hour', hour).set('minute', minutes).set('second', 0).toDate(),
+            nextInvocation: dayjs(startDate).set('hour', hour).set('minute', minutes).set('second', 0).toDate(),
             alarm,
           },
         });
@@ -156,9 +160,17 @@ export class TaskService {
         const hour = parseInt(time.split(':')[0]);
         const minutes = parseInt(time.split(':')[1]);
         if (ReminderTasks) {
-          await this.reminderService.update({ reminder: ReminderTasks.Reminder, task: taskExist });
+          await this.reminderService.update({
+            reminderTask : ReminderTasks,
+            reminder: ReminderTasks.Reminder,
+            task: taskExist,
+            db: prisma,
+            lang, user
+          });
         } else {
           await this.reminderService.create({
+            db: prisma,
+            lang, user,
             reminder: {
               dateReminder: dayjs.utc(startDate).toDate(),
               interval,

@@ -5,13 +5,13 @@ import dayjs from 'dayjs';
 import utc from "dayjs/plugin/utc";
 import { LangResponse } from 'src/constants';
 import { FileService } from 'src/file';
+import { ReminderService } from 'src/main/reminder/reminder.service';
 import { PrismaService } from 'src/prisma';
 import { dotToObject } from 'src/utils/string';
 import { XConfig } from 'src/xconfig';
+import { OrganizationService } from '../organization.service';
 import { ICreateTask, IFindAllTask, IFindOneTask, IRemoveTask, IUpdateTask, ReminderType } from './task.@types';
 import { DeletedFilesTaskEvent } from './task.event';
-import { ReminderService } from 'src/main/reminder/reminder.service';
-import { OrganizationService } from '../organization.service';
 
 dayjs.extend(utc);
 @Injectable()
@@ -66,7 +66,7 @@ export class TaskService {
         const hour = parseInt(time.split(':')[0])
         const minutes = parseInt(time.split(':')[1])
         await this.reminderService.create({
-          task,
+          task, db: prisma, lang, user,
           reminder: {
             dateReminder: dayjs.utc(startDate).toDate(),
             timeReminder: dayjs().set('hour', hour).set('minute', minutes).set('second', 0).toDate(),
@@ -163,9 +163,10 @@ export class TaskService {
         const hour = parseInt(time.split(':')[0]);
         const minutes = parseInt(time.split(':')[1]);
         if (ReminderTasks) {
-          await this.reminderService.update({ reminder: ReminderTasks.Reminder, task: taskExist });
+          await this.reminderService.update({ db: prisma, reminderTask: ReminderTasks, lang, user, reminder: ReminderTasks.Reminder, task: taskExist });
         } else {
           await this.reminderService.create({
+            db: prisma, lang, user,
             reminder: {
               dateReminder: dayjs.utc(startDate).toDate(),
               interval,

@@ -59,6 +59,8 @@ export const LangObjects = {
         member: "anggota",
         admin: "admin",
         owner: "pemilik",
+        comment:"komentar",
+        note:"catatan"
     },
     EN: {
         organization: "organization",
@@ -72,6 +74,9 @@ export const LangObjects = {
         member: "member",
         admin: "admin",
         collaborator: "collaborator",
-        owner: "owner"
+        owner: "owner",
+        comment:"comment",
+        note:"note"
+
     }
 }

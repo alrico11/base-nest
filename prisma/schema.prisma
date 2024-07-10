@@ -530,7 +530,7 @@ model Comment {
   id                 String    @id @default(uuid())
   content            String
   authorId           String    @map("author_id")
-  referenceCommentId String?    @map("reference_comment_id")
+  referenceCommentId String?   @map("reference_comment_id")
   createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt          DateTime? @map("deleted_at") @db.Timestamptz(3)
@@ -538,7 +538,7 @@ model Comment {
   TaskComment TaskComment[]
 
   Author        User      @relation(fields: [authorId], references: [id])
-  ParentComment Comment?   @relation(name: "ReferenceComments", fields: [referenceCommentId], references: [id])
+  ParentComment Comment?  @relation(name: "ReferenceComments", fields: [referenceCommentId], references: [id])
   ChildComments Comment[] @relation(name: "ReferenceComments")
 
   @@map("comment")
@@ -560,7 +560,7 @@ model Reminder {
   interval           IntervalReminder
   alarm              Boolean          @default(false)
   previousInvocation DateTime?        @db.Timestamptz(3)
-  nextInvocation     DateTime?        @db.Timestamptz(3)
+  nextInvocation     DateTime         @db.Timestamptz(3)
   createdAt          DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt          DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt          DateTime?        @map("deleted_at") @db.Timestamptz(3)
@@ -571,7 +571,7 @@ model Reminder {
 }
 
 model ReminderTask {
-  reminderId String   @map("reminder_id")
+  reminderId String   @unique @map("reminder_id")
   taskId     String   @unique @map("task_id")
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   Reminder   Reminder @relation(fields: [reminderId], references: [id])

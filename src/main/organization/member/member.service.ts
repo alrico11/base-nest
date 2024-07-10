@@ -44,13 +44,10 @@ export class MemberService {
           organizationId_userId: { organizationId: id, userId }
         }
       });
-      if (adminJoined)
+      if (adminJoined){
         await this.organizationService.ownerGuard({ lang, organizationId: id, userId: user.id })
-      await prisma.organizationAdmin.delete({
-        where: {
-          organizationId_userId: { organizationId: id, userId }
-        }
-      });
+        await prisma.organizationAdmin.delete({ where: { organizationId_userId: { organizationId: id, userId } } });
+      }
       if (!adminJoined && !userJoined) throw new HttpException(LangResponse({ key: "notJoin", lang, object: "member" }), HttpStatus.BAD_REQUEST);
 
       return { message: LangResponse({ key: "deleted", lang, object: 'member' }) };

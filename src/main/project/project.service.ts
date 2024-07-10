@@ -243,14 +243,14 @@ export class ProjectService {
       }
     })
 
-    const data = result.map(({ ProjectAdmins, ProjectCollaborators, User }) => {
+    const data = result.map(({ ProjectAdmins, ProjectCollaborators, User, creatorId }) => {
       const adminIds = new Set(ProjectAdmins.map(({ userId }) => { return userId }))
       const collaborators = ProjectCollaborators.map(({ User }) => {
         const { Resource, name, updatedAt } = User
         return {
           userId: User.id,
           name,
-          role: adminIds.has(id) ? LangWord({ key: "admin", lang }) : LangWord({ key: "member", lang }),
+          role: adminIds.has(User.id) ? LangWord({ key: "admin", lang }) : creatorId === User.id ? LangWord({ key: "owner", lang }) : LangWord({ key: "member", lang }),
           thumbnail: Resource ? this.fileService.cdnUrl({ objectKey: Resource.objectKey }) : undefined,
           blurhash: Resource ? Resource.blurHash : undefined,
           updatedAt,

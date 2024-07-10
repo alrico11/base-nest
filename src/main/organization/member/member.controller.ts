@@ -9,7 +9,8 @@ import { UserDeviceGuard } from 'src/main/device';
 
 @Controller('organization/:id/member')
 @ApiHeaders(DeviceHeaders)
-@UseGuards(UserJwtGuard, UserDeviceGuard)
+// @UseGuards(UserJwtGuard, UserDeviceGuard)
+@UseGuards(UserJwtGuard)
 @ApiTags("User Organization Member")
 export class MemberController {
   constructor(private readonly memberService: MemberService) { }
