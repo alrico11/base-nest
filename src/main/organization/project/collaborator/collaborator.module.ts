@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
-import { CollaboratorService } from './collaborator.service';
+import { CollaboratorModule as MainCollaboratorModule } from 'src/main/project/collaborator';
 import { CollaboratorController } from './collaborator.controller';
-import { ProjectModule } from '../project.module';
+import { ProjectModule } from 'src/main/project';
 
 @Module({
-  imports: [ProjectModule],
+  imports:[MainCollaboratorModule,ProjectModule],
   controllers: [CollaboratorController],
-  providers: [CollaboratorService],
 })
-export class CollaboratorModule { }
+export class CollaboratorModule {}

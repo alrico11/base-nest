@@ -13,7 +13,7 @@ export class ReminderListener {
     ) { }
     //HANDLE NOTIFICATION
     @OnEvent(CreateReminderNotificationEvent.key)
-    async handleCreateReminderNotificationEvent({ data: { lang, note, reminder, user, organization, project, task } }: CreateReminderNotificationEvent) {
+    async handleCreateReminderNotificationEvent({ data: { lang, note, reminder, user, organization, project, task, delay } }: CreateReminderNotificationEvent) {
         const item = note || task;
         if (!item) {
             throw new Error("Neither note nor task is provided.");
@@ -31,23 +31,27 @@ export class ReminderListener {
         }));
         const newReminder = await this.prisma.reminder.findFirst({ where: { id: reminder.id, deletedAt: null } });
         if (newReminder && newReminder.interval !== IntervalReminder.ONCE && note) {
-            console.log("masuk sini")
             this.ee.emit(SchedulerCreateReminderNoteEvent.key, new SchedulerCreateReminderNoteEvent({
-                lang, note, reminder: newReminder, user, organization, project
+                lang, note, reminder: newReminder, user, organization, project, delay
+            }));
+        }
+        if (newReminder && newReminder.interval !== IntervalReminder.ONCE && task) {
+            this.ee.emit(SchedulerCreateReminderTaskEvent.key, new SchedulerCreateReminderTaskEvent({
+                lang, task, reminder: newReminder, user, organization, project, delay
             }));
         }
     }
 
     //NOTE
     @OnEvent(CreateReminderNoteEvent.key)
-    handleShowReminderNoteEvent({ data: { note, lang, reminder, user, organization, project } }: CreateReminderNoteEvent) {
-        this.ee.emit(SchedulerCreateReminderNoteEvent.key, new SchedulerCreateReminderNoteEvent({ lang, reminder, user, organization, project, note }))
+    handleShowReminderNoteEvent({ data: { note, lang, reminder, user, organization, project, delay } }: CreateReminderNoteEvent) {
+        this.ee.emit(SchedulerCreateReminderNoteEvent.key, new SchedulerCreateReminderNoteEvent({ lang, reminder, user, organization, project, note, delay }))
     }
 
     //ON TESTING
     @OnEvent(UpdateReminderNoteEvent.key)
-    handleUpdateReminderNoteEvent({ data: { note, lang, reminder, user, organization, project } }: UpdateReminderNoteEvent) {
-        this.ee.emit(SchedulerUpdateReminderNoteEvent.key, new SchedulerUpdateReminderNoteEvent({ lang, reminder, user, organization, project, note }))
+    handleUpdateReminderNoteEvent({ data: { note, lang, reminder, user, organization, project, delay } }: UpdateReminderNoteEvent) {
+        this.ee.emit(SchedulerUpdateReminderNoteEvent.key, new SchedulerUpdateReminderNoteEvent({ lang, reminder, user, organization, project, note, delay }))
     }
     @OnEvent(DeleteReminderNoteEvent.key)
     handleDeleteReminderNoteEvent({ data: { reminder } }: DeleteReminderNoteEvent) {
@@ -56,13 +60,13 @@ export class ReminderListener {
 
     //TASK
     @OnEvent(CreateReminderTaskEvent.key)
-    handleCreateReminderTaskEvent({ data: { lang, reminder, task, user, organization, project } }: CreateReminderTaskEvent) {
-        this.ee.emit(SchedulerCreateReminderTaskEvent.key, new SchedulerCreateReminderTaskEvent({ lang, reminder, task, user, organization, project }))
+    handleCreateReminderTaskEvent({ data: { lang, reminder, task, user, organization, project,delay } }: CreateReminderTaskEvent) {
+        this.ee.emit(SchedulerCreateReminderTaskEvent.key, new SchedulerCreateReminderTaskEvent({ lang, reminder, task, user, organization, project,delay }))
     }
 
     @OnEvent(UpdateReminderTaskEvent.key)
-    handleUpdateReminderTaskEvent({ data: { lang, newReminder, oldReminder, task, user, organization, project } }: UpdateReminderTaskEvent) {
-        this.ee.emit(SchedulerUpdateReminderTaskEvent.key, new SchedulerUpdateReminderTaskEvent({ lang, newReminder, oldReminder, task, user, organization, project }))
+    handleUpdateReminderTaskEvent({ data: { lang, reminder, task, user, organization, project,delay } }: UpdateReminderTaskEvent) {
+        this.ee.emit(SchedulerUpdateReminderTaskEvent.key, new SchedulerUpdateReminderTaskEvent({ lang, reminder, task, user, organization, project,delay }))
     }
 
     @OnEvent(DeleteReminderTaskEvent.key)

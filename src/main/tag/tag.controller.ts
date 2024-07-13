@@ -4,7 +4,7 @@ import { DeviceHeaders, Lang, LangEnum } from 'src/constants';
 import { ApiHeaders, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserInstance, UserJwtGuard } from '../auth';
 import { UserDeviceGuard } from '../device';
-import { CreateTagBodyDto, DeleteTagParamDto, FindAllTagQueryDto, UpdateTagBodyDto, UpdateTagParamDto } from './tag.dto';
+import { CreateTagBodyDto, CreateTagParamDto, DeleteTagParamDto, FindAllTagParamDto, FindAllTagQueryDto, UpdateTagBodyDto, UpdateTagParamDto } from './tag.dto';
 import { User } from '@prisma/client';
 
 @Controller('tag')
@@ -12,20 +12,20 @@ import { User } from '@prisma/client';
 @ApiTags('User Tag')
 @UseGuards(UserJwtGuard, UserDeviceGuard)
 export class TagController {
-  constructor(private readonly tagService: TagService) {}
+  constructor(private readonly tagService: TagService) { }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ operationId: 'CreateTag' })
-  create(@Body() body: CreateTagBodyDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
-    return this.tagService.create({ body, lang, user });
+  create(@Param() param: CreateTagParamDto, @Body() body: CreateTagBodyDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
+    return this.tagService.create({ body, lang, user, param });
   }
 
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ operationId: 'FindAllTags' })
-  findAll(@Query() query: FindAllTagQueryDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
-    return this.tagService.findAll({ lang, query, user });
+  findAll(@Param() param: FindAllTagParamDto, @Query() query: FindAllTagQueryDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
+    return this.tagService.findAll({ lang, query, user, param });
   }
 
   @Patch(':id')

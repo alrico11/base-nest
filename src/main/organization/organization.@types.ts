@@ -52,3 +52,7 @@ export interface ICheckRole {
     organizationId: string
     lang: LangEnum
 }
+
+export interface IFindOrganizationById{
+    organizationId : string,
+}

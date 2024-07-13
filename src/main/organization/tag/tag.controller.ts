@@ -4,8 +4,7 @@ import { User } from '@prisma/client';
 import { DeviceHeaders, Lang, LangEnum } from 'src/constants';
 import { UserInstance, UserJwtGuard } from 'src/main/auth';
 import { UserDeviceGuard } from 'src/main/device';
-import { CreateTagBodyDto, CreateTagParamDto, DeleteTagParamDto, FindAllTagParamDto, FindAllTagQueryDto, UpdateTagBodyDto, UpdateTagParamDto } from './tag.dto';
-import { TagService } from './tag.service';
+import { TagService, CreateTagBodyDto, CreateTagParamDto, DeleteTagParamDto, FindAllTagParamDto, FindAllTagQueryDto, UpdateTagBodyDto, UpdateTagParamDto } from 'src/main/tag';
 
 @Controller('organization/:organizationId/tag')
 @ApiHeaders(DeviceHeaders)

@@ -3,7 +3,9 @@ import { ApiHeaders, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { DeviceHeaders, Lang, LangEnum } from 'src/constants';
 import { UserInstance, UserJwtGuard } from '../auth';
-import { UserDeviceGuard } from '../device';
+import { AdminGuard } from './admin.guard';
+import { MemberGuard } from './member.guard';
+import { OwnerGuard } from './owner.guard';
 import { CreateOrganizationBodyDto, DeleteOrganizationParamDto, FindAllMemberOrganizationParamDto, FindAllMemberOrganizationQueryDto, FindAllOrganizationQueryDto, FindOneOrganizationParamDto, UpdateOrganizationBodyDto, UpdateOrganizationParamDto } from './organization.dto';
 import { OrganizationService } from './organization.service';
 
@@ -23,6 +25,7 @@ export class OrganizationController {
   }
 
   @HttpCode(HttpStatus.OK)
+  @UseGuards(MemberGuard)
   @ApiOperation({ operationId: "FindAllOrganization" })
   @Get()
   findAll(@Query() query: FindAllOrganizationQueryDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
@@ -32,6 +35,7 @@ export class OrganizationController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ operationId: "FindOneOrganization" })
   @Get(':id')
+  @UseGuards(MemberGuard)
   findOne(@Param() param: FindOneOrganizationParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.organizationService.findOne({ param, lang, user });
   }
@@ -39,6 +43,7 @@ export class OrganizationController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ operationId: "UpdateOrganization" })
   @Patch(':id')
+  @UseGuards(AdminGuard)
   update(@Param() param: UpdateOrganizationParamDto, @Body() body: UpdateOrganizationBodyDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
     return this.organizationService.update({ body, lang, param, user });
   }
@@ -46,14 +51,16 @@ export class OrganizationController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ operationId: "DeleteOrganization" })
   @Delete(':id')
+  @UseGuards(OwnerGuard)
   remove(@Param() param: DeleteOrganizationParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.organizationService.remove({ lang, param, user });
   }
-  
+
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ operationId: "FindAllMember" })
   @Get(':id/member')
-  findAllMember(@Query() query: FindAllMemberOrganizationQueryDto, @Param() param: FindAllMemberOrganizationParamDto,@Lang() lang: LangEnum, @UserInstance() user: User) {
+  @UseGuards(MemberGuard)
+  findAllMember(@Query() query: FindAllMemberOrganizationQueryDto, @Param() param: FindAllMemberOrganizationParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.organizationService.findAllMemberOrganization({ lang, param, query, user })
   }
 }

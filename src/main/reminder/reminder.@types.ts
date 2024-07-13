@@ -6,8 +6,8 @@ export type CreateReminderInput = Prisma.ReminderCreateInput
 export type UpdateReminderInput = Prisma.ReminderUpdateInput
 
 interface BaseReminder {
-    project?: Project
-    organization?: Organization
+    project?: Project | null
+    organization?: Organization | null
     lang: LangEnum
     db: PrismaTrx
     user: User
@@ -25,14 +25,20 @@ export interface IUpdateReminderTask extends BaseReminder {
 }
 
 export interface IDeleteReminderTask {
+    projectId?: string
+    organizationId?: string
     reminderId: string
     taskId: string
     db: PrismaTrx
+    user: User
 }
 export interface IDeleteReminderNote {
+    projectId?: string
+    organizationId?: string
     reminderId: string
     noteId: string
     db: PrismaTrx
+    user: User
 }
 
 export interface ICreateReminderNote extends BaseReminder {

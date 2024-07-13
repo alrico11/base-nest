@@ -52,6 +52,8 @@ model User {
   Tag                            Tag[]
   UserDevice                     UserDevice[]
   Note                           Note[]
+  EventLog                       EventLog[]
+  Log                            Log[]
 
   @@map("user")
 }
@@ -265,6 +267,7 @@ model Project {
   NoteProjects         NoteProject[]
   ChatRoomProjects     ChatRoomProject[]
   EventLogs            EventLog[]
+  Log                  Log[]
 
   @@map("project")
 }
@@ -361,13 +364,14 @@ model EventLog {
   id              String    @id @default(uuid())
   date            DateTime  @db.Timestamptz(3)
   description     String?
-  lastUpdatedById String    @map("last_updated_by_id")
+  lastUpdatedById String?   @map("last_updated_by_id")
   projectId       String    @map("project_id")
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   Project Project @relation(fields: [projectId], references: [id])
+  User    User?   @relation(fields: [lastUpdatedById], references: [id])
 
   @@map("event_log")
 }
@@ -707,6 +711,7 @@ model Organization {
   Project             Project[]
   OrganizationAdmin   OrganizationAdmin[]
   Tag                 Tag[]
+  Log                 Log[]
 
   @@map("organization")
 }
@@ -798,12 +803,27 @@ model Sop {
   @@map("sop")
 }
 
+enum MethodEnum {
+  CREATE
+  UPDATE
+  DELETE
+}
+
 model Log {
-  id        String   @id @default(uuid())
-  context   String?
-  level     Int      @db.SmallInt
-  data      Json     @db.JsonB()
-  timestamp DateTime @default(now()) @db.Timestamptz(4)
+  id             String      @id @default(uuid())
+  context        String?
+  method         MethodEnum?
+  level          Int         @db.SmallInt
+  data           Json        @db.JsonB() // message
+  info           Json?       @db.JsonB() // oldvalue newvalue
+  timestamp      DateTime    @default(now()) @db.Timestamptz(4)
+  userId         String?      @map("user_id")
+  organizationId String?     @map("organization_id")
+  projectId      String?     @map("project_id")
+
+  User         User?          @relation(fields: [userId], references: [id])
+  Project      Project?      @relation(fields: [projectId], references: [id])
+  Organization Organization? @relation(fields: [organizationId], references: [id])
 
   @@index([timestamp])
   @@map("log")

@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ProjectService } from './project.service';
-import { CreateProjectBodyDto, DeleteProjectParamDto, FindAllProjectQueryDto, FindOneProjectParamDto, UpdateProjectParamDto, UpdateProjectBodyDto } from './project.dto';
+import { CreateProjectBodyDto, DeleteProjectParamDto, FindAllProjectQueryDto, FindOneProjectParamDto, UpdateProjectParamDto, UpdateProjectBodyDto, CreateProjectParamDto, FindAllProjectParamDto } from './project.dto';
 import { UserInstance, UserJwtGuard } from 'src/main/auth';
 import { User } from '@prisma/client';
 import { DeviceHeaders, Lang, LangEnum } from 'src/constants';
@@ -17,15 +17,15 @@ export class ProjectController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ operationId: "CreateProject" })
-  create(@Body() body: CreateProjectBodyDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
-    return this.projectService.create({ body, lang, user });
+  create(@Param() param: CreateProjectParamDto, @Body() body: CreateProjectBodyDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
+    return this.projectService.create({ body, lang, user, param });
   }
 
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ operationId: "FindAllProject" })
-  findAll(@Query() query: FindAllProjectQueryDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
-    return this.projectService.findAll({ lang, query, user });
+  findAll(@Param() param: FindAllProjectParamDto, @Query() query: FindAllProjectQueryDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
+    return this.projectService.findAll({ lang, query, user, param });
   }
 
   @Get(':id')

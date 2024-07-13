@@ -4,12 +4,13 @@ import { LangEnum } from "src/constants"
 
 type CreateReminderNotificationEventType = {
     reminder: Reminder
-    project?: Project
-    organization?: Organization
+    project?: Project | null
+    organization?: Organization | null
     note?: Note
     task?: Task
     user: User
     lang: LangEnum
+    delay: number
 }
 
 export class CreateReminderNotificationEvent extends CompactClass<CreateReminderNotificationEventType> {
@@ -17,20 +18,22 @@ export class CreateReminderNotificationEvent extends CompactClass<CreateReminder
 }
 
 type CreateReminderNoteEventType = {
+    delay: number
     reminder: Reminder
     user: User
     lang: LangEnum
-    project?: Project
-    organization?: Organization
+    project?: Project | null
+    organization?: Organization | null
     note: Note
 }
 
 type UpdateReminderNoteEventType = {
+    delay: number
     reminder: Reminder
     user: User
     lang: LangEnum
-    project?: Project
-    organization?: Organization
+    project?: Project | null
+    organization?: Organization | null
     note: Note
 }
 
@@ -43,22 +46,22 @@ export class UpdateReminderNoteEvent extends CompactClass<UpdateReminderNoteEven
 export class DeleteReminderNoteEvent extends CompactClass<DeleteReminderNoteEventType> { public static key = "REMINDER_NOTE.DELETED" }
 
 type CreateReminderTaskEventType = {
+    delay: number
     reminder: Reminder
     user: User
     lang: LangEnum
-    project?: Project
-    organization?: Organization
+    project?: Project | null
+    organization?: Organization | null
     task: Task
-
 }
 
 type UpdateReminderTaskEventType = {
-    newReminder: Reminder
-    oldReminder: Reminder
+    delay: number
+    reminder: Reminder
     user: User
     lang: LangEnum
-    project?: Project
-    organization?: Organization
+    project?: Project | null
+    organization?: Organization | null
     task: Task
 }
 
@@ -67,8 +70,5 @@ type DeleteReminderTaskEventType = {
 }
 
 export class CreateReminderTaskEvent extends CompactClass<CreateReminderTaskEventType> { public static key = "REMINDER_TASK.CREATED" }
-export class UpdateReminderTaskEvent extends CompactClass<UpdateReminderTaskEventType> { public static key = "REMINDER_TASK.CREATED" }
-export class DeleteReminderTaskEvent extends CompactClass<DeleteReminderTaskEventType> { public static key = "REMINDER_TASK.CREATED" }
-
-//TASK
-
+export class UpdateReminderTaskEvent extends CompactClass<UpdateReminderTaskEventType> { public static key = "REMINDER_TASK.UPDATED" }
+export class DeleteReminderTaskEvent extends CompactClass<DeleteReminderTaskEventType> { public static key = "REMINDER_TASK.DELETED" }

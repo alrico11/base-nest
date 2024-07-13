@@ -4,8 +4,9 @@ import { User } from '@prisma/client';
 import { DeviceHeaders, Lang, LangEnum } from 'src/constants';
 import { UserInstance, UserJwtGuard } from 'src/main/auth';
 import { UserDeviceGuard } from 'src/main/device';
-import { CreateProjectBodyDto, CreateProjectParamDto, DeleteProjectParamDto, FindAllProjectCollaboratorParamDto, FindAllProjectCollaboratorQueryDto, FindAllProjectParamDto, FindAllProjectQueryDto, FindOneProjectParamDto, UpdateProjectParamDto } from './project.dto';
-import { ProjectService } from './project.service';
+import { AdminGuard } from '../admin.guard';
+import { CreateProjectBodyDto, CreateProjectParamDto, DeleteProjectParamDto, FindAllProjectCollaboratorParamDto, FindAllProjectCollaboratorQueryDto, FindAllProjectParamDto, FindAllProjectQueryDto, FindOneProjectParamDto, ProjectService, UpdateProjectParamDto } from 'src/main/project';
+import { MemberGuard } from '../member.guard';
 
 @Controller('organization/:organizationId/project')
 @ApiHeaders(DeviceHeaders)
@@ -15,6 +16,7 @@ export class ProjectController {
   constructor(private readonly projectService: ProjectService) { }
 
   @Post()
+  @UseGuards(AdminGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ operationId: "CreateProjectOrganization" })
   create(@Body() body: CreateProjectBodyDto, @Param() param: CreateProjectParamDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
@@ -23,6 +25,7 @@ export class ProjectController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
+  @UseGuards(MemberGuard)
   @ApiOperation({ operationId: "FindAllProjectOrganization" })
   findAll(@Query() query: FindAllProjectQueryDto, @Param() param: FindAllProjectParamDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
     return this.projectService.findAll({ lang, param, query, user });
@@ -31,18 +34,21 @@ export class ProjectController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ operationId: "FindOneProjectOrganization" })
+  @UseGuards(MemberGuard)
   findOne(@Param() param: FindOneProjectParamDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
     return this.projectService.findOne({ lang, param, user });
   }
   @Get(':id/detail')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ operationId: "FindOneProjectOrganization" })
+  @UseGuards(MemberGuard)
   findDetail(@Param() param: FindOneProjectParamDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
     return this.projectService.findDetail({ lang, param, user });
   }
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(AdminGuard)
   @ApiOperation({ operationId: "UpdateProjectOrganization" })
   update(@Body() body: CreateProjectBodyDto, @Param() param: UpdateProjectParamDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
     return this.projectService.update({ body, lang, param, user });
@@ -51,12 +57,14 @@ export class ProjectController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ operationId: "DeleteProjectOrganization" })
+  @UseGuards(AdminGuard)
   remove(@Param() param: DeleteProjectParamDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
     return this.projectService.remove({ lang, param, user });
   }
 
   @Get(':id/collaborator')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(MemberGuard)
   @ApiOperation({ operationId: 'FindAllCollaboratorFromProject' })
   findAllCollaborator(@Query() query: FindAllProjectCollaboratorQueryDto, @Lang() lang: LangEnum, @Param() param: FindAllProjectCollaboratorParamDto) {
     return this.projectService.findAllCollaborator({ lang, param, query })

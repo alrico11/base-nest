@@ -4,24 +4,28 @@ import { RateLimiterModule } from "nestjs-rate-limiter"
 import { FileModule } from "./file"
 import { LogModule } from "./log"
 import { AuthModule } from "./main/auth"
-import { CommentModule as MainCommentModule } from "./main/comment"
 import { DeviceModule as MainDeviceModule } from "./main/device"
-import { NoteModule as MainNoteModule } from "./main/note/note.module"
+import { NoteModule as MainNoteModule } from "./main/note"
+import { OrganizationModule as MainOrganizationModule } from "./main/organization"
 import { MemberModule as MainOrganizationMemberModule } from "./main/organization/member"
 import { NoteModule as MainOrganizationNoteModule } from "./main/organization/note"
-import { OrganizationModule as MainOrganizationModule } from "./main/organization/organization.module"
 import { ProjectModule as MainOrganizationProjectModule } from "./main/organization/project"
 import { CollaboratorModule as MainOrganizationProjectCollaboratorModule } from "./main/organization/project/collaborator"
 import { NoteModule as MainOrganizationProjectNoteModule } from "./main/organization/project/note"
 import { TaskModule as MainOrganizationProjectTaskModule } from "./main/organization/project/task"
+import { CommentModule as MainOrganizationProjectTaskCommentModule } from "./main/organization/project/task/comment"
 import { TagModule as MainOrganizationTagModule } from "./main/organization/tag"
 import { TaskModule as MainOrganizationTaskModule } from "./main/organization/task"
+import { CommentModule as MainOrganizationTaskCommentModule } from "./main/organization/task/comment"
 import { CollaboratorModule as MainProjectCollaboratorModule } from "./main/project/collaborator"
+import { EventLogModule as MainProjectEventLogModule } from "./main/project/event-log"
 import { NoteModule as MainProjectNoteModule } from "./main/project/note"
 import { TaskModule as MainProjectTaskModule } from "./main/project/task"
-import { ReminderModule as MainReminderModule } from "./main/reminder/reminder.module"
-import { TagModule as MainTagModule } from "./main/tag/tag.module"
+import { CommentModule as MainProjectTaskComment } from "./main/project/task/comment"
+import { ReminderModule as MainReminderModule } from "./main/reminder"
+import { TagModule as MainTagModule } from "./main/tag"
 import { TaskModule as MainTaskModule } from "./main/task"
+import { CommentModule as MainCommentModule } from "./main/task/comment"
 import { UserModule } from "./main/user/user.module"
 import { NotificationModule } from "./notification"
 import { PrismaModule } from "./prisma"
@@ -56,20 +60,24 @@ const AppImports: (Type<any> | DynamicModule | Promise<DynamicModule> | ForwardR
   MainOrganizationTagModule,
   MainOrganizationMemberModule,
   MainOrganizationTaskModule,
+  MainOrganizationTaskCommentModule,
   MainOrganizationNoteModule,
 
   //Main Organization Project
   MainOrganizationProjectCollaboratorModule,
   MainOrganizationProjectModule,
   MainOrganizationProjectTaskModule,
+  MainOrganizationProjectTaskCommentModule,
   MainOrganizationProjectNoteModule,
+
   // organization project activitylog
 
   //MAIN PROJECT
   MainProjectCollaboratorModule,
   MainProjectTaskModule,
+  MainProjectTaskComment,
   MainProjectNoteModule,
-  // activity log
+  MainProjectEventLogModule,
 
   //MAIN
   MainTagModule,

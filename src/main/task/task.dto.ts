@@ -31,14 +31,25 @@ const CreateTaskBodyDtoSchema = z.object({
     reminder: CreateReminderBodyDtoSchema.optional()
 });
 
+const CreateTaskParamDtoSchema = z.object({
+    organizationId: z.string().uuid().optional(),
+    projectId: z.string().uuid().optional()
+})
+
 const FindAllTaskQueryDtoSchema = FindAllQueryDtoBaseSchema
 
 const UpdateTaskBodyDtoSchema = CreateTaskBodyDtoSchema
-const UpdateTaskParamDtoSchema = FindOneParamDtoBaseSchema
+const UpdateTaskParamDtoSchema = CreateTaskParamDtoSchema.extend({
+    id: z.string().uuid(),
+    projectId: z.string().uuid().optional(),
+    organizationId: z.string().uuid().optional(),
+})
 
 export class CreateTaskBodyDto extends createZodDto(CreateTaskBodyDtoSchema) { }
+export class CreateTaskParamDto extends createZodDto(CreateTaskParamDtoSchema) { }
 export class UpdateTaskBodyDto extends createZodDto(UpdateTaskBodyDtoSchema) { }
 export class UpdateTaskParamDto extends createZodDto(UpdateTaskParamDtoSchema) { }
 export class DeleteTaskParamDto extends createZodDto(UpdateTaskParamDtoSchema) { }
 export class FindOneTaskParamDto extends createZodDto(UpdateTaskParamDtoSchema) { }
 export class FindAllTaskQueryDto extends createZodDto(FindAllTaskQueryDtoSchema) { }
+export class FindAllTaskParamDto extends createZodDto(CreateTaskParamDtoSchema) { }

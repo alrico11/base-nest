@@ -10,35 +10,35 @@ import { UserDeviceGuard } from '../device';
 @ApiTags('Main Note')
 @ApiHeaders(DeviceHeaders)
 // @UseGuards(UserJwtGuard, UserDeviceGuard)
-@Controller()
+@Controller('note')
 @UseGuards(UserJwtGuard)
 export class NoteController {
   constructor(private readonly noteService: NoteService) { }
 
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ operationId: 'CreateMainNote' })
-  @Post('note')
+  @Post()
   create(@Body() body: CreateNoteBodyDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.noteService.create({ body, lang, user });
   }
 
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ operationId: 'FindAllMainNote' })
-  @Get('note')
+  @Get()
   findAll(@Query() query: FindAllNoteQueryDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
-    return this.noteService.findAll({ lang, query, user });
+    return this.noteService.findAll({ lang, query, user});
   }
 
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ operationId: 'UpdateMainNote' })
-  @Patch('note/:id')
+  @Patch(':id')
   update(@Param() param: UpdateNoteParamDto, @Body() body: UpdateNoteBodyDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.noteService.update({ body, lang, param, user });
   }
 
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ operationId: 'DeleteMainNote' })
-  @Delete('note/:id')
+  @Delete(':id')
   remove(@Param() param: DeleteNoteParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.noteService.remove({ lang, param, user });
   }

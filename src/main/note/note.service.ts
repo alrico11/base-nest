@@ -5,11 +5,8 @@ import utc from 'dayjs/plugin/utc';
 import { DateNow, LangResponse } from 'src/constants';
 import { PrismaService } from 'src/prisma';
 import { dotToObject } from 'src/utils/string';
-import { OrganizationService } from '../organization/organization.service';
-import { ProjectService as OrganizationProjectService } from '../organization/project';
-import { ProjectService } from '../project';
 import { ReminderService } from '../reminder/reminder.service';
-import { ICheckMemberOrCollaborator, ICheckToHandle, ICreateNote, IDeleteNote, IFindAllNote, IUpdateNote } from './note.@types';
+import { ICreateNote, IDeleteNote, IFindAllNote, IUpdateNote } from './note.@types';
 
 dayjs.extend(utc)
 @Injectable()
@@ -17,9 +14,6 @@ export class NoteService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly reminderService: ReminderService,
-    private readonly organizationService: OrganizationService,
-    private readonly projectService: ProjectService,
-    private readonly organizationProjectService: OrganizationProjectService,
   ) { }
   async create({ body, lang, user, param }: ICreateNote) {
     const { reminder, ...data } = body;
@@ -31,18 +25,9 @@ export class NoteService {
         }
       });
       if (param) {
-        const { projectId, organizationId } = param
-        if (projectId && !organizationId) {
-          prisma.noteProject.create({ data: { projectId, noteId: note.id } })
-        }
-        if (!projectId && organizationId) {
-          await this.organizationService.memberGuard({ lang, organizationId, userId: user.id })
-          await prisma.noteOrganization.create({ data: { organizationId, noteId: note.id } })
-        }
-        if (projectId && organizationId) {
-          await prisma.noteOrganization.create({ data: { organizationId, noteId: note.id } });
-          await prisma.noteProject.create({ data: { projectId, noteId: note.id } });
-        }
+        const { projectId, organizationId } = param;
+        if (organizationId) await prisma.noteOrganization.create({ data: { organizationId, noteId: note.id } });
+        if (projectId) await prisma.noteProject.create({ data: { projectId, noteId: note.id } });
       }
       if (reminder) {
         const { startDate, time, ...rest } = reminder;
@@ -71,14 +56,20 @@ export class NoteService {
   async findAll({ lang, query, user, param }: IFindAllNote) {
     const { limit, orderBy, orderDirection, page, search } = query
     let where: Prisma.NoteWhereInput = {
-      creatorId: user.id,
       deletedAt: null, title: { contains: search, mode: "insensitive" },
     }
     if (param) {
-      const { organizationId, projectId } = param
-      if (organizationId && !projectId) await this.organizationService.memberGuard({ lang, organizationId, userId: user.id })
-      where = { deletedAt: null, title: { contains: search, mode: "insensitive" } }
+      const { organizationId, projectId } = param;
+      if (organizationId) {
+        where.NoteOrganizations = { some: { organizationId } };
+      }
+      if (projectId) {
+        where.NoteProjects = { some: { projectId } };
+      }
+    } else {
+      where.creatorId = user.id;
     }
+
     const { result, ...rest } = await this.prisma.extended.note.paginate({
       where,
       include: {
@@ -109,8 +100,13 @@ export class NoteService {
   }
 
   async update({ body, lang, param, user }: IUpdateNote) {
-    const { id } = param
-    if (param) await this.checkToHandle({ lang, param, user })
+    const { id, organizationId, projectId } = param
+    let where: Prisma.NoteWhereUniqueInput = { deletedAt: null, id, }
+
+    if (organizationId) where.NoteOrganizations = { some: { organizationId } };
+    else if (projectId) where.NoteProjects = { some: { projectId } };
+    else where.creatorId = user.id;
+
     const noteExist = await this.prisma.note.findFirst({
       where: { id, deletedAt: null, creatorId: user.id },
       include: { ReminderNotes: true }
@@ -120,7 +116,7 @@ export class NoteService {
     const { reminder, ...data } = body;
     await this.prisma.$transaction(async (prisma) => {
       const note = await prisma.note.update({
-        where: { id, creatorId: user.id },
+        where,
         data: { creatorId: user.id, ...data }
       });
       if (reminder) {
@@ -155,7 +151,8 @@ export class NoteService {
         if (noteExist.ReminderNotes?.reminderId) {
           await this.reminderService.removeReminderNote({
             noteId: note.id, db: prisma,
-            reminderId: noteExist.ReminderNotes?.reminderId
+            reminderId: noteExist.ReminderNotes?.reminderId,
+            user
           });
         }
 
@@ -164,46 +161,29 @@ export class NoteService {
     return { message: LangResponse({ key: "updated", lang, object: "note" }) };
   }
   async remove({ lang, param, user }: IDeleteNote) {
-    const { id } = param
+    const { id, organizationId, projectId } = param
+    let where: Prisma.NoteWhereUniqueInput = { deletedAt: null, id }
+
+    if (organizationId) where.NoteOrganizations = { some: { organizationId } };
+    if (projectId) where.NoteProjects = { some: { projectId } };
+    else where.creatorId = user.id;
+
     await this.prisma.$transaction(async (prisma) => {
-      if (param) await this.checkToHandle({ lang, param, user })
       const noteExist = await prisma.note.findFirst({
-        where: { id, deletedAt: null, creatorId: user.id },
+        where,
         include: { ReminderNotes: true }
       })
 
       if (!noteExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "note" }), HttpStatus.NOT_FOUND)
       await prisma.note.update({
-        where: { id, creatorId: user.id },
+        where,
         data: { deletedAt: dayjs().toISOString() }
       })
       if (noteExist.ReminderNotes) {
-        await this.reminderService.removeReminderNote({ noteId: id, db: prisma, reminderId: noteExist.ReminderNotes?.reminderId })
+        await this.reminderService.removeReminderNote({ noteId: id, db: prisma, reminderId: noteExist.ReminderNotes?.reminderId, user })
       }
     })
 
     return { message: LangResponse({ key: "deleted", lang, object: "note" }) }
   }
-  async checkToHandle({ lang, param: { id, organizationId, projectId }, user }: ICheckToHandle) {
-    if (projectId && !organizationId) await this.projectService.adminGuard({ lang, projectId, userId: user.id })
-    if (organizationId && !projectId) await this.organizationService.adminGuard({ lang, organizationId, userId: user.id })
-    if (projectId && organizationId) await this.organizationProjectService.adminGuard({ lang, projectId, userId: user.id })
-  }
-  // checkMemberOrCollaborator({ organizationId, projectId, userId }: ICheckMemberOrCollaborator) {
-  //   let where: Prisma.NoteWhereInput = {}
-  //   if (projectId && !organizationId)
-  //     where = {
-  //       NoteProjects: { some: { projectId, Project: { ProjectCollaborators: { some: { userId } } } } }
-  //     }
-  //   if (organizationId && !projectId)
-  //     where = {
-  //       NoteOrganizations: { some: { Organization: { id: organizationId, OrganizationMembers: { some: { userId } } } } }
-  //     }
-  //   if (projectId && organizationId)
-  //     where = {
-  //       NoteProjects: { some: { projectId, Project: { ProjectCollaborators: { some: { userId } } } } },
-  //       NoteOrganizations: { some: { organizationId, Organization: { OrganizationMembers: { some: { userId } } } } }
-  //     }
-  //   return where
-  // }
 }

@@ -18,21 +18,34 @@ const CreateProjectBodyDtoSchema = z.object({
     files: z.array(z.string()).optional(),
 });
 
-const CreateProjectParamDtoSchema = FindOneParamDtoBaseSchema
+const CreateProjectParamDtoSchema = z.object({
+    organizationId: z.string().uuid().optional()
+})
+
+export class CreateProjectBodyDto extends createZodDto(CreateProjectBodyDtoSchema) { }
+export class CreateProjectParamDto extends createZodDto(CreateProjectParamDtoSchema) { }
 
 const FindAllProjectQueryDtoSchema = FindAllQueryDtoBaseSchema.extend({
     orderBy: z.enum(['createdAt', 'priority', 'updatedAt', 'name', 'createdAtLastChat']).optional().default('createdAt'),
-    tagId : z.string().uuid().optional()
+    tagId: z.string().uuid().optional()
 })
-const FindOneProjectParamDtoSchema = FindOneParamDtoBaseSchema
-const FindAllProjectCollaboratorQueryDtoSchema = FindAllQueryDtoBaseSchema
-
-export class CreateProjectBodyDto extends createZodDto(CreateProjectBodyDtoSchema) { }
 export class FindAllProjectQueryDto extends createZodDto(FindAllProjectQueryDtoSchema) { }
+export class FindAllProjectParamDto extends createZodDto(CreateProjectParamDtoSchema) { }
+
+
+const FindOneProjectParamDtoSchema = FindOneParamDtoBaseSchema.extend({
+    organizationId: z.string().uuid().optional()
+})
 export class FindOneProjectParamDto extends createZodDto(FindOneProjectParamDtoSchema) { }
+
 export class UpdateProjectParamDto extends createZodDto(FindOneProjectParamDtoSchema) { }
 export class UpdateProjectBodyDto extends createZodDto(CreateProjectBodyDtoSchema) { }
 export class DeleteProjectParamDto extends createZodDto(FindOneProjectParamDtoSchema) { }
-export class CreateProjectParamDto extends createZodDto(CreateProjectParamDtoSchema) { }
-export class FindAllProjectCollaboratorParamDto extends createZodDto(CreateProjectParamDtoSchema) { }
+
+const FindAllProjectCollaboratorQueryDtoSchema = FindAllQueryDtoBaseSchema
+const FindAllProjectCollaboratorParamDtoSchema = z.object({
+    id: z.string().uuid(),
+    organizationId: z.string().uuid().optional()
+})
+export class FindAllProjectCollaboratorParamDto extends createZodDto(FindAllProjectCollaboratorParamDtoSchema) { }
 export class FindAllProjectCollaboratorQueryDto extends createZodDto(FindAllProjectCollaboratorQueryDtoSchema) { }

@@ -14,9 +14,8 @@ import { ReminderModule } from 'src/main/reminder/reminder.module';
       },
     }),
     BullModule.registerQueue({ name: SCHEDULER_QUEUE_KEY  }),
-    ReminderModule
   ],
-  providers: [SchedulerListener,ReminderJob],
+  providers: [SchedulerListener],
   exports:[SchedulerModule]
 })
 export class SchedulerModule {}

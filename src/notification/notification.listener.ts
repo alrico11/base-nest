@@ -34,6 +34,6 @@ export class NotificationListener {
             data
         }
         await this.notificationService.create({ data, fcm, user, scope })
-        const notif = await this.firebaseService.sendNotification(message)
+        await this.firebaseService.sendNotification(message)
     }
 }

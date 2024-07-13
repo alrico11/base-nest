@@ -4,8 +4,8 @@ import { User } from '@prisma/client';
 import { DeviceHeaders, Lang, LangEnum } from 'src/constants';
 import { UserInstance, UserJwtGuard } from 'src/main/auth';
 import { UserDeviceGuard } from 'src/main/device';
-import { AddAdminProjectCollaboratorBodyDto, AddAdminProjectCollaboratorParamDto, CreateProjectCollaboratorBodyDto, CreateProjectCollaboratorParamDto, RemoveAdminProjectCollaboratorBodyDto, RemoveAdminProjectCollaboratorParamDto, RemoveProjectCollaboratorBodyDto, RemoveProjectCollaboratorParamDto } from './collaborator.dto';
-import { CollaboratorService } from './collaborator.service';
+import { AdminCollaboratorGuard } from 'src/main/project/admin-collaborator.guard';
+import { AddAdminProjectCollaboratorBodyDto, AddAdminProjectCollaboratorParamDto, CollaboratorService, CreateProjectCollaboratorBodyDto, CreateProjectCollaboratorParamDto, RemoveAdminProjectCollaboratorBodyDto, RemoveAdminProjectCollaboratorParamDto, RemoveProjectCollaboratorBodyDto, RemoveProjectCollaboratorParamDto } from 'src/main/project/collaborator';
 
 @ApiHeaders(DeviceHeaders)
 @ApiTags('User Organization Collaborator')
@@ -16,13 +16,15 @@ export class CollaboratorController {
 
   @Post('add-collaborator')
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(AdminCollaboratorGuard)
   @ApiOperation({ operationId: 'AddCollaboratorToProject' })
-  addCollaborator(@Body() body: CreateProjectCollaboratorBodyDto, @Param() param: CreateProjectCollaboratorParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
+  addCollabzorator(@Body() body: CreateProjectCollaboratorBodyDto, @Param() param: CreateProjectCollaboratorParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.collaboratorService.addCollaborator({ body, lang, param, user });
   }
 
   @Post('add-admin')
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(AdminCollaboratorGuard)
   @ApiOperation({ operationId: 'AddAdminToProject' })
   addAdmin(@Body() body: AddAdminProjectCollaboratorBodyDto, @Param() param: AddAdminProjectCollaboratorParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.collaboratorService.addAdmin({ body, lang, param, user });
@@ -30,6 +32,7 @@ export class CollaboratorController {
 
   @Delete('remove-admin')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(AdminCollaboratorGuard)
   @ApiOperation({ operationId: 'RemoveAdminFromProject' })
   removeAdmin(@Body() body: RemoveAdminProjectCollaboratorBodyDto, @Param() param: RemoveAdminProjectCollaboratorParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.collaboratorService.removeAdmin({ body, lang, param, user });
@@ -37,10 +40,9 @@ export class CollaboratorController {
 
   @Delete('remove-collaborator')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(AdminCollaboratorGuard)
   @ApiOperation({ operationId: 'RemoveCollaboratorFromProject' })
   removeCollaborator(@Body() body: RemoveProjectCollaboratorBodyDto, @Param() param: RemoveProjectCollaboratorParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.collaboratorService.removeCollaborator({ body, lang, param, user });
   }
-
-
 }

@@ -7,6 +7,7 @@ import AppImports from './app.imports';
 import { AppService } from './app.service';
 import { AllExceptionsFilter, InternalServerErrorExceptionFilter, ZodErrorFilter } from './globalException.filter';
 import { ResponseInterceptor } from './interceptor';
+import { EventLogModule } from './main/project/event-log/event-log.module';
 
 @Global()
 @Module({

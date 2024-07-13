@@ -1,13 +1,14 @@
 import { createZodDto } from "@anatine/zod-nestjs";
-import { FindAllQueryDtoBaseSchema } from "src/constants/findAll-query.dto";
-import { FindOneParamDtoBaseSchema } from "src/constants/findOne-param.dto";
 import { z } from "zod";
 
 const CreateProjectCollaboratorBodyDtoSchema = z.object({
     userId: z.string().uuid()
 })
 
-const CreateProjectCollaboratorParamDtoSchema = FindOneParamDtoBaseSchema
+const CreateProjectCollaboratorParamDtoSchema = z.object({
+    organizationId: z.string().uuid().optional(),
+    projectId: z.string().uuid()
+})
 
 export class CreateProjectCollaboratorBodyDto extends createZodDto(CreateProjectCollaboratorBodyDtoSchema) { }
 export class CreateProjectCollaboratorParamDto extends createZodDto(CreateProjectCollaboratorParamDtoSchema) { }

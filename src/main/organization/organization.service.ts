@@ -228,13 +228,13 @@ export class OrganizationService {
   async adminGuard({ organizationId, userId, lang }: ICheckRole) {
     const isAdmin = await this.prisma.organizationAdmin.findFirst({ where: { organizationId, userId } })
     const isOwner = await this.prisma.organization.findFirst({ where: { id: organizationId, creatorId: userId } })
-    if (!isAdmin && !isOwner) throw new HttpException(LangResponse({ key: "unauthorize", lang, object: "user" }), HttpStatus.UNAUTHORIZED)
+    if (!isAdmin && !isOwner && lang) return false
     return true
   }
 
   async ownerGuard({ organizationId, userId, lang }: ICheckRole) {
     const isOwner = await this.prisma.organization.findFirst({ where: { id: organizationId, creatorId: userId } })
-    if (!isOwner) throw new HttpException(LangResponse({ key: "unauthorize", lang, object: "user" }), HttpStatus.UNAUTHORIZED)
+    if (!isOwner) return false
     return true
   }
 
@@ -243,7 +243,7 @@ export class OrganizationService {
     if (!organization) throw new HttpException(LangResponse({ key: "notFound", lang, object: "organization" }), HttpStatus.NOT_FOUND)
     const memberIds = new Set(organization.OrganizationMembers.map(({ userId }) => { return userId }))
     memberIds.add(organization.creatorId)
-    if (!memberIds.has(userId)) throw new HttpException(LangResponse({ key: "unauthorize", lang, object: "user" }), HttpStatus.UNAUTHORIZED)
+    if (!memberIds.has(userId)) return false
     return true
   }
 }

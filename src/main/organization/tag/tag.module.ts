@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { TagService } from './tag.service';
+import { TagModule as MainTagModule } from 'src/main/tag';
 import { TagController } from './tag.controller';
 
 @Module({
+  imports : [MainTagModule],
   controllers: [TagController],
-  providers: [TagService],
 })
 export class TagModule {}
