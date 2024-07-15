@@ -4,6 +4,7 @@ import { OnEvent } from "@nestjs/event-emitter";
 import { Queue } from "bull";
 import { SCHEDULER_QUEUE_KEY } from "./scheduler.constans";
 import { SchedulerCreateReminderNoteEvent, SchedulerCreateReminderTaskEvent, SchedulerDeleteReminderNoteEvent, SchedulerReminderDeleteTaskEvent, SchedulerUpdateReminderNoteEvent, SchedulerUpdateReminderTaskEvent, SchedulerUserResetTokenJobEvent } from "./scheduler.event";
+import dayjs from "dayjs";
 
 @Injectable()
 export class SchedulerListener {
@@ -21,17 +22,20 @@ export class SchedulerListener {
 
   @OnEvent(SchedulerCreateReminderNoteEvent.key)
   async handleSchedulerCreateReminderNoteEvent({ data }: SchedulerCreateReminderNoteEvent) {
-    const { note, reminder, lang, user, organization, project, delay } = data;
+    const { note, reminder, lang, user, organization, project } = data;
+    const delay = dayjs(reminder.nextInvocation).diff(dayjs());
+    console.log(delay)
     await this.queue.add(SchedulerCreateReminderNoteEvent.key, { note, reminder, user, lang, organization, project }, { delay, jobId: reminder.id, removeOnComplete: true, })
   }
 
   // ON TESTING
   @OnEvent(SchedulerUpdateReminderNoteEvent.key)
   async handleSchedulerUpdateReminderNoteEvent({ data }: SchedulerUpdateReminderNoteEvent) {
-    const { lang, note, reminder, user, organization, project,delay } = data
-    const oldJob = await this.queue.getJob(reminder.id)
-    await oldJob?.remove()
-    await this.queue.add(SchedulerUpdateReminderNoteEvent.key, { note, reminder, user, lang, organization, project }, { delay, jobId: reminder.id })
+    const { lang, note, reminder, user, organization, project } = data
+    const delay = dayjs(reminder.nextInvocation).diff(dayjs());
+    const job = await this.queue.getJob(reminder.id)
+    await job?.remove()
+    await this.queue.add(SchedulerUpdateReminderNoteEvent.key, { note, reminder, user, lang, organization, project }, { delay, jobId: reminder.id, removeOnComplete: true })
   }
 
   @OnEvent(SchedulerDeleteReminderNoteEvent.key)
@@ -43,16 +47,19 @@ export class SchedulerListener {
 
   @OnEvent(SchedulerCreateReminderTaskEvent.key)
   async handleSchedulerCreateReminderTaskEvent({ data }: SchedulerCreateReminderTaskEvent) {
-    const { lang, reminder, task, user, organization, project,delay } = data
+    const { lang, reminder, task, user, organization, project } = data
+    const delay = dayjs(reminder.nextInvocation).diff(reminder.nextInvocation);
+
     await this.queue.add(SchedulerCreateReminderTaskEvent.key, { task, reminder, user, lang, organization, project }, { delay, jobId: reminder.id, removeOnComplete: true });
   }
 
   @OnEvent(SchedulerUpdateReminderTaskEvent.key)
   async handleSchedulerUpdateReminderTaskEvent({ data }: SchedulerUpdateReminderTaskEvent) {
-    const { lang, reminder, task, user, organization, project,delay } = data
-    const oldJob = await this.queue.getJob(reminder.id)
-    await oldJob?.remove()
-    await this.queue.add(SchedulerUpdateReminderTaskEvent.key, { task, reminder, user, lang, organization, project }, { delay, jobId: reminder.id })
+    const { lang, reminder, task, user, organization, project } = data
+    const delay = dayjs(reminder.nextInvocation).diff(reminder.nextInvocation);
+    const job = await this.queue.getJob(reminder.id)
+    await job?.remove()
+    await this.queue.add(SchedulerUpdateReminderTaskEvent.key, { task, reminder, user, lang, organization, project }, { delay, jobId: reminder.id, removeOnComplete: true })
   }
 
   @OnEvent(SchedulerReminderDeleteTaskEvent.key)

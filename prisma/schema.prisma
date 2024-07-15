@@ -267,7 +267,7 @@ model Project {
   NoteProjects         NoteProject[]
   ChatRoomProjects     ChatRoomProject[]
   EventLogs            EventLog[]
-  Log                  Log[]
+  LogModel             LogModel[]
 
   @@map("project")
 }
@@ -711,7 +711,7 @@ model Organization {
   Project             Project[]
   OrganizationAdmin   OrganizationAdmin[]
   Tag                 Tag[]
-  Log                 Log[]
+  LogModel            LogModel[]
 
   @@map("organization")
 }
@@ -810,23 +810,31 @@ enum MethodEnum {
 }
 
 model Log {
-  id             String      @id @default(uuid())
-  context        String?
-  method         MethodEnum?
-  level          Int         @db.SmallInt
-  data           Json        @db.JsonB() // message
-  info           Json?       @db.JsonB() // oldvalue newvalue
-  timestamp      DateTime    @default(now()) @db.Timestamptz(4)
-  userId         String?      @map("user_id")
-  organizationId String?     @map("organization_id")
-  projectId      String?     @map("project_id")
+  id        String      @id @default(uuid())
+  context   String?
+  method    MethodEnum?
+  level     Int         @db.SmallInt
+  data      Json        @db.JsonB() // message
+  info      Json?       @db.JsonB() // oldvalue newvalue
+  timestamp DateTime    @default(now()) @db.Timestamptz(4)
+  userId    String?     @map("user_id")
 
-  User         User?          @relation(fields: [userId], references: [id])
-  Project      Project?      @relation(fields: [projectId], references: [id])
-  Organization Organization? @relation(fields: [organizationId], references: [id])
+  User User? @relation(fields: [userId], references: [id])
 
   @@index([timestamp])
   @@map("log")
+}
+
+model LogModel {
+  id             Int      @id @default(autoincrement())
+  projectId      String?  @map("project_id")
+  organizationId String?  @map("organization_id")
+  logId          String   @map("log_id")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  Project      Project?      @relation(fields: [projectId], references: [id])
+  Organization Organization? @relation(fields: [organizationId], references: [id])
+  @@map("log_model")
 }
 
 model City {

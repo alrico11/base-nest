@@ -10,7 +10,6 @@ type CreateReminderNotificationEventType = {
     task?: Task
     user: User
     lang: LangEnum
-    delay: number
 }
 
 export class CreateReminderNotificationEvent extends CompactClass<CreateReminderNotificationEventType> {
@@ -18,7 +17,6 @@ export class CreateReminderNotificationEvent extends CompactClass<CreateReminder
 }
 
 type CreateReminderNoteEventType = {
-    delay: number
     reminder: Reminder
     user: User
     lang: LangEnum
@@ -28,7 +26,6 @@ type CreateReminderNoteEventType = {
 }
 
 type UpdateReminderNoteEventType = {
-    delay: number
     reminder: Reminder
     user: User
     lang: LangEnum
@@ -46,7 +43,6 @@ export class UpdateReminderNoteEvent extends CompactClass<UpdateReminderNoteEven
 export class DeleteReminderNoteEvent extends CompactClass<DeleteReminderNoteEventType> { public static key = "REMINDER_NOTE.DELETED" }
 
 type CreateReminderTaskEventType = {
-    delay: number
     reminder: Reminder
     user: User
     lang: LangEnum
@@ -56,7 +52,6 @@ type CreateReminderTaskEventType = {
 }
 
 type UpdateReminderTaskEventType = {
-    delay: number
     reminder: Reminder
     user: User
     lang: LangEnum

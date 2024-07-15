@@ -1,15 +1,12 @@
 import { createZodDto } from "@anatine/zod-nestjs";
+import { FindAllQueryDtoBaseSchema } from "src/constants/findAll-query.dto";
 import { z } from "zod";
 
-const NotificationQuerySchema = z.object({
-    page : z.number({coerce : true}).default(1),
-    limit : z.number({coerce : true}).default(10)
-})
-
+const NotificationQuerySchema = FindAllQueryDtoBaseSchema
 const NotificationParamSchema = z.object({
-    notificationId : z.string().uuid()
+    notificationId: z.string().uuid()
 })
 
 
-export class NotificationQueryDto extends createZodDto(NotificationQuerySchema){}
-export class NotificationParamDto extends createZodDto(NotificationParamSchema){}
+export class NotificationQueryDto extends createZodDto(NotificationQuerySchema) { }
+export class NotificationParamDto extends createZodDto(NotificationParamSchema) { }

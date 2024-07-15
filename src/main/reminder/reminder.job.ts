@@ -15,24 +15,24 @@ export class ReminderJob {
     //NOTE
     @Process(SchedulerCreateReminderNoteEvent.key)
     async handleCreateReminderNoteEvent({ data }: SchedulerCreateReminderNoteEvent) {
-        const { lang, note, reminder, user, organization, project,delay } = data
-        this.ee.emit(CreateReminderNotificationEvent.key, new CreateReminderNotificationEvent({ lang, note, reminder, user, organization, project,delay}))
+        const { lang, note, reminder, user, organization, project, } = data
+        this.ee.emit(CreateReminderNotificationEvent.key, new CreateReminderNotificationEvent({ lang, note, reminder, user, organization, project}))
     }
     @Process(SchedulerUpdateReminderNoteEvent.key)
     async handleSchedulerUpdateReminderNoteEvent({ data }: SchedulerUpdateReminderNoteEvent) {
-        const { lang, reminder, note, user, organization, project,delay } = data
-        this.ee.emit(CreateReminderNotificationEvent.key, new CreateReminderNotificationEvent({ lang, note, reminder, user, organization, project,delay}))
+        const { lang, reminder, note, user, organization, project } = data
+        this.ee.emit(CreateReminderNotificationEvent.key, new CreateReminderNotificationEvent({ lang, note, reminder, user, organization, project}))
     }
     //TASK
     @Process(SchedulerCreateReminderTaskEvent.key)
     async handleSchedulerCreateReminderTaskEvent({ data }: SchedulerCreateReminderTaskEvent) {
-        const { lang, reminder, task, user, organization, project,delay } = data
-        this.ee.emit(CreateReminderNotificationEvent.key, new CreateReminderNotificationEvent({ lang, task, reminder, user, organization, project ,delay}))
+        const { lang, reminder, task, user, organization, project } = data
+        this.ee.emit(CreateReminderNotificationEvent.key, new CreateReminderNotificationEvent({ lang, task, reminder, user, organization, project }))
     }
 
     @Process(SchedulerUpdateReminderTaskEvent.key)
     async handleSchedulerUpdateReminderTaskEvent({ data }: SchedulerUpdateReminderTaskEvent) {
-        const { lang, reminder, task, user, organization, project,delay } = data
-        this.ee.emit(CreateReminderNotificationEvent.key, new CreateReminderNotificationEvent({ lang, task, reminder, user, organization, project,delay }))
+        const { lang, reminder, task, user, organization, project } = data
+        this.ee.emit(CreateReminderNotificationEvent.key, new CreateReminderNotificationEvent({ lang, task, reminder, user, organization, project }))
     }
 }

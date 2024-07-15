@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { IntervalReminder } from '@prisma/client';
+import { IntervalReminder, Note, Reminder, Task } from '@prisma/client';
 import dayjs from 'dayjs';
 import { LangResponse } from 'src/constants';
 import { LogService } from 'src/log';
@@ -8,7 +8,7 @@ import { PrismaService } from 'src/prisma';
 import {
   ICreateReminderNote, ICreateReminderTask, IDeleteReminderNote, IDeleteReminderTask,
   ITimeTriggerReminder,
-  IUpdateReminderNextInvocation, IUpdateReminderNote, IUpdateReminderTask
+  IUpdateInvocation, IUpdateReminderNote, IUpdateReminderTask
 } from './reminder.@types';
 import { CreateReminderNoteEvent, CreateReminderTaskEvent, DeleteReminderNoteEvent, DeleteReminderTaskEvent, UpdateReminderNoteEvent, UpdateReminderTaskEvent } from './reminder.event';
 
@@ -25,9 +25,8 @@ export class ReminderService {
       data: { ...reminder }
     });
     await db.reminderTask.create({ data: { reminderId: data.id, taskId: task.id } });
-    const delay = await this.setTriggerReminder({ task, reminder: data, user });
-
-    this.ee.emit(CreateReminderTaskEvent.key, new CreateReminderTaskEvent({ lang, reminder: data, task, user, organization, project, delay }));
+    await this.setNextInvocReminder({ task, reminder: data, user, db });
+    this.ee.emit(CreateReminderTaskEvent.key, new CreateReminderTaskEvent({ lang, reminder: data, task, user, organization, project, }));
 
     this.l.save({
       data: { message: `Reminder created with id ${data.id} by user id ${user.id}` },
@@ -53,9 +52,9 @@ export class ReminderService {
       where: { taskId: task.id },
       data: { reminderId: id, taskId: task.id }
     });
-    const delay = await this.setTriggerReminder({ task, reminder: data, user });
-
-    this.ee.emit(UpdateReminderTaskEvent.key, new UpdateReminderTaskEvent({ lang, reminder: data, task, user, organization, project, delay }));
+    // const delay = await this.setNextInvocReminder({ task, reminder: data, user, db });
+    await this.setNextInvocReminder({ task, reminder: data, user, db });
+    this.ee.emit(UpdateReminderTaskEvent.key, new UpdateReminderTaskEvent({ lang, reminder: data, task, user, organization, project, }));
 
     this.l.save({
       data: { message: `Reminder updated with id ${id} by user id ${user.id}` },
@@ -87,7 +86,7 @@ export class ReminderService {
     return true;
   }
 
-  async removeReminderNote({ reminderId, noteId, db, user,organizationId,projectId }: IDeleteReminderNote) {
+  async removeReminderNote({ reminderId, noteId, db, user, organizationId, projectId }: IDeleteReminderNote) {
     const reminderNote = await db.reminderNote.delete({ where: { reminderId_noteId: { reminderId, noteId } } });
     const reminder = await db.reminder.delete({ where: { id: reminderId } });
 
@@ -109,10 +108,8 @@ export class ReminderService {
       data: { ...reminder }
     });
     await db.reminderNote.create({ data: { reminderId: data.id, noteId: note.id } });
-    const delay = await this.setTriggerReminder({ note, reminder: data, user });
-
-    this.ee.emit(CreateReminderNoteEvent.key, new CreateReminderNoteEvent({ lang, note, reminder: data, user, organization, project, delay }));
-
+    await this.setNextInvocReminder({ note, reminder: data, user, db });
+    this.ee.emit(CreateReminderNoteEvent.key, new CreateReminderNoteEvent({ lang, reminder: data, note, user, organization, project, }));
     this.l.save({
       data: { message: `Reminder note created with id ${data.id} by user id ${user.id}` },
       method: 'CREATE',
@@ -141,9 +138,8 @@ export class ReminderService {
       },
       data: { reminderId: id, noteId: note.id }
     });
-    const delay = await this.setTriggerReminder({ note, reminder: data, user });
-
-    this.ee.emit(UpdateReminderNoteEvent.key, new UpdateReminderNoteEvent({ lang, note, reminder: data, user, organization, project, delay }));
+    await this.setNextInvocReminder({ note, reminder: data, user, db });
+    this.ee.emit(UpdateReminderNoteEvent.key, new UpdateReminderNoteEvent({ lang, reminder: data, note, user, organization, project }));
 
     this.l.save({
       data: { message: `Reminder note updated with id ${id} by user id ${user.id}` },
@@ -158,20 +154,20 @@ export class ReminderService {
     return data;
   }
 
-  async updateReminderNextInvocation({ reminder, note, user, task }: IUpdateReminderNextInvocation) {
+  async updateInvocation({ reminder, note, user, task, db }: IUpdateInvocation) {
     const { id, nextInvocation, interval } = reminder;
-    await this.prisma.$transaction(async (prisma) => {
-      if (interval === IntervalReminder.ONCE) {
-        await prisma.reminder.update({ where: { id }, data: { deletedAt: dayjs().toISOString() } });
-        if (note) await prisma.reminderNote.delete({ where: { reminderId: id } });
-        if (task) await prisma.reminderTask.delete({ where: { reminderId: id } });
-        return true;
-      }
-      const newNextInvocation = this.calculateNextInvocation(nextInvocation, interval);
-      if (newNextInvocation) {
-        await prisma.reminder.update({ where: { id }, data: { nextInvocation: newNextInvocation } });
-      }
-    });
+    if (interval === IntervalReminder.ONCE) {
+      await db.reminder.update({ where: { id }, data: { deletedAt: dayjs().toISOString() } });
+      if (note) await db.reminderNote.delete({ where: { reminderId: id } });
+      if (task) await db.reminderTask.delete({ where: { reminderId: id } });
+      return undefined;
+    }
+    const newNextInvocation = this.calculateNextInvocation(nextInvocation, interval);
+    if (newNextInvocation) {
+      const data = await db.reminder.update({ where: { id }, data: { nextInvocation: newNextInvocation } })
+      console.log(data.nextInvocation)
+      return data
+    }
   }
 
   calculateNextInvocation(currentInvocation: Date, interval: IntervalReminder): Date | undefined {
@@ -187,11 +183,10 @@ export class ReminderService {
     }
   }
 
-  async setTriggerReminder({ reminder, note, user, task }: ITimeTriggerReminder) {
-    const { nextInvocation } = reminder;
-    if (note) await this.updateReminderNextInvocation({ reminder, note, user });
-    if (task) await this.updateReminderNextInvocation({ reminder, task, user });
-    const delay = dayjs(nextInvocation).diff(dayjs());
-    return delay;
+  async setNextInvocReminder({ reminder, note, user, task, db }: ITimeTriggerReminder) {
+    let data: Reminder | undefined
+    if (note) { data = await this.updateInvocation({ reminder, note, user, db }) };
+    if (task) { data = await this.updateInvocation({ reminder, task, user, db }) };
+    return true;
   }
 }

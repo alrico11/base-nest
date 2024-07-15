@@ -5,7 +5,7 @@ import { LangEnum } from "src/constants"
 //NOTE
 
 type SchedulerCreateReminderNoteEventType = {
-    delay: number
+    
     reminder: Reminder
     project?: Project | null
     organization?: Organization | null
@@ -15,7 +15,7 @@ type SchedulerCreateReminderNoteEventType = {
 }
 
 type SchedulerUpdateReminderNoteEventType = {
-    delay: number
+    
     reminder: Reminder
     project?: Project | null
     organization?: Organization | null
@@ -36,7 +36,7 @@ export class SchedulerDeleteReminderNoteEvent extends CompactClass<SchedulerDele
 //TASK
 
 type SchedulerCreateReminderTaskEventType = {
-    delay: number
+    
     reminder: Reminder
     project?: Project | null
     organization?: Organization | null
@@ -46,7 +46,7 @@ type SchedulerCreateReminderTaskEventType = {
 }
 
 type SchedulerUpdateReminderTaskEventType = {
-    delay: number
+    
     reminder: Reminder
     project?: Project | null
     organization?: Organization | null

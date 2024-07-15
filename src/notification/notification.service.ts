@@ -4,13 +4,15 @@ import dayjs from 'dayjs';
 import { LogService } from 'src/log';
 import { PrismaService } from 'src/prisma';
 import { IFindAll, INotificationCreate, INotificationReadAt } from './notification.@types';
+import { LangResponse } from 'src/constants';
+import { dotToObject } from 'src/utils/string';
 
 @Injectable()
 export class NotificationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly l: LogService
-  ) { }
+  ) { this.l.setContext(NotificationService.name) }
 
   async create({ data, fcm, user: { id }, scope }: INotificationCreate) {
     const notification = await this.prisma.notification.create({
@@ -22,14 +24,14 @@ export class NotificationService {
     return true
   }
 
-  // async findAll({ user: { id }, lang, query: { page, limit } }: IFindAll) {
-  //   const data = await this.prisma.notification.findMany({
-  //     where: { userId: id, deletedAt: null },
-  //     take: limit,
-  //     skip: (page - 1) * limit,
-  //   })
-  //   return { message: LangResponse({ key: 'fetched', lang, object: 'notification' }), statusCode: HttpStatusCode.Ok, data };
-  // }
+  async findAll({ user: { id }, lang, query: { page, limit, orderBy, orderDirection } }: IFindAll) {
+    const data = await this.prisma.extended.notification.paginate({
+      where: { userId: id, deletedAt: null },
+      page, limit,
+      orderBy: dotToObject({ orderBy, orderDirection })
+    })
+    return { message: LangResponse({ key: 'fetched', lang, object: 'notification' }), statusCode: HttpStatusCode.Ok, data };
+  }
 
   // async readNotification({ notificationId, user }: INotificationReadAt) {
   //   await this.prisma.userNotification.update({

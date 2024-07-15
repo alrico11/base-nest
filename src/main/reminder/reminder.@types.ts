@@ -57,9 +57,11 @@ export interface ITimeTriggerReminder {
     note?: Note
     task?: Task
     user: User
+    db: PrismaTrx
 }
 
-export interface IUpdateReminderNextInvocation {
+export interface IUpdateInvocation {
+    db: PrismaTrx
     reminder: Reminder
     note?: Note
     task?: Task

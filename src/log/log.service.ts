@@ -15,23 +15,33 @@ export class LogService implements LoggerService {
 
   private async saveLog({ data, level: { level = 1, ...optionalParams }, info, method, organizationId, projectId, userId }: ISaveLog) {
     try {
-      await this.prisma.log.create({
-        data: {
-          context: this.context,
-          level: level,
-          method,
-          organizationId, projectId,
-          info,
-          data: data instanceof Error ? { message: data?.message, stack: data?.stack, name: data?.name } : data,
-          userId,
-        }
+      await this.prisma.$transaction(async (prisma) => {
+        const log = await prisma.log.create({
+          data: {
+            context: this.context,
+            level: level,
+            method,
+            info,
+            data: data instanceof Error ? { message: data?.message, stack: data?.stack, name: data?.name } : data,
+            userId,
+          }
+        })
+        if (organizationId || projectId) await prisma.logModel.create({
+          data: {
+            logId: log.id,
+            organizationId, projectId
+          }
+        })
       })
+
     } catch (error) { console.error(error) }
   }
 
-  save({ method, newData, oldData, userId, organizationId, projectId,data }: LogInterface) {
+  
+
+  save({ method, newData, oldData, userId, organizationId, projectId, data }: LogInterface) {
     const newInfo = newData && oldData ? this.compareObjects(oldData, newData) : newData
-    this.saveLog({ data, level: { level: 1 }, userId, info : newInfo, method, organizationId, projectId })
+    this.saveLog({ data, level: { level: 1 }, userId, info: newInfo, method, organizationId, projectId })
   }
 
   info(data: object, { level = 1, ...optionalParams }: LogOptions = { level: 1 }) {
@@ -59,7 +69,7 @@ export class LogService implements LoggerService {
   }
 
   event(data: object, { level = 4, ...optionalParams }: LogOptions = { level: 5 }) {
-    this.saveLog({ data, level: { level:  4} })
+    this.saveLog({ data, level: { level: 4 } })
   }
 
   compareObjects(oldObj: Record<string, any>, newObj: Record<string, any>) {
