@@ -1,4 +1,4 @@
-import { User } from "@prisma/client"
+import { OrganizationMember, User } from "@prisma/client"
 import { LangEnum } from "src/constants"
 import { AddAdminOrganizationBodyDto, AddAdminOrganizationParamDto, CreateMemberOrganizationBodyDto, CreateMemberOrganizationParamDto, RemoveAdminOrganizationBodyDto, RemoveAdminOrganizationParamDto, RemoveMemberOrganizationBodyDto, RemoveMemberOrganizationParamDto } from "./member.dto"
 
@@ -30,3 +30,14 @@ export interface IRemoveAdmin {
     lang: LangEnum
 }
 
+export interface IFindMemberIsExist {
+    userIds: string[]
+    organizationCreatorId: string
+    organizationMembers: OrganizationMember[]
+}
+
+export interface ICreateManyMember {
+    userIds : string[]
+    organizationId : string
+    addedById : string
+}

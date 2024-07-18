@@ -18,7 +18,7 @@ export class UserListener {
     @OnEvent(UserResetPasswordCreatedEvent.key)
     handleUserResetPasswordCreatedEvent({ data }: UserResetPasswordCreatedEvent) {
         const { user, expiry, token } = data
-        this.ee.emit(SchedulerUserResetTokenJobEvent.key, new SchedulerUserResetTokenJobEvent({ expiry, token, user }))
         this.ee.emit(MailResetUserPasswordEvent.key, new MailResetUserPasswordEvent({ user, token }))
+        this.ee.emit(SchedulerUserResetTokenJobEvent.key, new SchedulerUserResetTokenJobEvent({ expiry, token, user }))
     }
 }

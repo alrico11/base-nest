@@ -1,4 +1,4 @@
-import { Reminder, User } from "@prisma/client"
+import { Organization, Project, Reminder, User } from "@prisma/client"
 import { CompactClass } from "src/@classes"
 import { CollapseKey, FcmType } from "./notification.@types"
 
@@ -20,6 +20,8 @@ export type NotificationCreateEventType = {
     fcm: FcmJson,
     scope: string
     data: DataJson,
+    tokens: string[],
+    save?: boolean
 }
 
 export class NotificationCreateEvent extends CompactClass<NotificationCreateEventType> {

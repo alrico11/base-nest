@@ -8,7 +8,7 @@ const CreateTagBodyDtoSchema = z.object({
 })
 
 const CreateTagParamDtoSchema = z.object({
-    organizationId: z.string().uuid().optional(),
+    organizationId: z.string().uuid().optional()
 })
 
 export class CreateTagBodyDto extends createZodDto(CreateTagBodyDtoSchema) { }

@@ -16,7 +16,7 @@ export class UserDeviceGuard implements CanActivate {
         const deviceToken = request.headers['x-client-token']
         if (!deviceId) throw new HttpException("unauthorized", HttpStatus.UNAUTHORIZED)
         if (!deviceToken) throw new HttpException("unauthorized", HttpStatus.UNAUTHORIZED)
-        const decoded: any = verify(deviceToken, this.config.env.USER_JWT_SECRET)
+        const decoded: any = verify(deviceToken, this.config.env.DEVICE_JWT_SECRET)
         if (deviceId && decoded.id !== deviceId) throw new HttpException("unauthorized", HttpStatus.UNAUTHORIZED)
         const device = await this.prisma.device.findFirst({
             where: { id: deviceId, deletedAt: null },

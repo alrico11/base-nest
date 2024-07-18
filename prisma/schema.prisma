@@ -54,6 +54,7 @@ model User {
   Note                           Note[]
   EventLog                       EventLog[]
   Log                            Log[]
+  History                        History[]
 
   @@map("user")
 }
@@ -147,9 +148,15 @@ model DeviceAdmin {
   @@map("device_admin")
 }
 
+enum LangDeviceEnum {
+  ID
+  EN
+}
+
 model Device {
   id                 String    @id @default(uuid())
   fingerprint        String
+  lang               LangDeviceEnum      @default(EN)
   fcmToken           String?
   fcmTokenLastUpdate DateTime? @db.Timestamptz(3)
   lastActive         DateTime  @default(now()) @db.Timestamptz(3)
@@ -235,24 +242,30 @@ enum ProjectStatus {
   CANCELLED
 }
 
+enum ProjectPriority {
+  LOW    @map("0")
+  MEDIUM @map("1")
+  HIGH   @map("2")
+}
+
 model Project {
-  id               String        @id @default(uuid())
+  id               String          @id @default(uuid())
   color            String?
   name             String
   description      String?
-  lastChatActivity DateTime?     @map("last_chat_activity") @db.Timestamptz(3)
-  priority         String
+  lastChatActivity DateTime?       @map("last_chat_activity") @db.Timestamptz(3)
+  priority         ProjectPriority
   target           String?
   budget           Int?
   goals            String?
   status           ProjectStatus
-  creatorId        String        @map("creator_id")
-  thumbnailId      String?       @map("thumbnail_id")
-  lastChatId       String?       @unique @map("last_chat_id")
-  organizationId   String?       @map("organization_id")
-  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
-  deletedAt        DateTime?     @map("deleted_at") @db.Timestamptz(3)
+  creatorId        String          @map("creator_id")
+  thumbnailId      String?         @map("thumbnail_id")
+  lastChatId       String?         @unique @map("last_chat_id")
+  organizationId   String?         @map("organization_id")
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt        DateTime?       @map("deleted_at") @db.Timestamptz(3)
 
   LastChat             Chat?                 @relation(fields: [lastChatId], references: [id])
   User                 User                  @relation(fields: [creatorId], references: [id])
@@ -267,7 +280,7 @@ model Project {
   NoteProjects         NoteProject[]
   ChatRoomProjects     ChatRoomProject[]
   EventLogs            EventLog[]
-  LogModel             LogModel[]
+  HistoryModel         HistoryModel[]
 
   @@map("project")
 }
@@ -711,7 +724,7 @@ model Organization {
   Project             Project[]
   OrganizationAdmin   OrganizationAdmin[]
   Tag                 Tag[]
-  LogModel            LogModel[]
+  HistoryModel        HistoryModel[]
 
   @@map("organization")
 }
@@ -814,8 +827,8 @@ model Log {
   context   String?
   method    MethodEnum?
   level     Int         @db.SmallInt
-  data      Json        @db.JsonB() // message
-  info      Json?       @db.JsonB() // oldvalue newvalue
+  data      Json        @db.JsonB()
+  info      Json?       @db.JsonB()
   timestamp DateTime    @default(now()) @db.Timestamptz(4)
   userId    String?     @map("user_id")
 
@@ -825,16 +838,32 @@ model Log {
   @@map("log")
 }
 
-model LogModel {
+model History {
+  id        String      @id @default(uuid())
+  context   String?
+  method    MethodEnum?
+  data      Json        @db.JsonB()
+  info      Json?       @db.JsonB()
+  timestamp DateTime    @default(now()) @db.Timestamptz(4)
+  userId    String?     @map("user_id")
+
+  User User? @relation(fields: [userId], references: [id])
+
+  @@index([timestamp])
+  @@map("history")
+}
+
+model HistoryModel {
   id             Int      @id @default(autoincrement())
   projectId      String?  @map("project_id")
   organizationId String?  @map("organization_id")
-  logId          String   @map("log_id")
+  historyId      String   @map("history_id")
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   Project      Project?      @relation(fields: [projectId], references: [id])
   Organization Organization? @relation(fields: [organizationId], references: [id])
-  @@map("log_model")
+
+  @@map("history_model")
 }
 
 model City {

@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
-import { Prisma, Resource } from "@prisma/client";
+import { Prisma, Project, Resource } from "@prisma/client";
 import dayjs from "dayjs";
 import { LangResponse, LangWord } from "src/constants";
 import { FileService } from "src/file";
@@ -8,9 +8,9 @@ import { LogService } from "src/log";
 import { PrismaService } from "src/prisma";
 import { dotToObject } from "src/utils/string";
 import { XConfig } from "src/xconfig";
-import { ICheckProjectCollaborator, ICheckRoleCollaborator, ICreateProject, IFindAllProject, IFindAllProjectCollaborator, IFindOneProject, IRemoveProject, IUpdateProject } from "./project.@types";
-import { DeletedProjectFilesEvent, UpdatedProjectEvent } from "./project.event";
 import { OrganizationRepository } from "../organization/organization.repository";
+import { DeviceLang, ICheckRoleCollaborator, ICreateProject, IFindAllProject, IFindAllProjectCollaborator, IFindOneProject, IRemoveProject, IUpdateProject } from "./project.@types";
+import { DeletedProjectFilesEvent, UpdatedProjectEvent } from "./project.event";
 
 @Injectable()
 export class ProjectService {
@@ -51,13 +51,22 @@ export class ProjectService {
       });
       if (files) {
         FileResource = await this.fileService.handleUploadObjectStorage({ fileName: files, prefix: this.config.env.OBJECT_STORAGE_PREFIX_PROJECT_FILE, user });
-        if (Array.isArray(FileResource) && FileResource.length > 0) {
-          await prisma.projectFile.createMany({
-            data: FileResource.map(({ id }) => ({
-              projectId: project.id,
-              resourceId: id
-            }))
+        if (Array.isArray(Resource) && Resource.length > 0) {
+          const ProjectImages: Prisma.ProjectImageCreateManyInput[] = [];
+          const ProjectFiles: Prisma.ProjectImageCreateManyInput[] = [];
+          Resource.forEach(({ fileType, id }) => {
+            if (fileType.includes("image")) {
+              ProjectImages.push({ resourceId: id, projectId: project.id });
+            } else {
+              ProjectFiles.push({ resourceId: id, projectId: project.id });
+            }
           });
+          if (ProjectImages.length > 0) await prisma.projectImage.createMany({ data: ProjectImages })
+          if (ProjectFiles.length > 0) await prisma.projectFile.createMany({ data: ProjectFiles })
+        }
+        if (!Array.isArray(Resource) && Resource) {
+          if (Resource.fileType.includes("image")) await prisma.projectImage.create({ data: { projectId: project.id, resourceId: Resource.id } })
+          else await prisma.projectFile.createMany({ data: { projectId: project.id, resourceId: Resource.id } })
         }
       }
       this.l.save({
@@ -75,13 +84,6 @@ export class ProjectService {
   }
 
   async findAll({ lang, query, user, param }: IFindAllProject) {
-    if (param) {
-      const { organizationId } = param
-      if (organizationId) {
-        const organization = this.organizationRepository.findById({ organizationId })
-        if (!organization) throw new HttpException(LangResponse({ key: "notFound", lang, object: "organization" }), HttpStatus.NOT_FOUND)
-      }
-    }
 
     const { limit, orderDirection, page, tagId, search } = query
     let orderBy: Prisma.ProjectOrderByWithRelationInput = dotToObject({ orderBy: query.orderBy, orderDirection })
@@ -91,7 +93,17 @@ export class ProjectService {
       name: { contains: search, mode: "insensitive" },
       ...(tagId && { ProjectTags: { some: { tagId } } })
     };
-    if (param?.organizationId) where = { ...where, organizationId: param?.organizationId }
+    if (param) {
+      const { organizationId } = param
+      if (organizationId) {
+        const organization = this.organizationRepository.findById({ organizationId })
+        if (!organization) throw new HttpException(LangResponse({ key: "notFound", lang, object: "organization" }), HttpStatus.NOT_FOUND)
+        where.organizationId = organizationId
+      } else {
+        where.organizationId = null
+      }
+    }
+
     if (query.orderBy === "createdAtLastChat") {
       orderBy = { LastChat: dotToObject({ orderBy: query.orderBy, orderDirection }) }
     }
@@ -109,9 +121,8 @@ export class ProjectService {
       },
       limit, page, orderBy
     })
-
     const data = result.map(({ id, name, createdAt, ProjectCollaborators, _count, priority, User }) => {
-      const { Resource } = User
+      const UserResource = User.Resource
       const teams = ProjectCollaborators.map(({ User }) => {
         const resource = User.Resource
         let thumbnail: undefined | string
@@ -133,8 +144,8 @@ export class ProjectService {
         teams: [{
           userId: User.id,
           name: User.name,
-          thumbnail: Resource ? this.fileService.cdnUrl({ objectKey: Resource.objectKey }) : undefined,
-          blurHash: Resource ? Resource.blurHash : undefined
+          thumbnail: UserResource ? this.fileService.cdnUrl({ objectKey: UserResource.objectKey }) : undefined,
+          blurHash: UserResource ? UserResource.blurHash : undefined
         }, ...teams]
       }
     })
@@ -155,15 +166,13 @@ export class ProjectService {
         ProjectAdmins: {
           include: {
             User: {
-              include: {
-                Resource: true
-              }
+              include: { Resource: true }
             }
           }
         },
       }
     })
-    if (!projectExist) throw new HttpException(LangResponse({ key: "fetched", lang, object: "project" }), HttpStatus.NOT_FOUND)
+    if (!projectExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "project" }), HttpStatus.NOT_FOUND)
     const { name, ProjectAdmins, creatorId, _count } = projectExist
     const adminIds = new Set(ProjectAdmins.map(({ userId }) => { return userId }))
     const data = {
@@ -190,7 +199,7 @@ export class ProjectService {
         }
       });
 
-      if (!projectExist) throw new HttpException(LangResponse({ key: "fetched", lang, object: "project" }), HttpStatus.NOT_FOUND);
+      if (!projectExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "project" }), HttpStatus.NOT_FOUND);
       const { thumbnail, files, tagId, ...rest } = body;
       let newResource: Resource | undefined | Resource[];
       if (tagId) {
@@ -218,22 +227,58 @@ export class ProjectService {
       }
 
       if (files && files.length > 0) {
-        const objectKeyFiles = new Set(projectExist.ProjectFiles.map(({ Resource }) => Resource.fileName));
-        const objectKeyImages = new Set(projectExist.ProjectImages.map(({ Resource }) => Resource.fileName))
-        await Promise.all(files.map(async (fileName) => {
-          const fileExists = [...objectKeyFiles, ...objectKeyImages].some(key => key.includes(this.fileService.parseFilename(fileName)));
-          if (!fileExists) {
-            const newFileResource = await this.fileService.handleUploadObjectStorage({
-              fileName,
-              prefix: this.config.env.OBJECT_STORAGE_PREFIX_PROJECT_FILE,
-              user
-            });
-            !Array.isArray(newFileResource) && !newFileResource.fileType.includes("image")
-              ? await prisma.projectFile.create({ data: { resourceId: newFileResource.id, projectId: id } })
-              : !Array.isArray(newFileResource) && newFileResource.fileType.includes("image") ?
-                await prisma.projectImage.create({ data: { resourceId: newFileResource.id, projectId: id } }) : undefined
+        const { ProjectFiles, ProjectImages } = projectExist
+        const objectKeyFiles = ProjectFiles.map(({ Resource }) => Resource.fileName)
+        const objectKeyImages = ProjectImages.map(({ Resource }) => Resource.fileName)
+        let projectFiles: Prisma.ProjectFileCreateManyInput[] = []
+        let projectImages: Prisma.ProjectImageCreateManyInput[] = []
+        let fileNamesToDelete: string[] = [];
+        let fileNamesToAdd: string[] = [];
+        const FileAttachment = [...objectKeyFiles, ...objectKeyImages];
+
+        fileNamesToAdd = files.filter(fileName => !FileAttachment.includes(fileName));
+        fileNamesToDelete = FileAttachment.filter(fileName => !files.includes(fileName));
+
+        let newFileResources = await this.fileService.handleUploadObjectStorage({
+          fileName: fileNamesToAdd,
+          prefix: this.config.env.OBJECT_STORAGE_PREFIX_PROJECT_FILE,
+          user
+        });
+
+        if (newFileResources) {
+          if (!Array.isArray(newFileResources)) {
+            newFileResources = [newFileResources];
           }
-        }));
+          newFileResources.forEach(newFileResource => {
+            if (newFileResource.fileType.includes("image")) projectImages.push({ resourceId: newFileResource.id, projectId: id });
+            else projectFiles.push({ resourceId: newFileResource.id, projectId: id });
+          });
+        }
+        if (projectFiles.length > 0) await prisma.projectFile.createMany({ data: projectFiles });
+        if (projectImages.length > 0) await prisma.projectImage.createMany({ data: projectImages });
+        if (fileNamesToDelete.length > 0) {
+          let oldResourceFiles: Resource[] = [];
+          let oldResourceImages: Resource[] = [];
+
+          fileNamesToDelete.forEach(fileName => {
+            const resource = [...ProjectFiles, ...ProjectImages].find(({ Resource }) => Resource.fileName === fileName);
+            if (resource) {
+              if (resource.Resource.fileType.includes("image")) oldResourceImages.push(resource.Resource);
+              else oldResourceFiles.push(resource.Resource);
+            }
+          });
+          for (const resource of oldResourceFiles) {
+            await prisma.projectFile.delete({
+              where: { projectId_resourceId: { resourceId: resource.id, projectId: id } }
+            });
+          }
+          for (const resource of oldResourceImages) {
+            await prisma.projectImage.delete({
+              where: { projectId_resourceId: { resourceId: resource.id, projectId: id } }
+            });
+          }
+          this.ee.emit(DeletedProjectFilesEvent.key, new DeletedProjectFilesEvent({ oldResourceFiles, oldResourceImages }));
+        }
       }
       const newData = await prisma.project.update({
         where,
@@ -249,8 +294,8 @@ export class ProjectService {
         method: "UPDATE",
         newData,
         oldData: projectExist,
-        organizationId: id,
-        projectId:projectExist.id,
+        organizationId: organizationId,
+        projectId: id,
         userId: user.id
       })
       return { message: LangResponse({ key: "updated", lang, object: "project" }) };
@@ -261,34 +306,43 @@ export class ProjectService {
     const projectExist = await this.prisma.project.findFirst({
       where: { id, organizationId },
       include: {
-        _count: { select: { Tasks: true } },
         Resource: true,
         ProjectTags: { include: { Tag: true } },
-        ProjectAdmins: {
-          include: {
-            User: {
-              include: {
-                Resource: true
-              }
-            }
-          }
-        },
+        ProjectFiles: { include: { Resource: true } },
+        ProjectImages: { include: { Resource: true } },
       }
     })
-    if (!projectExist) throw new HttpException(LangResponse({ key: "fetched", lang, object: "project" }), HttpStatus.NOT_FOUND)
-    const { name, ProjectAdmins, creatorId, _count } = projectExist
-    const adminIds = new Set(ProjectAdmins.map(({ userId }) => { return userId }))
+    if (!projectExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "project" }), HttpStatus.NOT_FOUND)
+    const { ProjectTags, name, ProjectFiles, ProjectImages, creatorId, Resource, budget, color, goals, priority, status, target, description, } = projectExist
+    const allAttachment = [
+      ...ProjectImages.map(({ Resource }) => {
+        return {
+          attachment: Resource ? this.fileService.cdnUrl({ objectKey: Resource.objectKey }) : undefined,
+          blurHash: Resource ? Resource.blurHash : undefined,
+          createdAt: Resource ? Resource.createdAt : undefined,
+        }
+      }),
+      ...ProjectFiles.map(({ Resource }) => {
+        return {
+          attachment: Resource ? this.fileService.cdnUrl({ objectKey: Resource.objectKey }) : undefined,
+          createdAt: Resource ? Resource.createdAt : undefined,
+        }
+      })
+    ]
+    const sortedResources = allAttachment
+      .filter(resource => resource.createdAt)
+      .sort((a, b) => dayjs(b.createdAt).diff(dayjs(a.createdAt)));
+    const attachment = sortedResources.map(({ createdAt, ...rest }) => rest);
     const data = {
-      detailsProject: {
-        id,
-        name,
-        totalTask: _count.Tasks
-      },
-      detailUser: {
-        userId: user.id,
-        name: user.name,
-        role: adminIds.has(user.id) ? LangWord({ key: "admin", lang }) : (user.id === creatorId ? LangWord({ key: "owner", lang }) : LangWord({ key: "member", lang }))
-      },
+      name,
+      thumbnail: Resource ? this.fileService.cdnUrl({ objectKey: Resource.objectKey }) : undefined,
+      blurHash: Resource ? Resource.blurHash : undefined,
+      priority,
+      status,
+      description,
+      target,
+      group: ProjectTags.map(({ Tag }) => { return Tag.name })[0],
+      attachment
     }
     return { message: LangResponse({ key: "fetched", lang, object: "project" }), data };
   }
@@ -304,7 +358,7 @@ export class ProjectService {
       method: "DELETE",
       oldData: projectExist,
       organizationId: organizationId,
-      projectId : projectExist.id,
+      projectId: projectExist.id,
       userId: user.id
     });
     return { message: LangResponse({ key: "deleted", lang, object: "project" }) };
@@ -379,19 +433,17 @@ export class ProjectService {
     return true
   }
 
-  async checkProjectCollaborator({ userIds, lang, organizationId, projectId }: ICheckProjectCollaborator) {
-    const project = await this.prisma.project.findFirst({
-      where: { id: projectId, organizationId: organizationId ? organizationId : null },
-      include: { ProjectCollaborators: true }
+  async getCollaborator(project: Project) {
+    const collaborator = await this.prisma.projectCollaborator.findMany({
+      where: { projectId: project.id },
+      include: { User: { include: { UserDevice: { include: { Device: true } } } } }
     })
-    if (!project) throw new HttpException(LangResponse({ key: "notFound", lang, object: "project" }), HttpStatus.NOT_FOUND)
-    const { ProjectCollaborators, creatorId } = project
-    const memberIds = new Set(ProjectCollaborators.map(({ userId }) => { return userId }))
-    memberIds.add(creatorId)
-    userIds.map((id) => {
-      if (!memberIds.has(id)) throw new HttpException(LangResponse({ key: "notFound", lang, object: "project" }), HttpStatus.NOT_FOUND)
-      return true
+    let fcmToken: DeviceLang[] = []
+    collaborator.map(({ User }) => {
+      User.UserDevice.map(({ Device }) => {
+        if (Device.fcmToken) fcmToken.push({ fcmToken: Device.fcmToken, lang: Device.lang })
+      })
     })
-    return true
+    return fcmToken as DeviceLang[]
   }
 }

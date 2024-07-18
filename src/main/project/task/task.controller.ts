@@ -8,7 +8,8 @@ import { CreateTaskBodyDto, CreateTaskParamDto, DeleteTaskParamDto, FindAllTaskP
 
 @ApiTags('Main Project Task')
 @ApiHeaders(DeviceHeaders)
-@UseGuards(UserJwtGuard, UserDeviceGuard)
+// @UseGuards(UserJwtGuard, UserDeviceGuard)
+@UseGuards(UserJwtGuard)
 @Controller('project/:projectId/task')
 export class TaskController {
   constructor(private readonly taskService: TaskService) { }

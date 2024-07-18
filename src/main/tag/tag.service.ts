@@ -1,11 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import dayjs from 'dayjs';
 import { LangResponse } from 'src/constants';
 import { LogService } from 'src/log';
 import { PrismaService } from 'src/prisma';
 import { dotToObject } from 'src/utils/string';
-import { ICreateTag, IFindAllTag, IRemoveTag, IUpdateTag } from './tag.@types';
-import dayjs from 'dayjs';
 import { OrganizationRepository } from '../organization/organization.repository';
+import { ICreateTag, IFindAllTag, IRemoveTag, IUpdateTag } from './tag.@types';
 
 @Injectable()
 export class TagService {
@@ -29,7 +30,7 @@ export class TagService {
 
     this.l.save({
       data: { message: `Tag with id ${data.id} created by user id ${user.id}` },
-      organizationId : param ? param.organizationId : undefined,
+      organizationId: param ? param.organizationId : undefined,
       method: 'CREATE',
       newData: data
     });
@@ -37,20 +38,24 @@ export class TagService {
   }
 
   async findAll({ lang, query, user, param }: IFindAllTag) {
+    const { limit, orderBy, orderDirection, page, search } = query;
+    let where: Prisma.TagWhereInput = { deletedAt: null, name: { contains: search, mode: "insensitive" }, }
     if (param) {
       const { organizationId } = param
       if (organizationId) {
         const organization = await this.organizationRepository.findById({ organizationId })
         if (!organization) throw new HttpException(LangResponse({ key: "notFound", lang, object: "organization" }), HttpStatus.NOT_FOUND)
+        where.organizationId = organizationId
       }
+      else where = {creatorId : user.id, organizationId : null} 
     }
-    const { limit, orderBy, orderDirection, page, search } = query;
+   
     const { result, ...rest } = await this.prisma.extended.tag.paginate({
-      where: { deletedAt: null, name: { contains: search, mode: "insensitive" }, creatorId: user.id, organizationId: null },
+      where,
       limit, page,
       orderBy: dotToObject({ orderBy, orderDirection })
     });
-    const data = result.map(({ id, name }) => ({ id, name }));
+    const data = result.map(({ id, name, creatorId }) => ({ id, name,creatorId }));
     return { message: LangResponse({ key: "fetched", lang, object: "tag" }), data: data, ...rest };
   }
 

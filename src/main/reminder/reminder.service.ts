@@ -52,7 +52,6 @@ export class ReminderService {
       where: { taskId: task.id },
       data: { reminderId: id, taskId: task.id }
     });
-    // const delay = await this.setNextInvocReminder({ task, reminder: data, user, db });
     await this.setNextInvocReminder({ task, reminder: data, user, db });
     this.ee.emit(UpdateReminderTaskEvent.key, new UpdateReminderTaskEvent({ lang, reminder: data, task, user, organization, project, }));
 
@@ -70,11 +69,9 @@ export class ReminderService {
   }
 
   async removeReminderTask({ reminderId, taskId, db, user, organizationId, projectId }: IDeleteReminderTask) {
-    const reminderTask = await db.reminderTask.delete({ where: { reminderId_taskId: { reminderId, taskId } } });
+    await db.reminderTask.delete({ where: { reminderId_taskId: { reminderId, taskId } } });
     const reminder = await db.reminder.delete({ where: { id: reminderId } });
-
     this.ee.emit(DeleteReminderTaskEvent.key, new DeleteReminderTaskEvent({ reminder }));
-
     this.l.save({
       data: { message: `Reminder task deleted with id ${reminderId} by user id ${user.id}` },
       method: 'DELETE',
@@ -158,14 +155,11 @@ export class ReminderService {
     const { id, nextInvocation, interval } = reminder;
     if (interval === IntervalReminder.ONCE) {
       await db.reminder.update({ where: { id }, data: { deletedAt: dayjs().toISOString() } });
-      if (note) await db.reminderNote.delete({ where: { reminderId: id } });
-      if (task) await db.reminderTask.delete({ where: { reminderId: id } });
       return undefined;
     }
     const newNextInvocation = this.calculateNextInvocation(nextInvocation, interval);
     if (newNextInvocation) {
-      const data = await db.reminder.update({ where: { id }, data: { nextInvocation: newNextInvocation } })
-      console.log(data.nextInvocation)
+      const data = await db.reminder.update({ where: { id }, data: { previousInvocation: reminder.nextInvocation, nextInvocation: newNextInvocation } })
       return data
     }
   }
@@ -173,11 +167,11 @@ export class ReminderService {
   calculateNextInvocation(currentInvocation: Date, interval: IntervalReminder): Date | undefined {
     switch (interval) {
       case IntervalReminder.DAILY:
-        return dayjs.utc(currentInvocation).add(1, 'day').toDate();
+        return dayjs(currentInvocation).add(1, 'day').toDate();
       case IntervalReminder.WEEKLY:
-        return dayjs.utc(currentInvocation).add(1, 'week').toDate();
+        return dayjs(currentInvocation).add(1, 'week').toDate();
       case IntervalReminder.MONTHLY:
-        return dayjs.utc(currentInvocation).add(1, 'month').toDate();
+        return dayjs(currentInvocation).add(1, 'month').toDate();
       default:
         return undefined;
     }

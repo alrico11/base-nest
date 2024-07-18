@@ -1,5 +1,5 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { HttpException, HttpStatus, Injectable, UnsupportedMediaTypeException } from '@nestjs/common';
+import { Organization, Prisma, Project } from '@prisma/client';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { DateNow, LangResponse } from 'src/constants';
@@ -7,6 +7,8 @@ import { PrismaService } from 'src/prisma';
 import { dotToObject } from 'src/utils/string';
 import { ReminderService } from '../reminder/reminder.service';
 import { ICreateNote, IDeleteNote, IFindAllNote, IUpdateNote } from './note.@types';
+import { OrganizationRepository } from '../organization/organization.repository';
+import { ProjectRepository } from '../project';
 
 dayjs.extend(utc)
 @Injectable()
@@ -14,9 +16,13 @@ export class NoteService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly reminderService: ReminderService,
+    private readonly organizationRepository: OrganizationRepository,
+    private readonly projectRepository: ProjectRepository
   ) { }
   async create({ body, lang, user, param }: ICreateNote) {
     const { reminder, ...data } = body;
+    let organization
+    let project
     await this.prisma.$transaction(async (prisma) => {
       const note = await prisma.note.create({
         data: {
@@ -26,8 +32,16 @@ export class NoteService {
       });
       if (param) {
         const { projectId, organizationId } = param;
-        if (organizationId) await prisma.noteOrganization.create({ data: { organizationId, noteId: note.id } });
-        if (projectId) await prisma.noteProject.create({ data: { projectId, noteId: note.id } });
+        if (organizationId) {
+          await prisma.noteOrganization.create({ data: { organizationId, noteId: note.id }, include: { Organization: true } })
+          // organization = await this.organizationRepository.findMemberInOrganization({ organizationId })
+          if (!organization) throw new HttpException(LangResponse({ key: "notFound", lang, object: "organization" }), HttpStatus.NOT_FOUND)
+        }
+        if (projectId) {
+          await prisma.noteProject.create({ data: { projectId, noteId: note.id } });
+          // project = await this.projectRepository.findById({ projectId })
+          if (!project) throw new HttpException(LangResponse({ key: "notFound", lang, object: "project" }), HttpStatus.NOT_FOUND)
+        };
       }
       if (reminder) {
         const { startDate, time, ...rest } = reminder;
@@ -38,6 +52,8 @@ export class NoteService {
           lang,
           user,
           db: prisma,
+          organization,
+          project,
           note,
           reminder: {
             dateReminder: dayjs.utc(startDate).toDate(),
@@ -67,9 +83,8 @@ export class NoteService {
         where.NoteProjects = { some: { projectId } };
       }
     } else {
-      where.creatorId = user.id;
+      where.creatorId = user.id
     }
-
     const { result, ...rest } = await this.prisma.extended.note.paginate({
       where,
       include: {
@@ -102,9 +117,18 @@ export class NoteService {
   async update({ body, lang, param, user }: IUpdateNote) {
     const { id, organizationId, projectId } = param
     let where: Prisma.NoteWhereUniqueInput = { deletedAt: null, id, }
-
-    if (organizationId) where.NoteOrganizations = { some: { organizationId } };
-    else if (projectId) where.NoteProjects = { some: { projectId } };
+    let project
+    let organization
+    if (organizationId) {
+      where.NoteOrganizations = { some: { organizationId } };
+      organization = await this.organizationRepository.findById({ organizationId })
+      if (!organization) throw new HttpException(LangResponse({ key: "notFound", lang, object: "organization" }), HttpStatus.NOT_FOUND)
+    }
+    else if (projectId) {
+      project = await this.projectRepository.findById({ projectId })
+      where.NoteProjects = { some: { projectId } }
+      if (!project) throw new HttpException(LangResponse({ key: "notFound", lang, object: "project" }), HttpStatus.NOT_FOUND)
+    }
     else where.creatorId = user.id;
 
     const noteExist = await this.prisma.note.findFirst({
@@ -129,6 +153,7 @@ export class NoteService {
             note,
             db: prisma, lang, user,
             reminderNote: noteExist.ReminderNotes,
+            organization, project,
             reminder: {
               dateReminder: dayjs.utc(startDate).toDate(),
               timeReminder: dayjs(startDate).set('hour', hours).set('minute', minutes).set('second', 0).toDate(),
@@ -138,7 +163,7 @@ export class NoteService {
           });
         } else {
           await this.reminderService.createReminderNote({
-            lang, user, db: prisma, note,
+            lang, user, db: prisma, note, project: project,
             reminder: {
               dateReminder: dayjs.utc(startDate).toDate(),
               timeReminder: dayjs(startDate).set('hour', hours).set('minute', minutes).set('second', 0).toDate(),
@@ -183,7 +208,6 @@ export class NoteService {
         await this.reminderService.removeReminderNote({ noteId: id, db: prisma, reminderId: noteExist.ReminderNotes?.reminderId, user })
       }
     })
-
     return { message: LangResponse({ key: "deleted", lang, object: "note" }) }
   }
 }

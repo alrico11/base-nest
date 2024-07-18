@@ -5,6 +5,7 @@ import { Queue } from "bull";
 import { SCHEDULER_QUEUE_KEY } from "./scheduler.constans";
 import { SchedulerCreateReminderNoteEvent, SchedulerCreateReminderTaskEvent, SchedulerDeleteReminderNoteEvent, SchedulerReminderDeleteTaskEvent, SchedulerUpdateReminderNoteEvent, SchedulerUpdateReminderTaskEvent, SchedulerUserResetTokenJobEvent } from "./scheduler.event";
 import dayjs from "dayjs";
+import { Console } from "console";
 
 @Injectable()
 export class SchedulerListener {
@@ -24,7 +25,6 @@ export class SchedulerListener {
   async handleSchedulerCreateReminderNoteEvent({ data }: SchedulerCreateReminderNoteEvent) {
     const { note, reminder, lang, user, organization, project } = data;
     const delay = dayjs(reminder.nextInvocation).diff(dayjs());
-    console.log(delay)
     await this.queue.add(SchedulerCreateReminderNoteEvent.key, { note, reminder, user, lang, organization, project }, { delay, jobId: reminder.id, removeOnComplete: true, })
   }
 
@@ -48,15 +48,14 @@ export class SchedulerListener {
   @OnEvent(SchedulerCreateReminderTaskEvent.key)
   async handleSchedulerCreateReminderTaskEvent({ data }: SchedulerCreateReminderTaskEvent) {
     const { lang, reminder, task, user, organization, project } = data
-    const delay = dayjs(reminder.nextInvocation).diff(reminder.nextInvocation);
-
+    const delay = dayjs(reminder.nextInvocation).diff(dayjs());
     await this.queue.add(SchedulerCreateReminderTaskEvent.key, { task, reminder, user, lang, organization, project }, { delay, jobId: reminder.id, removeOnComplete: true });
   }
 
   @OnEvent(SchedulerUpdateReminderTaskEvent.key)
   async handleSchedulerUpdateReminderTaskEvent({ data }: SchedulerUpdateReminderTaskEvent) {
     const { lang, reminder, task, user, organization, project } = data
-    const delay = dayjs(reminder.nextInvocation).diff(reminder.nextInvocation);
+    const delay = dayjs(reminder.nextInvocation).diff(dayjs());
     const job = await this.queue.getJob(reminder.id)
     await job?.remove()
     await this.queue.add(SchedulerUpdateReminderTaskEvent.key, { task, reminder, user, lang, organization, project }, { delay, jobId: reminder.id, removeOnComplete: true })

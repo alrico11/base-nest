@@ -17,7 +17,6 @@ interface SendMailParams {
 export class MailService {
     private transporter: Transporter;
     private resetPasswordTemplate: HandlebarsTemplateDelegate;
-    private invoiceTemplate: HandlebarsTemplateDelegate
     constructor(
         private readonly prisma: PrismaService,
         private readonly config: XConfig
@@ -29,8 +28,7 @@ export class MailService {
 
         const resetPasswordTemplatePath = readFileSync(path.resolve(__dirname, '..', '..', 'src', 'mail', 'reset-password.html'), 'utf8');
         this.resetPasswordTemplate = handlebars.compile(resetPasswordTemplatePath);
-        const invoiceTemplatePath = readFileSync(path.resolve(__dirname, '..', '..', 'src', 'mail', 'newInvoice.html'), 'utf8');
-        this.invoiceTemplate = handlebars.compile(invoiceTemplatePath);
+   
     }
 
     async sendMail(params: SendMailParams | SendMailParams[]) {

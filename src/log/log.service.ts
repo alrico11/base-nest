@@ -1,6 +1,6 @@
 import { Injectable, LoggerService, Scope } from '@nestjs/common';
 import { PrismaService } from 'src/prisma';
-import { ISaveLog, LogInterface } from './log.@types';
+import { IHistoryLog, ISaveLog, LogInterface } from './log.@types';
 
 interface LogOptions { level: number }
 
@@ -13,10 +13,32 @@ export class LogService implements LoggerService {
 
   public setContext(context: string) { this.context = context }
 
-  private async saveLog({ data, level: { level = 1, ...optionalParams }, info, method, organizationId, projectId, userId }: ISaveLog) {
+  private async saveHistory({ data, level: { level = 1, ...optionalParams }, info, method, organizationId, projectId, userId }: IHistoryLog) {
     try {
       await this.prisma.$transaction(async (prisma) => {
-        const log = await prisma.log.create({
+        const history = await prisma.history.create({
+          data: {
+            context: this.context,
+            method,
+            info,
+            data: data,
+            userId,
+          }
+        })
+        if (organizationId || projectId) await prisma.historyModel.create({
+          data: {
+            historyId: history.id,
+            organizationId, projectId
+          }
+        })
+      })
+    } catch (error) { console.error(error) }
+  }
+
+  private async saveLog({ data, level: { level = 1, ...optionalParams }, info, method, userId }: ISaveLog) {
+    try {
+      await this.prisma.$transaction(async (prisma) => {
+        await prisma.log.create({
           data: {
             context: this.context,
             level: level,
@@ -26,22 +48,13 @@ export class LogService implements LoggerService {
             userId,
           }
         })
-        if (organizationId || projectId) await prisma.logModel.create({
-          data: {
-            logId: log.id,
-            organizationId, projectId
-          }
-        })
       })
-
     } catch (error) { console.error(error) }
   }
 
-  
-
   save({ method, newData, oldData, userId, organizationId, projectId, data }: LogInterface) {
     const newInfo = newData && oldData ? this.compareObjects(oldData, newData) : newData
-    this.saveLog({ data, level: { level: 1 }, userId, info: newInfo, method, organizationId, projectId })
+    this.saveHistory({ data, level: { level: 1 }, userId, info: newInfo, method, organizationId, projectId })
   }
 
   info(data: object, { level = 1, ...optionalParams }: LogOptions = { level: 1 }) {

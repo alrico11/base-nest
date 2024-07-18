@@ -2,35 +2,40 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LangResponse } from 'src/constants';
 import { LogService } from 'src/log';
 import { PrismaService } from 'src/prisma';
-import { IAddAdminProjectCollaborator, ICreateProjectCollaborator, IRemoveAdminProjectCollaborator, IRemoveMemberProjectCollaborator } from './collaborator.@types';
+import { IAddAdminProjectCollaborator, ICheckAlreadyCollaborator, ICreateProjectCollaborator, IFindCollaboratorIsExist, IRemoveAdminProjectCollaborator, IRemoveMemberProjectCollaborator } from './collaborator.@types';
+import { MemberService } from 'src/main/organization/member';
+import { OrganizationRepository } from 'src/main/organization/organization.repository';
+import { CollaboratorRepository } from './collaborator.repository';
 
 @Injectable()
 export class CollaboratorService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly l: LogService
-  ) { this.l.setContext(CollaboratorService.name)}
+    private readonly l: LogService,
+    private readonly memberService: MemberService,
+    private readonly organizationRepository: OrganizationRepository,
+    private readonly collaboratorRepository: CollaboratorRepository
+  ) { this.l.setContext(CollaboratorService.name) }
 
   async addCollaborator({ body, param: { organizationId, projectId }, user, lang }: ICreateProjectCollaborator) {
-    const { userId } = body;
+    const { userIds } = body;
+
     if (organizationId) {
-      const organization = await this.prisma.project.findFirst({ where: { id: projectId, organizationId } });
-      if (!organization) throw new HttpException(LangResponse({ key: "notFound", lang, object: "organization" }), HttpStatus.NOT_FOUND);
+      const organization = await this.organizationRepository.findById({ organizationId })
+      if (!organization) throw new HttpException(LangResponse({ key: "notFound", lang, object: "project" }), HttpStatus.NOT_FOUND)
+      const isMember = await this.memberService.findMemberIsExist({ organizationCreatorId: organization.creatorId, organizationMembers: organization.OrganizationMembers, userIds })
+      if (!isMember) throw new HttpException(LangResponse({ key: "badRequest", lang, object: "task" }), HttpStatus.BAD_REQUEST)
     }
-    const userExist = await this.prisma.user.findFirst({ where: { id: userId } });
-    if (!userExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "collaborator" }), HttpStatus.NOT_FOUND);
-    const collaboratorExist = await this.prisma.projectCollaborator.findFirst({ where: { userId: body.userId, projectId } });
-    if (collaboratorExist) throw new HttpException(LangResponse({ key: "alreadyJoin", lang, object: "alreadyCollaborator" }), HttpStatus.CONFLICT);
-    const newCollaborator = await this.prisma.projectCollaborator.create({
-      data: {
-        ...body,
-        projectId,
-        addedById: user.id
-      }
-    });
+
+    const project = await this.prisma.project.findFirst({ where: { id: projectId }, include: { ProjectCollaborators: true } })
+    if (!project) throw new HttpException(LangResponse({ key: "notFound", lang, object: "project" }), HttpStatus.NOT_FOUND)
+    const isExist = await this.findCollaboratorIsExist({ projectCollaborators: project.ProjectCollaborators, userIds })
+    if (isExist) throw new HttpException(LangResponse({ key: "conflict", lang, object: "alreadyCollaborator" }), HttpStatus.CONFLICT);
+
+    const newCollaborator = await this.collaboratorRepository.createManyCollaborator({ addedById: user.id, projectId, userIds })
     this.l.save({
       data: {
-        message: `userId ${userId} joined successfully in projectId ${projectId} by user id${user.id}`
+        message: `userId ${userIds} joined successfully in projectId ${projectId} by user id${user.id}`
       },
       method: "CREATE",
       newData: newCollaborator,
@@ -141,5 +146,10 @@ export class CollaboratorService {
       userId: user.id
     });
     return result;
+  }
+  async findCollaboratorIsExist({  projectCollaborators, userIds }: IFindCollaboratorIsExist) {
+    const collaborators = new Set(projectCollaborators.map(({ userId }) => userId));
+    const allExist = userIds.every(id => collaborators.has(id));
+    return allExist;
   }
 }

@@ -1,6 +1,6 @@
-import { LangEnum } from "src/constants";
-import { CreateUserBodyDto, FindAllUserQueryDto, FindOneUserParamDto, RequestChangePasswordUserBodyDto, UpdateUserBodyDto } from "./user.dto";
 import { Device, User } from "@prisma/client";
+import { LangEnum } from "src/constants";
+import { CheckRequestPasswordUserParamDto, ConfirmChangePasswordUserBodyDto, ConfirmChangePasswordUserParamDto, CreateUserBodyDto, FindAllUserQueryDto, FindOneUserParamDto, RequestChangePasswordUserBodyDto, UpdateUserBodyDto } from "./user.dto";
 
 export interface ICreateUser {
     body: CreateUserBodyDto
@@ -30,5 +30,18 @@ export interface IFindOneUser {
 }
 
 export interface IRequestChangePasswordUser {
-    body : RequestChangePasswordUserBodyDto
+    body: RequestChangePasswordUserBodyDto
+    lang: LangEnum
+}
+
+export interface IConfirmChangePassword {
+    body: ConfirmChangePasswordUserBodyDto
+    param: ConfirmChangePasswordUserParamDto
+    device: Device
+    lang: LangEnum
+}
+
+export interface CheckRequestResetPassword {
+    param: CheckRequestPasswordUserParamDto
+    lang: LangEnum
 }

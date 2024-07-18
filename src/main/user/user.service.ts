@@ -3,14 +3,15 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Resource } from '@prisma/client';
 import { compare, hashSync } from 'bcrypt';
 import dayjs from 'dayjs';
-import { sign } from 'jsonwebtoken';
+import { sign, verify } from 'jsonwebtoken';
 import { LangResponse } from 'src/constants';
 import { FileService } from 'src/file';
 import { PrismaService } from 'src/prisma';
 import { dotToObject } from 'src/utils/string';
 import { XConfig } from 'src/xconfig';
-import { ICreateUser, IFindAllUser, IFindOneUser, IRemoveUser, IRequestChangePasswordUser, IUpdateUser } from './user.@types';
+import { CheckRequestResetPassword, IConfirmChangePassword, ICreateUser, IFindAllUser, IFindOneUser, IRemoveUser, IRequestChangePasswordUser, IUpdateUser } from './user.@types';
 import { UserResetPasswordCreatedEvent, UserUpdatedEvent } from './user.event';
+import { LogService } from 'src/log';
 
 @Injectable()
 export class UserService {
@@ -18,8 +19,9 @@ export class UserService {
     private readonly prisma: PrismaService,
     private readonly config: XConfig,
     private readonly fileService: FileService,
-    private readonly ee: EventEmitter2
-  ) { }
+    private readonly ee: EventEmitter2,
+    private readonly l: LogService
+  ) { this.l.setContext(UserService.name) }
   async create({ body, device, lang }: ICreateUser) {
     const { email, username, password, repeatPassword, ...rest } = body
     const userExist = await this.prisma.user.findFirst({ where: { OR: [{ email }, { username }] } })
@@ -102,52 +104,39 @@ export class UserService {
     return { message: LangResponse({ key: "deleted", lang, object: "user" }) };
   }
 
-  // async changePassword({ body }: IUpdatePasswordUserBodyDto, user: User, device: Device) {
-  //   const password: IUserResetPassword = {
-  //     oldPassword: hashSync(body.oldPassword, 12),
-  //     newPassword: hashSync(body.newPassword, 12)
-  //   }
-  //   await this.userRepository.userResetPassword(password, user, device)
-  //   return { statusCode: HttpStatus.OK, message: "success" };
-  // }
 
-  // async decodeJwtRequest(jwt: string) {
-  //   const { JWT_SECRET } = this.config.env;
-  //   const decodedJwt = verify(jwt, JWT_SECRET);
-  //   if (!decodedJwt) return false;
-  //   return decodedJwt;
-  // }
+  async checkRequestPassword({ lang, param: { token } }: CheckRequestResetPassword) {
+    const decodedJwt = verify(token, this.config.env.USER_JWT_SECRET);
+    if (!decodedJwt) throw new HttpException("token invalid", HttpStatus.FORBIDDEN);
+    return { message: LangResponse({ key: "success", lang, object: 'user' }), data: { decodedJwt } };
+  }
 
-  // async checkRequestPassword({ body: { token } }: ICheckRequestPasswordUserBodyDto) {
-  //   const decodeJwt = await this.decodeJwtRequest(token);
-  //   if (!decodeJwt) throw new HttpException("token invalid", HttpStatus.FORBIDDEN);
-  //   return decodeJwt;
-  // }
-
-  async requestResetPassword({ body: { email } }: IRequestChangePasswordUser) {
+  async requestResetPassword({ body: { email }, lang }: IRequestChangePasswordUser) {
     const user = await this.prisma.user.findFirst({ where: { email } });
     if (!user) throw new HttpException('user not found', HttpStatus.NOT_FOUND);
     const { id, name } = user
     const { USER_JWT_SECRET } = this.config.env;
-    const token = sign({ id, email }, USER_JWT_SECRET, { expiresIn: '1h' });
+    const token = sign({ id, email }, USER_JWT_SECRET);
     await this.prisma.userResetToken.create({ data: { id: token, userId: user.id } })
     const expiry = dayjs().add(this.config.env.USER_RESET_TOKEN_EXPIRY, 'm').diff(dayjs(), 'ms');
     this.ee.emit(UserResetPasswordCreatedEvent.key, new UserResetPasswordCreatedEvent({ user, expiry, token }))
-    return { statusCode: HttpStatus.OK, message: 'success', data: { userId: id, email: user.email, token, name: name } };
+    return { message: LangResponse({ key: "mailSuccess", lang, object: "user" }), data: { userId: id, email: user.email } };
   }
 
-  // async confirmChangePassword({ body: { confirmPassword, userId, password, token } }: IConfirmChangePasswordUserBodyDto, device: Device) {
-  //   if (password != confirmPassword) throw new HttpException("password not same", HttpStatus.FORBIDDEN);
-  //   const tokenExist = await this.userRepository.findUserResetToken(token, userId)
-  //   if (!tokenExist) throw new HttpException("invalid token", HttpStatus.BAD_REQUEST)
-  //   await this.userRepository.updateUserResetToken(token, userId)
-  //   const user = await this.userRepository.findById(userId)
-  //   if (!user) throw new HttpException("not found", HttpStatus.NOT_FOUND)
-  //   await this.userRepository.userResetPassword({ newPassword: hashSync(password, 12), oldPassword: undefined }, user, device)
-  //   this.l.info({
-  //     message: `user confirmed to changepassword ${user.email}`,
-  //     userId: user.id,
-  //   })
-  //   return { statusCode: HttpStatus.OK, message: 'password updated' };
-  // }
+  async confirmChangePassword({ body: { confirmPassword, password, userId }, device, param: { token }, lang }: IConfirmChangePassword) {
+    if (password != confirmPassword) throw new HttpException(LangResponse({ key: "badRequest", lang, object: "user" }), HttpStatus.FORBIDDEN);
+    const tokenExist = await this.prisma.userResetToken.findFirst({ where: { id: token } })
+    if (!tokenExist) throw new HttpException("invalid token", HttpStatus.BAD_REQUEST)
+    await this.prisma.$transaction(async (prisma) => {
+      await prisma.userResetToken.update({ where: { id: token, userId }, data: { usedAt: dayjs().toISOString() } })
+      await prisma.user.update({
+        where: { id: userId, },
+        data: { password: hashSync(password, 12) },
+      });
+      await prisma.userDevice.deleteMany({
+        where: { userId: userId, NOT: { deviceId: device.id } }
+      });
+    });
+    return { message: LangResponse({ key: "success", lang }) };
+  }
 }

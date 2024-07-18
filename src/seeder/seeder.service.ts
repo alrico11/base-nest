@@ -29,59 +29,32 @@ export class SeederService {
 
   async seedAll() {
     console.log("seeding")
-  try {
-    await this.region()
-  } catch (error) {
-    console.log(error)
-  }
+    try {
+      await this.region()
+    } catch (error) {
+      console.log(error)
+    }
     // await this.devices()
-    // await this.user()
+    await this.user()
   }
 
-  // async seedUser(tx: TxCtx) {
-  //   await tx.user.create({
-  //     data: {
-  //       id: 'c4bc860c-4605-4124-900d-ebd566308ca5',
-  //       email: 'alricowibowo@gmail.com',
-  //       password: hashSync("user123", GEN_SALT),
-  //       name: 'alricowibowo',
-  //       phone: "081235135153",
-  //       cityId : ""
-  //     }
-  //   })
-  //   await tx.admin.create({
-  //     data: {
-  //       id: 'c4bc860c-4605-4124-900d-ebd566308ca5',
-  //       email: 'alricowibowo@gmail.com',
-  //       password: hashSync("user123", GEN_SALT),
-  //       name: 'alricowibowo',
-  //     }
-  //   })
-  // }
+  async seedUser(tx: TxCtx) {
+    const city = await this.prisma.city.findFirst()
+    if (city) {
+      await tx.user.create({
+        data: {
+          id: 'c4bc860c-4605-4124-900d-ebd566308ca5',
+          email: 'alricowibowo@gmail.com',
+          password: hashSync("qweasd123", 12),
+          name: 'alricowibowo',
+          phone: "081235135153",
+          cityId: city?.code,
+          username: "alrico11",
 
-  // async resource(tx: TxCtx) {
-  //   await tx.resource.createMany({
-  //     data: [{
-  //       objectKey: 'user/Screenshotfrom20240502105030-1714977948228.webp',
-  //       objectUrl: 'http://localhost:3000/user/file/cdn/WhatsAppImage20240511at16-1715915212511.webp',
-  //       fileName: 'WhatsAppImage20240511at16-1715915212511.webp',
-  //       fileType: "image/webp",
-  //       fileSize: 19870,
-  //       metadata: { "depth": "uchar", "space": "srgb", "width": 492, "format": "webp", "height": 359, "channels": 3, "hasAlpha": false, "hasProfile": false, "isProgressive": false },
-  //       blurHash: 'KKFFpW~XS#s:V@WToxxakD'
-  //     },
-  //     {
-  //       objectKey: 'user/Screenshotfrom20240502105030-1714977948123.webp',
-  //       objectUrl: 'http://localhost:3000/user/file/cdn/WhatsAppImage20240511at16-1715915212511.webp',
-  //       fileName: 'WhatsAppImage20240511at16-1715915212511.webp',
-  //       fileType: "image/webp",
-  //       fileSize: 19870,
-  //       metadata: { "depth": "uchar", "space": "srgb", "width": 492, "format": "webp", "height": 359, "channels": 3, "hasAlpha": false, "hasProfile": false, "isProgressive": false },
-  //       blurHash: 'KKFFpW~XS#s:V@WToxxakD'
-  //     }
-  //     ]
-  //   })
-  // }
+        }
+      })
+    }
+  }
 
   async seedProvinces(tx: TxCtx) {
     try {
@@ -129,7 +102,6 @@ export class SeederService {
           }))
           .filter((p) => !!p.code),
       });
-      console.log(data)
     } catch (error) {
       throw error
     }
@@ -258,19 +230,18 @@ export class SeederService {
     }
   }
 
-  // async user() {
-  //   try {
-  //     await this.prisma.$transaction(
-  //       async (tx) => {
-  //         await this.seedUser(tx);
-  //         await this.resource(tx)
-  //       },
-  //       {
-  //         timeout: 100000,
-  //       },
-  //     );
-  //   } catch (error) {
-  //     console.error("Error creating sports:", error);
-  //   }
-  // }
+  async user() {
+    try {
+      await this.prisma.$transaction(
+        async (tx) => {
+          await this.seedUser(tx);
+        },
+        {
+          timeout: 100000,
+        },
+      );
+    } catch (error) {
+      console.error("Error creating sports:", error);
+    }
+  }
 }

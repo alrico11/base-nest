@@ -1,5 +1,5 @@
 import { createZodDto } from "@anatine/zod-nestjs";
-import { ProjectStatus } from "@prisma/client";
+import { ProjectPriority, ProjectStatus } from "@prisma/client";
 import { FindAllQueryDtoBaseSchema } from "src/constants/findAll-query.dto";
 import { FindOneParamDtoBaseSchema } from "src/constants/findOne-param.dto";
 import { z } from "zod";
@@ -8,13 +8,13 @@ const CreateProjectBodyDtoSchema = z.object({
     color: z.string().optional(),
     name: z.string(),
     description: z.string().optional(),
-    priority: z.string(),
+    priority: z.nativeEnum(ProjectPriority),
     target: z.string().optional(),
     budget: z.number().optional(),
     goals: z.string().optional(),
     status: z.nativeEnum(ProjectStatus),
     thumbnail: z.string().optional(),
-    tagId: z.string().optional(),
+    tagId: z.string().uuid().optional(),
     files: z.array(z.string()).optional(),
 });
 

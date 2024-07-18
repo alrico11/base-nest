@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { LangDeviceEnum, Organization, OrganizationMember, Prisma, Project, ProjectCollaborator, User } from "@prisma/client";
 import { LangEnum } from "src/constants";
 import { CreateProjectBodyDto, CreateProjectParamDto, DeleteProjectParamDto, FindAllProjectCollaboratorParamDto, FindAllProjectCollaboratorQueryDto, FindAllProjectParamDto, FindAllProjectQueryDto, FindOneProjectParamDto, UpdateProjectBodyDto, UpdateProjectParamDto } from "./project.dto";
 
@@ -52,16 +52,8 @@ export interface ICheckRoleCollaborator {
     lang: LangEnum
 }
 
-export interface ICheckProjectCollaborator {
-    userIds: string[]
-    projectId: string
-    lang: LangEnum
-    organizationId?: string
-}
-
 export interface IFindByIdProject {
     projectId: string
-    organizationId?: string
 }
 
 export interface ICheckRoleCollaborator {
@@ -69,4 +61,14 @@ export interface ICheckRoleCollaborator {
     projectId: string
     userId: string
     lang: LangEnum
+}
+
+export interface IFindCollaborator {
+    projectId: string
+    organizationId?: string
+}
+
+export interface DeviceLang {
+    fcmToken : string
+    lang : LangDeviceEnum
 }

@@ -6,43 +6,44 @@ import { UserInstance, UserJwtGuard } from 'src/main/auth';
 import { UserDeviceGuard } from 'src/main/device';
 import { CreateTaskBodyDto, CreateTaskParamDto, DeleteTaskParamDto, FindAllTaskParamDto, FindAllTaskQueryDto, FindOneTaskParamDto, TaskService, UpdateTaskBodyDto, UpdateTaskParamDto } from 'src/main/task';
 
-@ApiTags('Main Project Task')
+@ApiTags('Main Organization Task')
 @ApiHeaders(DeviceHeaders)
-@UseGuards(UserJwtGuard, UserDeviceGuard)
-@Controller('project/:projectId/task')
+// @UseGuards(UserJwtGuard, UserDeviceGuard)
+@UseGuards(UserJwtGuard)
+@Controller('organization/:organizationId/task')
 export class TaskController {
   constructor(private readonly taskService: TaskService) { }
 
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ operationId: 'CreateMainProjectTask' })
+  @ApiOperation({ operationId: 'CreateMainOrganizationTask' })
   @Post()
   create(@Param() param: CreateTaskParamDto, @Body() body: CreateTaskBodyDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.taskService.create({ body, lang, user, param });
   }
 
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ operationId: 'FindAllMainProjectTask' })
+  @ApiOperation({ operationId: 'FindAllMainOrganizationTask' })
   @Get()
   findAll(@Param() param: FindAllTaskParamDto, @Query() query: FindAllTaskQueryDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.taskService.findAll({ lang, query, user, param });
   }
 
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ operationId: 'FindOneMainProjectTask' })
+  @ApiOperation({ operationId: 'FindOneMainOrganizationTask' })
   @Get(':id')
   findOne(@Param() param: FindOneTaskParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.taskService.findOne({ lang, param, user });
   }
 
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ operationId: 'UpdateMainProjectTask' })
+  @ApiOperation({ operationId: 'UpdateMainOrganizationTask' })
   @Patch(':id')
   update(@Param() param: UpdateTaskParamDto, @Body() body: UpdateTaskBodyDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.taskService.update({ body, lang, param, user });
   }
 
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ operationId: 'DeleteMainProjectTask' })
+  @ApiOperation({ operationId: 'DeleteMainOrganizationTask' })
   @Delete(':id')
   remove(@Param() param: DeleteTaskParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.taskService.remove({ lang, param, user });

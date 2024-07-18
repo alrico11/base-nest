@@ -35,7 +35,7 @@ export class DeviceService {
 
     return {
       message: LangResponse({ key: 'created', lang, object: 'device' }),
-      data: { ...result, deviceToken: sign({ id: result.id }, this.config.env.USER_JWT_SECRET, {}) }
+      data: { ...result, deviceToken: sign({ id: result.id }, this.config.env.DEVICE_JWT_SECRET, {}) }
     }
   }
 
@@ -45,7 +45,7 @@ export class DeviceService {
     })
     if (!device) throw new HttpException({ message: LangResponse({ key: 'notFound', lang, object: 'device' }) }, HttpStatus.NOT_FOUND)
 
-    const token = sign({ id: device.id }, this.config.env.USER_JWT_SECRET, {})
+    const token = sign({ id: device.id }, this.config.env.DEVICE_JWT_SECRET, {})
     return {
       message: LangResponse({ key: 'conflict', lang }),
       data: { ...device, deviceToken: token }
@@ -53,11 +53,11 @@ export class DeviceService {
   }
 
   async registerFcm({ body: { deviceToken, fcmToken }, lang }: IRegisterFcm) {
-    const tokenData: any = verify(deviceToken, this.config.env.USER_JWT_SECRET)
+    const tokenData: any = verify(deviceToken, this.config.env.DEVICE_JWT_SECRET)
     if (tokenData?.id === undefined) throw new HttpException(LangResponse({ key: 'forbidden', lang }), HttpStatus.FORBIDDEN)
     const device = await this.prisma.device.findFirst({ where: { id: tokenData.id, deletedAt: null } })
     if (!device) throw new HttpException({ message: LangResponse({ key: 'notFound', lang, object: 'device' }) }, HttpStatus.NOT_FOUND)
-    verify(deviceToken, this.config.env.USER_JWT_SECRET)
+    verify(deviceToken, this.config.env.DEVICE_JWT_SECRET)
 
     await this.prisma.device.update({
       where: { id: device.id },

@@ -1,37 +1,31 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { OrganizationAdmin, OrganizationMember } from '@prisma/client';
 import { LangResponse } from 'src/constants';
 import { LogService } from 'src/log';
 import { PrismaService } from 'src/prisma';
-import { IAddAdmin, ICreateMember, IRemoveAdmin, IRemoveMember } from './member.@types';
-import { OrganizationAdmin, OrganizationMember } from '@prisma/client';
+import { IAddAdmin, ICreateMember, IFindMemberIsExist, IRemoveAdmin, IRemoveMember } from './member.@types';
+import { MemberRepository } from './member.repository';
 
 @Injectable()
 export class MemberService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly l: LogService,
+    private readonly memberRepository: MemberRepository
   ) { this.l.setContext(MemberService.name) }
 
   async addMember({ body, lang, param: { id }, user }: ICreateMember) {
-    const { userId } = body;
-    const userExist = await this.prisma.user.findFirst({ where: { id: userId } });
-    if (!userExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "user" }), HttpStatus.NOT_FOUND);
-    const userJoined = await this.prisma.organizationMember.findFirst({ where: { organizationId: id, userId } });
-    if (userJoined) throw new HttpException(LangResponse({ key: "alreadyJoin", lang, object: "member" }), HttpStatus.CONFLICT);
-
-    const newMember = await this.prisma.organizationMember.create({
-      data: {
-        organizationId: id,
-        userId: userId,
-        addedById: user.id
-      }
-    });
-
+    const { userIds } = body
+    const organization = await this.prisma.organization.findFirst({ where: { id }, include: { OrganizationMembers: true } })
+    if (!organization) throw new HttpException(LangResponse({ key: "notFound", lang, object: "organization" }), HttpStatus.NOT_FOUND)
+    const isExist = await this.findMemberIsExist({ organizationCreatorId: organization.creatorId, organizationMembers: organization.OrganizationMembers, userIds })
+    if (isExist) throw new HttpException(LangResponse({ key: "alreadyJoin", lang, object: "organization" }), HttpStatus.CONFLICT);
+    const newMembers = await this.memberRepository.createManyMember({ addedById: user.id, organizationId: id, userIds })
     this.l.save({
-      data: { message: `userId ${userId} joined successfully in organizationId ${id} by user id${user.id}` },
+      data: { message: `userId ${userIds} joined successfully in organizationId ${id} by user id${user.id}` },
       method: 'CREATE',
       organizationId: id,
-      newData: newMember,
+      newData: newMembers,
       userId: user.id,
     });
 
@@ -44,7 +38,7 @@ export class MemberService {
       if (!userExist) throw new HttpException(LangResponse({ key: "notFound", lang, object: "user" }), HttpStatus.NOT_FOUND);
       const userJoined = await prisma.organizationMember.findFirst({ where: { organizationId: id, userId } });
       const adminJoined = await prisma.organizationAdmin.findFirst({ where: { organizationId: id, userId } });
-      let newData : OrganizationMember | OrganizationAdmin | undefined
+      let newData: OrganizationMember | OrganizationAdmin | undefined
       if (userJoined) {
         newData = await prisma.organizationMember.delete({
           where: {
@@ -114,7 +108,7 @@ export class MemberService {
           organizationId_userId: { organizationId: id, userId }
         }
       });
-      
+
       this.l.save({
         data: { message: `userId ${userId} removed from admin successfully in organizationId ${id} by user id${user.id}` },
         method: 'DELETE',
@@ -125,8 +119,12 @@ export class MemberService {
       return { message: LangResponse({ key: "deleted", lang, object: 'admin' }) };
     });
 
-
-
     return result;
+  }
+  async findMemberIsExist({ organizationCreatorId, organizationMembers, userIds }: IFindMemberIsExist) {
+    const members = new Set(organizationMembers.map(({ userId }) => userId));
+    members.add(organizationCreatorId);
+    const allExist = userIds.every(id => members.has(id));
+    return allExist;
   }
 }

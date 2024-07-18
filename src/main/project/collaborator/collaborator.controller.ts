@@ -7,10 +7,11 @@ import { UserDeviceGuard } from 'src/main/device';
 import { AddAdminProjectCollaboratorBodyDto, AddAdminProjectCollaboratorParamDto, CreateProjectCollaboratorBodyDto, CreateProjectCollaboratorParamDto, RemoveAdminProjectCollaboratorBodyDto, RemoveAdminProjectCollaboratorParamDto, RemoveProjectCollaboratorBodyDto, RemoveProjectCollaboratorParamDto } from './collaborator.dto';
 import { CollaboratorService } from './collaborator.service';
 
-@Controller('collaborator')
+@Controller('project/:projectId/collaborator')
 @ApiHeaders(DeviceHeaders)
 @ApiTags('User Collaborator')
-@UseGuards(UserJwtGuard, UserDeviceGuard)
+// @UseGuards(UserJwtGuard, UserDeviceGuard)
+@UseGuards(UserJwtGuard)
 export class CollaboratorController {
   constructor(private readonly collaboratorService: CollaboratorService) { }
 

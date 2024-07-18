@@ -10,7 +10,8 @@ import { UserDeviceGuard } from 'src/main/device';
 @Controller('project')
 @ApiTags('User Project')
 @ApiHeaders(DeviceHeaders)
-@UseGuards(UserJwtGuard, UserDeviceGuard)
+// @UseGuards(UserJwtGuard, UserDeviceGuard)
+@UseGuards(UserJwtGuard)
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) { }
 
@@ -33,6 +34,13 @@ export class ProjectController {
   @ApiOperation({ operationId: "FindOneProject" })
   findOne(@Param() param: FindOneProjectParamDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
     return this.projectService.findOne({ lang, param, user });
+  }
+
+  @Get(':id/detail')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ operationId: "FindOneProject" })
+  findDetail(@Param() param: FindOneProjectParamDto, @UserInstance() user: User, @Lang() lang: LangEnum) {
+    return this.projectService.findDetail({ lang, param, user });
   }
 
   @Patch(':id')

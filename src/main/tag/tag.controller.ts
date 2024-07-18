@@ -10,7 +10,8 @@ import { User } from '@prisma/client';
 @Controller('tag')
 @ApiHeaders(DeviceHeaders)
 @ApiTags('User Tag')
-@UseGuards(UserJwtGuard, UserDeviceGuard)
+// @UseGuards(UserJwtGuard, UserDeviceGuard)
+@UseGuards(UserJwtGuard)
 export class TagController {
   constructor(private readonly tagService: TagService) { }
 

@@ -1,3 +1,4 @@
+import { LangDeviceEnum } from "@prisma/client";
 import { LangConstants, LangObjects } from "./lang.constant";
 
 export const enum LangEnum {
@@ -17,4 +18,9 @@ export interface ILang {
 export interface ILangWord {
     lang: LangEnum
     key: LangObjectType,
+}
+
+export interface ILangNotification {
+    lang: LangDeviceEnum
+    key: LangKeys,
 }

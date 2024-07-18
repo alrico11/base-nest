@@ -7,6 +7,7 @@ import { PrismaService } from 'src/prisma';
 import { dotToObject } from 'src/utils/string';
 import { ProjectRepository } from '..';
 import { ICreateEventLog, IFindAllEventLog, IRemoveEventLog, IUpdateEventLog } from './event-log.@types';
+import { OrganizationRepository } from 'src/main/organization/organization.repository';
 
 @Injectable()
 export class EventLogService {
@@ -14,17 +15,18 @@ export class EventLogService {
     private readonly prisma: PrismaService,
     private readonly projectRepository: ProjectRepository,
     private readonly fileService: FileService,
-    private readonly logService: LogService
+    private readonly logService: LogService,
+    private readonly organizationRepository: OrganizationRepository
   ) {
     this.logService.setContext(EventLogService.name);
   }
 
-  async create({ body, param, lang,user }: ICreateEventLog) {
+  async create({ body, param, lang, user }: ICreateEventLog) {
     const { projectId, organizationId } = param;
     const { date, ...rest } = body;
 
     if (organizationId) {
-      const projectOrganization = await this.projectRepository.findById({ projectId, organizationId });
+      const projectOrganization = await this.projectRepository.findById({ projectId });
       if (!projectOrganization) throw new HttpException(LangResponse({ key: 'notFound', lang, object: 'project' }), HttpStatus.NOT_FOUND);
     }
 
@@ -54,9 +56,17 @@ export class EventLogService {
     const { limit, orderBy, orderDirection, page, search } = query;
     const { projectId, organizationId } = param;
 
+    if (projectId) {
+      const project = await this.projectRepository.findById({ projectId });
+      if (!project) throw new HttpException(LangResponse({ key: 'notFound', lang, object: 'project' }), HttpStatus.NOT_FOUND);
+    }
     if (organizationId) {
-      const projectOrganization = await this.projectRepository.findById({ projectId, organizationId });
-      if (!projectOrganization) throw new HttpException(LangResponse({ key: 'notFound', lang, object: 'project' }), HttpStatus.NOT_FOUND);
+      const organization = await this.organizationRepository.findById({ organizationId });
+      if (!organization)
+        throw new HttpException(
+          LangResponse({ key: 'notFound', lang, object: 'organization' }),
+          HttpStatus.NOT_FOUND
+        );
     }
 
     const { result, ...rest } = await this.prisma.extended.eventLog.paginate({
@@ -84,9 +94,17 @@ export class EventLogService {
   async update({ body, lang, param, user }: IUpdateEventLog) {
     const { id, projectId, organizationId } = param;
     const { date, ...rest } = body;
+    if (projectId) {
+      const project = await this.projectRepository.findById({ projectId });
+      if (!project) throw new HttpException(LangResponse({ key: 'notFound', lang, object: 'project' }), HttpStatus.NOT_FOUND);
+    }
     if (organizationId) {
-      const projectOrganization = await this.projectRepository.findById({ projectId, organizationId });
-      if (!projectOrganization) throw new HttpException(LangResponse({ key: 'notFound', lang, object: 'project' }), HttpStatus.NOT_FOUND);
+      const organization = await this.organizationRepository.findById({ organizationId });
+      if (!organization)
+        throw new HttpException(
+          LangResponse({ key: 'notFound', lang, object: 'organization' }),
+          HttpStatus.NOT_FOUND
+        );
     }
     const eventLog = await this.prisma.eventLog.findFirst({
       where: { id, deletedAt: null }
@@ -118,9 +136,17 @@ export class EventLogService {
   async remove({ lang, param, user }: IRemoveEventLog) {
     const { id, projectId, organizationId } = param;
 
+    if (projectId) {
+      const project = await this.projectRepository.findById({ projectId });
+      if (!project) throw new HttpException(LangResponse({ key: 'notFound', lang, object: 'project' }), HttpStatus.NOT_FOUND);
+    }
     if (organizationId) {
-      const projectOrganization = await this.projectRepository.findById({ projectId, organizationId });
-      if (!projectOrganization) throw new HttpException(LangResponse({ key: 'notFound', lang, object: 'project' }), HttpStatus.NOT_FOUND);
+      const organization = await this.organizationRepository.findById({ organizationId });
+      if (!organization)
+        throw new HttpException(
+          LangResponse({ key: 'notFound', lang, object: 'organization' }),
+          HttpStatus.NOT_FOUND
+        );
     }
 
     const eventLog = await this.prisma.eventLog.findFirst({

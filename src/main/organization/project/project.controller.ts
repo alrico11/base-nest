@@ -11,7 +11,8 @@ import { MemberGuard } from '../member.guard';
 @Controller('organization/:organizationId/project')
 @ApiHeaders(DeviceHeaders)
 @ApiTags('User Organization Project')
-@UseGuards(UserJwtGuard, UserDeviceGuard)
+// @UseGuards(UserJwtGuard, UserDeviceGuard)
+@UseGuards(UserJwtGuard)
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) { }
 

@@ -32,6 +32,7 @@ import { PrismaModule } from "./prisma"
 import { SchedulerModule } from "./scheduler"
 import { SeederModule } from "./seeder"
 import { XConfigModule } from "./xconfig"
+import { MailModule } from "./mail"
 
 const AppImports: (Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference<any>)[] = [
   XConfigModule,
@@ -50,6 +51,7 @@ const AppImports: (Type<any> | DynamicModule | Promise<DynamicModule> | ForwardR
   PrismaModule,
   SchedulerModule,
   NotificationModule,
+  MailModule,
   //ON TESTING
   AuthModule,
   MainDeviceModule,

@@ -18,7 +18,11 @@ export interface ISaveLog {
     level : LogOptions, 
     method?: MethodEnum,
     info?: object,
+    userId?:string
+}
+
+export interface IHistoryLog extends ISaveLog {
+    data: object
     projectId?: string
     organizationId?: string,
-    userId?:string
 }

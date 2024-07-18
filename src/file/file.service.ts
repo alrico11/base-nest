@@ -50,8 +50,11 @@ export class FileService {
     const outputFilePath = join(outputFileDir, `${parsedFilePath.name}.webp`);
 
     if (!existsSync(outputFileDir)) mkdirSync(outputFileDir, { recursive: true });
-    const { data, info } = await sharp(filePath)
-      .ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    const { data, info } = await sharp(filePath).resize(
+      this.config.env.DEFAULT_IMAGE_COMPRESSION_WIDTH,
+      this.config.env.DEFAULT_IMAGE_COMPRESSION_HEIGHT,
+      { fit: 'inside', position: sharp.strategy.entropy, withoutEnlargement: true }
+    ).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
     sharp(data, { raw: { width: info.width, height: info.height, channels: info.channels } }).toFile(outputFilePath);
     const blurHash = encode(
       new Uint8ClampedArray(data),
@@ -149,12 +152,12 @@ export class FileService {
   async handleUploadObjectStorage({ fileName, user, prefix }: IFileCompressUpload) {
     const fileNames = Array.isArray(fileName) ? fileName : [fileName];
     const resources: Resource[] = [];
+    let resource;
     for (const name of fileNames) {
       const contentType = mime.lookup(name);
       if (!contentType) {
         throw new Error('Unrecognized file type.');
       }
-      let resource;
       if (contentType.includes("image")) {
         const baseName = name.split('.').slice(0, -1).join('.');
         const fileNameWebp = `${baseName}.webp`;
@@ -164,13 +167,13 @@ export class FileService {
           const { blurHash, outputFilePath } = await this.compressImage(filePath);
           resource = await this.uploadToObjectStorage({ filePath: outputFilePath, fileName: fileNameWebp, prefix, blurHash, contentType, originalName: name });
         }
-      } else {
+      }
+      else {
         const filePath = this.findFile({ fileName: name, user });
         resource = await this.uploadToObjectStorage({ filePath, fileName: name, prefix, contentType, originalName: name });
       }
       resources.push(resource);
     }
-
     return resources.length > 1 ? resources : resources[0];
   }
 

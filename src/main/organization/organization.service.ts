@@ -51,7 +51,6 @@ export class OrganizationService {
         { OrganizationMembers: { some: { userId: user.id } } }
       ]
     }
-
     const { result, ...rest } = await this.prisma.extended.organization.paginate({
       where: condition,
       limit,

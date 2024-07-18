@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { Project, ProjectCollaborator, User } from "@prisma/client";
 import { LangEnum } from "src/constants";
 import { CreateReminderBodyDtoSchema, CreateTaskBodyDto, CreateTaskParamDto, DeleteTaskParamDto, FindAllTaskParamDto, FindAllTaskQueryDto, FindOneTaskParamDto, UpdateTaskBodyDto, UpdateTaskParamDto } from "./task.dto";
 import { z } from "zod";

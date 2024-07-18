@@ -25,7 +25,6 @@ export class OrganizationController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @UseGuards(MemberGuard)
   @ApiOperation({ operationId: "FindAllOrganization" })
   @Get()
   findAll(@Query() query: FindAllOrganizationQueryDto, @Lang() lang: LangEnum, @UserInstance() user: User) {

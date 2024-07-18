@@ -1,7 +1,6 @@
 import { User } from "@prisma/client";
 import { LangEnum } from "src/constants";
 import { CreateOrganizationBodyDto, DeleteOrganizationParamDto, FindAllMemberOrganizationParamDto, FindAllMemberOrganizationQueryDto, FindAllOrganizationQueryDto, FindOneOrganizationParamDto, UpdateOrganizationBodyDto, UpdateOrganizationParamDto } from "./organization.dto";
-import e from "express";
 
 export interface IFindAllMemberOrganization {
     query: FindAllMemberOrganizationQueryDto
@@ -53,6 +52,8 @@ export interface ICheckRole {
     lang: LangEnum
 }
 
-export interface IFindOrganizationById{
-    organizationId : string,
+export interface IFindOrganizationById {
+    organizationId: string,
 }
+
+export interface IFindMemberInOrganization extends IFindOrganizationById { }

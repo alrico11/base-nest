@@ -19,7 +19,19 @@ export const LangConstants = {
         notJoin: "belum bergabung",
         alreadyCollaborator: "sudah menjadi kolaborator",
         alreadyRegistered: "sudah terdaftar sebelumnya",
-        added: "berhasil ditambahkan"
+        added: "berhasil ditambahkan",
+        mailSuccess: "email berhasil dikirim",
+        addedCollaborator: "menambahkan kamu sebagai kolaborator di proyek",
+        addedAdmin: "merubah role kamu sebagai admin di proyek",
+        addedMember: "menambahkan kamu sebagai anggota di organisasi",
+        addedAdminOrganization: "merubah role kamu sebagai admin di proyek",
+        addedAssignee: "menugaskan kamu di tugas",
+        reminderTask: "Pengingat untuk tugas",
+        reminderNote: "Pengingat untuk catatan",
+        reminder: "Pengingat",
+        organization: "Organisasi",
+        project: "Proyek",
+        task: "Tugas",
     },
     EN: {
         created: "created",
@@ -41,7 +53,19 @@ export const LangConstants = {
         notJoin: "not join yet",
         alreadyCollaborator: "already as a collaborator",
         alreadRegistered: "already registered",
-        added: "added"
+        added: "added",
+        mailSuccess: "mail sended successfully",
+        addedCollaborator: "added you as collaborator in project",
+        addedAdmin: "changed your role as admin in project",
+        addedMember: "added you as member in organization",
+        addedAdminOrganization: "changed your role as admin in organization",
+        addedAssignee: "assigned you in task",
+        reminderTask: "Reminder for task",
+        reminderNote: "Reminder for note",
+        reminder: "Reminder",
+        organization: "Organization",
+        project: "Project",
+        task: "Task",
     }
 }
 
@@ -59,8 +83,8 @@ export const LangObjects = {
         member: "anggota",
         admin: "admin",
         owner: "pemilik",
-        comment:"komentar",
-        note:"catatan"
+        comment: "komentar",
+        note: "catatan"
     },
     EN: {
         organization: "organization",
@@ -75,8 +99,7 @@ export const LangObjects = {
         admin: "admin",
         collaborator: "collaborator",
         owner: "owner",
-        comment:"comment",
-        note:"note"
-
+        comment: "comment",
+        note: "note"
     }
 }

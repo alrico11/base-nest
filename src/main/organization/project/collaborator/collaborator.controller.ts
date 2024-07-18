@@ -9,8 +9,9 @@ import { AddAdminProjectCollaboratorBodyDto, AddAdminProjectCollaboratorParamDto
 
 @ApiHeaders(DeviceHeaders)
 @ApiTags('User Organization Collaborator')
-@Controller('organization/:organizationId/project/:id/collaborator')
-@UseGuards(UserJwtGuard, UserDeviceGuard)
+@Controller('organization/:organizationId/project/:projectId/collaborator')
+// @UseGuards(UserJwtGuard, UserDeviceGuard)
+@UseGuards(UserJwtGuard)
 export class CollaboratorController {
   constructor(private readonly collaboratorService: CollaboratorService) { }
 

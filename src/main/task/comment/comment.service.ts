@@ -21,15 +21,15 @@ export class CommentService {
 
   async create({ body, lang, param, user }: ICreateCommentTask) {
     const { taskId, organizationId, projectId } = param;
-    if (organizationId && projectId) {
-      const project = await this.projectRepository.findById({ projectId, organizationId });
+    if (projectId) {
+      const project = await this.projectRepository.findById({ projectId });
       if (!project)
         throw new HttpException(
           LangResponse({ key: 'notFound', lang, object: 'project' }),
           HttpStatus.NOT_FOUND
         );
     }
-    if (organizationId && !projectId) {
+    if (organizationId) {
       const organization = await this.organizationRepository.findById({ organizationId });
       if (!organization)
         throw new HttpException(
@@ -66,8 +66,8 @@ export class CommentService {
 
   async findAll({ lang, param, query }: IFindAllComment) {
     const { taskId, organizationId, projectId } = param;
-    if (organizationId && projectId) {
-      const project = await this.projectRepository.findById({ projectId, organizationId });
+    if (!organizationId && projectId) {
+      const project = await this.projectRepository.findById({ projectId });
       if (!project)
         throw new HttpException(
           LangResponse({ key: 'notFound', lang, object: 'project' }),
@@ -146,15 +146,15 @@ export class CommentService {
 
   async update({ body, lang, param, user }: IUpdateComment) {
     const { taskId, organizationId, projectId, id } = param;
-    if (organizationId && projectId) {
-      const project = await this.projectRepository.findById({ projectId, organizationId });
+    if (projectId) {
+      const project = await this.projectRepository.findById({ projectId });
       if (!project)
         throw new HttpException(
           LangResponse({ key: 'notFound', lang, object: 'project' }),
           HttpStatus.NOT_FOUND
         );
     }
-    if (organizationId && !projectId) {
+    if (organizationId) {
       const organization = await this.organizationRepository.findById({ organizationId });
       if (!organization)
         throw new HttpException(
@@ -191,15 +191,15 @@ export class CommentService {
 
   async remove({ lang, param, user }: IDeleteComment) {
     const { taskId, organizationId, projectId, id } = param;
-    if (organizationId && projectId) {
-      const project = await this.projectRepository.findById({ projectId, organizationId });
+    if (projectId) {
+      const project = await this.projectRepository.findById({ projectId });
       if (!project)
         throw new HttpException(
           LangResponse({ key: 'notFound', lang, object: 'project' }),
           HttpStatus.NOT_FOUND
         );
     }
-    if (organizationId && !projectId) {
+    if (organizationId) {
       const organization = await this.organizationRepository.findById({ organizationId });
       if (!organization)
         throw new HttpException(

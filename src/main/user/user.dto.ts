@@ -29,16 +29,21 @@ export class UpdateUserBodyDto extends createZodDto(UpdateUserBodyDtoSchema) { }
 export class FindAllUserQueryDto extends createZodDto(FindAllUserQueryDtoSchema) { }
 export class FindOneUserParamDto extends createZodDto(FindOneUserParamDtoSchema) { }
 
-const RequestChangePasswordUserBodySchema = z.object({ email: z.string().email() })
+const RequestChangePasswordUserBodyDtoSchema = z.object({ email: z.string().email() })
 
-const CheckRequestPasswordUserBodySchema = z.object({ token: z.string() })
-
-const ConfirmChangePasswordUserBodySchema = z.object({
+const ConfirmChangePasswordUserBodyDtoSchema = z.object({
     userId: z.string().min(6),
-    token: z.string().min(6),
     password: z.string().min(6),
     confirmPassword: z.string().min(6)
 })
-export class ConfirmChangePasswordUserBodyDto extends createZodDto(ConfirmChangePasswordUserBodySchema) {}
-export class RequestChangePasswordUserBodyDto extends createZodDto(RequestChangePasswordUserBodySchema){}
-export class CheckRequestPasswordUserBodyDto extends createZodDto(CheckRequestPasswordUserBodySchema) {}
+
+const ConfirmChangePasswordUserParamDtoSchema = z.object({
+    token: z.string(),
+})
+
+export class ConfirmChangePasswordUserBodyDto extends createZodDto(ConfirmChangePasswordUserBodyDtoSchema) {}
+export class ConfirmChangePasswordUserParamDto extends createZodDto(ConfirmChangePasswordUserParamDtoSchema) {}
+
+export class RequestChangePasswordUserBodyDto extends createZodDto(RequestChangePasswordUserBodyDtoSchema){}
+export class CheckRequestPasswordUserParamDto extends createZodDto(ConfirmChangePasswordUserParamDtoSchema) {}
+

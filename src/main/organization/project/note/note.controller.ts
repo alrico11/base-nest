@@ -4,7 +4,7 @@ import { User } from '@prisma/client';
 import { DeviceHeaders, Lang, LangEnum } from 'src/constants';
 import { UserInstance, UserJwtGuard } from 'src/main/auth';
 import { UserDeviceGuard } from 'src/main/device';
-import { CreateNoteBodyDto, CreateNoteParamDto, DeleteNoteParamDto, FindAllNoteQueryDto, NoteService, UpdateNoteBodyDto, UpdateNoteParamDto } from 'src/main/note';
+import { CreateNoteBodyDto, CreateNoteParamDto, DeleteNoteParamDto, FindAllNoteParamDto, FindAllNoteQueryDto, NoteService, UpdateNoteBodyDto, UpdateNoteParamDto } from 'src/main/note';
 
 @ApiTags('Main Project Note')
 @ApiHeaders(DeviceHeaders)
@@ -14,28 +14,28 @@ export class NoteController {
   constructor(private readonly noteService: NoteService) { }
 
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ operationId: 'CreateMainNote' })
+  @ApiOperation({ operationId: 'CreateOrganizationProjectNote' })
   @Post()
-  create(@Body() body: CreateNoteBodyDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
+  create(@Param() param: CreateNoteParamDto,@Body() body: CreateNoteBodyDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.noteService.create({ body, lang, user });
   }
 
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ operationId: 'FindAllMainNote' })
+  @ApiOperation({ operationId: 'FindAllOrganizationProjectNote' })
   @Get()
-  findAll(@Query() query: FindAllNoteQueryDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
+  findAll(@Param() param: FindAllNoteParamDto,@Query() query: FindAllNoteQueryDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.noteService.findAll({ lang, query, user });
   }
 
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ operationId: 'UpdateMainNote' })
+  @ApiOperation({ operationId: 'UpdateOrganizationProjectNote' })
   @Patch(':id')
   update(@Param() param: UpdateNoteParamDto, @Body() body: UpdateNoteBodyDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.noteService.update({ body, lang, param, user });
   }
 
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ operationId: 'DeleteMainNote' })
+  @ApiOperation({ operationId: 'DeleteOrganizationProjectNote' })
   @Delete(':id')
   remove(@Param() param: DeleteNoteParamDto, @Lang() lang: LangEnum, @UserInstance() user: User) {
     return this.noteService.remove({ lang, param, user });
